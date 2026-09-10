@@ -610,7 +610,7 @@ The six-stage product architecture is unchanged. Wonder/Express cognitive bands 
 
 ## Challenge Gold lifecycle binding
 
-The authoritative Challenge content-quality contract is [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes). This standard does not redefine those rules.
+The authoritative Challenge content-quality contract is [Phoenix Six-Stage Journey Standard §3](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-families). This standard does not redefine those rules.
 
 For every new or materially repaired Journey, the learning-package development order is binding:
 
@@ -618,12 +618,12 @@ For every new or materially repaired Journey, the learning-package development o
 
 Phase B MUST define a primary learning intent, active source provenance, teach-before-test evidence, one-defensible-answer evidence, distractor misconception logic, and level-progression intent for every active Challenge item. Phase E machine validation covers the structurally testable portions; Lv1/Lv5/Lv10 human Challenge review remains REQUIRED before Gold Founder Review.
 
-A Journey is blocked if Challenge was filled after the fact from random source sentences, if the three modes do not have distinct learning functions, or if any required Challenge Gold gate from the Six-Stage Standard fails.
+A Journey is blocked if Challenge was filled after the fact from random source sentences, if the six authoritative 2×6 families do not have distinct learning functions, or if any required Challenge Gold gate from the Six-Stage Standard fails.
 
 ### Challenge Gold global convergence precondition
 
 The detailed authority remains Phoenix Six-Stage Journey Standard §3. When a materially stronger Challenge Gold contract has been merged, no new Journey Story development may begin while the required current all-Gold Challenge audit/remediation remains incomplete, unless the Founder explicitly changes priority.
 
-The all-Gold line MUST read the approved Gold registry dynamically from merged current `main`, audit all Lv1-Lv10 active `paragraphRebuild`, `grammarRepair`, and `missingSentence` items before mass rewrite, complete the required matrix and defect inventory, repair real defects with the smallest teaching-layer change, and pass Lv1/Lv5/Lv10 human Challenge review plus cross-Gold anti-template review for every Gold Journey.
+The all-Gold line MUST read the approved Gold registry dynamically from merged current `main`, audit all Lv1-Lv10 active Challenge items against the authoritative 2×6 family contract (2 Semantic Rebuild, 2 Grammar Repair, 2 Context Completion, 2 Story Evidence, 2 Knowledge / Spatial Reasoning, and 2 Scenario / Route Decision per level) before mass rewrite, complete the required matrix and defect inventory, repair real defects with the smallest teaching-layer change, and pass Lv1/Lv5/Lv10 human Challenge review plus cross-Gold anti-template review for every Gold Journey.
 
 This convergence gate does not authorize a second development branch, a second PR, Challenge UI redesign, Six-Stage UI changes, Map, Passport, Navigation, Reward, Progress, audio architecture, location hierarchy, dependency changes, or automatic Story rewrite.
