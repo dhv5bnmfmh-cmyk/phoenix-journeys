@@ -62,6 +62,7 @@ Future<void> _pump(
           width: 390,
           height: 760,
           child: HskStoryChallenge(
+            key: ValueKey('rendered-${question.id}'),
             challenge: StoryChallengeSet(
               journeyId: _journeyId,
               sessionLevel: level,
@@ -132,6 +133,12 @@ Future<void> _answerCorrectly(
 }
 
 void main() {
+  test('Journey Challenge has no page-level pre-completion CTA', () {
+    final source = File('lib/screens/journey_screen.dart').readAsStringSync();
+    expect(source, isNot(contains('完成挑战后继续')));
+    expect(source, contains('showActions: _challengeResolved'));
+  });
+
   testWidgets(
     'Golden Challenge renders all 120 authored 2x6 questions',
     (tester) async {

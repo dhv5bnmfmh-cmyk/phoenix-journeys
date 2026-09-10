@@ -204,6 +204,7 @@ Classifications are `INTENTIONALLY RELATED`, `MEANINGFULLY DIFFERENT`,
 Founder Preview is blocked unless:
 
 - `TEMPLATE DUPLICATE = 0`;
+- `TRIVIAL VARIATION = 0`;
 - `INVALID = 0`.
 
 UI shell reuse is allowed. Question-content template cloning is not.
@@ -262,6 +263,7 @@ acceptance matrices MUST prove:
 - `SILENT_FALLBACK = 0`
 - `KNOWLEDGE_SOURCES = DEFINED`
 - `TEMPLATE_DUPLICATE = 0`
+- `TRIVIAL_VARIATION = 0`
 - `INVALID_QUESTION = 0`
 
 Missing content is a hard failure. Another Story, a previous level, generic
@@ -277,7 +279,7 @@ Before Founder receives a Preview, the exact candidate MUST pass:
 2. all 120 Golden Challenge questions rendered and recorded;
 3. `challenge-rendered-matrix.json`;
 4. `challenge-semantic-uniqueness-report.json`;
-5. Semantic Anti-Template (`TEMPLATE DUPLICATE=0`, `INVALID=0`);
+5. Semantic Anti-Template (`TEMPLATE DUPLICATE=0`, `TRIVIAL VARIATION=0`, `INVALID=0`);
 6. targeted product contracts;
 7. `flutter analyze`;
 8. performance regression;

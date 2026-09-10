@@ -1415,6 +1415,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     FocusNode? keyboardFocusNode,
     bool primaryLoading = false,
     bool primaryEnabled = true,
+    bool showActions = true,
     String? secondaryButtonText,
     IconData secondaryButtonIcon = Icons.auto_awesome_outlined,
     VoidCallback? onSecondary,
@@ -1490,7 +1491,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                 const SizedBox(height: 3),
               ],
               Expanded(child: pageBody),
-              if (!keyboardVisible) ...[
+              if (!keyboardVisible && showActions) ...[
                 SizedBox(height: compact ? 4 : 7),
                 SizedBox(
                   height: compact ? 36 : 40,
@@ -2158,13 +2159,10 @@ class _JourneyScreenState extends State<JourneyScreen>
       onBack: _isSummerPalacePilot
           ? () => setState(() => _pilotChallengeVisible = false)
           : null,
-      buttonText: _challengeResolved
-          ? (_isSummerPalacePilot ? '继续表达' : '继续留下回忆')
-          : '完成挑战后继续',
-      buttonIcon: _challengeResolved
-          ? Icons.arrow_forward_rounded
-          : Icons.lock_outline_rounded,
+      buttonText: _isSummerPalacePilot ? '继续表达' : '继续留下回忆',
+      buttonIcon: Icons.arrow_forward_rounded,
       primaryEnabled: _challengeResolved,
+      showActions: _challengeResolved,
       child: _isForbiddenCity
           ? HskStoryChallenge(
               challenge: _preparedChallenge,

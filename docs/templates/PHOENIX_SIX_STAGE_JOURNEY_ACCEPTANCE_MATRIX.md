@@ -21,7 +21,7 @@
 | 0 | Story / 故事 | Independent causal narrative |  |  |
 | 1 | Vocabulary / 单词 | Selected terms appear in Story or Discovery |  |  |
 | 2 | Discovery / 发现 | Adds verified understanding without retelling Story |  |  |
-| 3 | Challenge / 挑战 | All three required modes complete before Memory |  |  |
+| 3 | Challenge / 挑战 | All 12 questions in the authoritative 2×6 architecture complete before Memory |  |  |
 | 4 | Memory / 回忆 | Journey-specific durable recall anchor |  |  |
 | 5 | Completion / 完成 | Completion, progress, reward and next action |  |  |
 
@@ -30,13 +30,16 @@ Top-level committed range: `0–5`
 Standalone Reflection present: `NO`  
 Standalone Writing present: `NO`
 
-## Required Challenge modes
+## Required Challenge families
 
-| Mode | Chinese label | Journey-specific content | Answer validity | Feedback | Result |
+| Family | Required count / level | Journey-specific content | Answer validity | Feedback | Result |
 |---|---|---|---|---|---|
-| `paragraphRebuild` | 段落重组 |  |  |  |  |
-| `grammarRepair` | 语法修复 |  |  |  |  |
-| `missingSentence` | 补全句子 |  |  |  |  |
+| Semantic Sentence Rebuild / 语义块复原 | 2 |  |  |  |  |
+| Grammar Repair / 语病修复 | 2 |  |  |  |  |
+| Context Completion / 情境补全 | 2 |  |  |  |  |
+| Story Evidence / Understanding / 故事证据与理解 | 2 |  |  |  |  |
+| Knowledge / Spatial Reasoning / 知识与空间推理 | 2 |  |  |  |  |
+| Scenario / Route Decision / 情境与路线决策 | 2 |  |  |  |  |
 
 ## Story evidence
 
@@ -148,8 +151,8 @@ Only one:
 
 ## Stage 3 Challenge Gold evidence
 
-Stage 3 remains the existing `challenge` stage and MUST NOT introduce a new user-visible stage or mode. In addition to confirming all three runtime modes, attach the Challenge Gold gate results from [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes), including Lv1/Lv5/Lv10 human review.
+Stage 3 remains the existing `challenge` stage and MUST NOT introduce a new user-visible stage. Confirm all six runtime families, exactly two questions per family and 12 per level, then attach the Challenge Gold gate results from [Phoenix Six-Stage Journey Standard §3](../PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-families), including Lv1/Lv5/Lv10 human review.
 
 ### Stage 3 all-Gold convergence evidence
 
-For current-Gold Challenge re-audit, record the dynamic merged-main Gold registry identity, complete Lv1-Lv10 × three-mode coverage, all canonical §3 blocking gates, the all-Gold matrix result, defect codes and repairs, Lv1/Lv5/Lv10 human review, and cross-Gold anti-template result. Previous Gold approval is not acceptance evidence for a newly introduced Challenge gate.
+For current-Gold Challenge re-audit, record the dynamic merged-main Gold registry identity, complete Lv1-Lv10 × 2×6 coverage, all canonical §3 blocking gates, the all-Gold matrix result, defect codes and repairs, Lv1/Lv5/Lv10 human review, and cross-Gold anti-template result. Previous Gold approval is not acceptance evidence for a newly introduced Challenge gate.
