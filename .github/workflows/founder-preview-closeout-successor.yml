@@ -1,0 +1,199 @@
+name: Founder Preview Closeout Successor
+
+on:
+  push:
+    branches:
+      - validation/founder-preview-closeout-853cd1
+    paths:
+      - '.github/workflows/founder-preview-closeout-successor.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+env:
+  PRODUCT_SHA: 853cd1e627ef43363f9d795f3dcac6720e99190f
+  PREVIEW_WORKER: phoenix-journeys-pr-208
+  PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev
+
+jobs:
+  founder-preview-closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out validation carrier
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Capture evidence-backed harness corrections
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/founder-harness"
+          cp app/test/challenge_gold_governance_test.dart "$RUNNER_TEMP/founder-harness/"
+          cp app/test/forbidden_city_rebuild_concise_contract_test.dart "$RUNNER_TEMP/founder-harness/"
+          cp app/test/multiple_choice_answer_position_contract_test.dart "$RUNNER_TEMP/founder-harness/"
+
+      - name: Check out exact product SHA
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PRODUCT_SHA }}
+          fetch-depth: 0
+          clean: true
+
+      - name: Overlay harness corrections only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          cp "$RUNNER_TEMP/founder-harness/challenge_gold_governance_test.dart" app/test/challenge_gold_governance_test.dart
+          cp "$RUNNER_TEMP/founder-harness/forbidden_city_rebuild_concise_contract_test.dart" app/test/forbidden_city_rebuild_concise_contract_test.dart
+          cp "$RUNNER_TEMP/founder-harness/multiple_choice_answer_position_contract_test.dart" app/test/multiple_choice_answer_position_contract_test.dart
+          git diff --name-only | sort > "$RUNNER_TEMP/actual-harness-paths.txt"
+          printf '%s\n' \
+            app/test/challenge_gold_governance_test.dart \
+            app/test/forbidden_city_rebuild_concise_contract_test.dart \
+            app/test/multiple_choice_answer_position_contract_test.dart \
+            | sort > "$RUNNER_TEMP/expected-harness-paths.txt"
+          diff -u "$RUNNER_TEMP/expected-harness-paths.txt" "$RUNNER_TEMP/actual-harness-paths.txt"
+          test -z "$(git diff --name-only -- app/lib app/web worker wrangler.toml docs)"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Parse and format repaired harness
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format --output=none --set-exit-if-changed \
+            test/challenge_gold_governance_test.dart \
+            test/forbidden_city_rebuild_concise_contract_test.dart \
+            test/multiple_choice_answer_position_contract_test.dart
+
+      - name: Validate only the three failed acceptance harnesses
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --reporter expanded \
+            test/challenge_gold_governance_test.dart \
+            test/forbidden_city_rebuild_concise_contract_test.dart \
+            test/multiple_choice_answer_position_contract_test.dart
+
+      - name: Build Artifact A once
+        id: build
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          flutter build web --release
+          digest="$(find build/web -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          echo "tree_digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "BUILD COUNT = 1"
+          echo "BUILD SHA = $PRODUCT_SHA"
+          echo "ARTIFACT A TREE DIGEST = $digest"
+
+      - name: Upload Artifact A
+        id: artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: founder-preview-web-853cd1e627ef43363f9d795f3dcac6720e99190f
+          path: app/build/web
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove build workspace before rehydration
+        shell: bash
+        run: rm -rf app/build/web
+
+      - name: Rehydrate SAME Artifact A
+        uses: actions/download-artifact@v5
+        with:
+          name: founder-preview-web-853cd1e627ef43363f9d795f3dcac6720e99190f
+          path: app/build/web
+
+      - name: Validate SAME Artifact A
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f app/build/web/index.html
+          digest="$(find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          test "$digest" = "${{ steps.build.outputs.tree_digest }}"
+          echo "ARTIFACT ID = ${{ steps.artifact.outputs.artifact-id }}"
+          echo "ARTIFACT DIGEST = ${{ steps.artifact.outputs.artifact-digest }}"
+          echo "ARTIFACT A TREE DIGEST = $digest"
+          npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+
+      - name: Deploy SAME Artifact A
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          npx --yes wrangler@4 deploy \
+            --name "$PREVIEW_WORKER" \
+            --var "PHOENIX_RELEASE:$PRODUCT_SHA"
+
+      - name: Verify strict exact health
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_url="${PREVIEW_URL}/api/health?commit=${PRODUCT_SHA}"
+          verified=false
+          for attempt in {1..18}; do
+            response="$(curl --fail --silent --show-error "$health_url" || true)"
+            echo "Exact release check ${attempt}/18: ${response:-no response}"
+            if node -e '
+              let health;
+              try { health = JSON.parse(process.argv[1]); } catch (_) { process.exit(1); }
+              const expected = process.argv[2];
+              if (!health.ok || !health.ai || health.service !== "phoenix-journeys" || health.release !== expected) process.exit(1);
+            ' "$response" "$PRODUCT_SHA"; then
+              verified=true
+              echo "health.release = $PRODUCT_SHA"
+              break
+            fi
+            sleep 5
+          done
+          [[ "$verified" == true ]]
+
+      - name: Publish exact preview status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="${PREVIEW_URL}/?unlock=all&prototype=journeys&v=${PRODUCT_SHA}"
+          payload="$(node -e '
+            const [url] = process.argv.slice(1);
+            process.stdout.write(JSON.stringify({
+              state: "success",
+              description: "Founder Preview closeout successor ready",
+              context: "cloudflare/preview",
+              target_url: url
+            }));
+          ' "$url")"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${PRODUCT_SHA}" \
+            --data "$payload" >/dev/null
+          echo "FOUNDER PREVIEW URL = $url"
