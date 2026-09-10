@@ -87,8 +87,7 @@ void main() {
     expect(journey, contains("'继续留下回忆'"));
     expect(journey, contains('setState(() => _challengeResolved = true)'));
     expect(challenge, isNot(contains("'完成挑战'")));
-    expect(challenge, contains('completionReported = true'));
-    expect(challenge, contains('unawaited(widget.onCompleted())'));
+    expect(challenge, contains('await widget.onCompleted()'));
     expect(challenge, contains("? '下一题'"));
     expect(journey, contains("title: '回忆 · 完成'"));
     expect(journey, contains("title: '文化发现'"));
