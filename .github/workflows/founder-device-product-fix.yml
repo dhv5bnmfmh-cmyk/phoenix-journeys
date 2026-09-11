@@ -25,12 +25,13 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Capture exact patch helper and regression test
+      - name: Capture exact patch helpers and regression test
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/founder-device"
           cp .github/scripts/apply_founder_device_acceptance_fix.py "$RUNNER_TEMP/founder-device/apply.py"
+          cp .github/scripts/apply_founder_device_test_compat.py "$RUNNER_TEMP/founder-device/test-compat.py"
           cp app/test/founder_challenge_device_regression_test.dart "$RUNNER_TEMP/founder-device/regression.dart"
 
       - name: Check out exact product SHA
@@ -51,6 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 "$RUNNER_TEMP/founder-device/apply.py"
+          python3 "$RUNNER_TEMP/founder-device/test-compat.py"
           cp "$RUNNER_TEMP/founder-device/regression.dart" app/test/founder_challenge_device_regression_test.dart
 
       - name: Set up Flutter
@@ -70,11 +72,13 @@ jobs:
           dart format \
             app/lib/screens/journey_screen.dart \
             app/lib/widgets/hsk_story_challenge.dart \
-            app/test/founder_challenge_device_regression_test.dart
+            app/test/founder_challenge_device_regression_test.dart \
+            app/test/founder_device_fix_v1_test.dart
           dart format --output=none --set-exit-if-changed \
             app/lib/screens/journey_screen.dart \
             app/lib/widgets/hsk_story_challenge.dart \
-            app/test/founder_challenge_device_regression_test.dart
+            app/test/founder_challenge_device_regression_test.dart \
+            app/test/founder_device_fix_v1_test.dart
           git diff --check
           {
             git diff --name-only
@@ -84,6 +88,7 @@ jobs:
             app/lib/screens/journey_screen.dart \
             app/lib/widgets/hsk_story_challenge.dart \
             app/test/founder_challenge_device_regression_test.dart \
+            app/test/founder_device_fix_v1_test.dart \
             | sort > /tmp/expected.txt
           diff -u /tmp/expected.txt /tmp/actual.txt
 
@@ -100,6 +105,7 @@ jobs:
         run: |
           flutter test --reporter expanded \
             test/founder_challenge_device_regression_test.dart \
+            test/founder_device_fix_v1_test.dart \
             test/authoritative_story_challenge_contract_test.dart
 
       - name: Create single product commit and fast-forward canonical
@@ -111,7 +117,8 @@ jobs:
           git add \
             app/lib/screens/journey_screen.dart \
             app/lib/widgets/hsk_story_challenge.dart \
-            app/test/founder_challenge_device_regression_test.dart
+            app/test/founder_challenge_device_regression_test.dart \
+            app/test/founder_device_fix_v1_test.dart
           git diff --cached --name-only | sort > /tmp/staged.txt
           diff -u /tmp/expected.txt /tmp/staged.txt
           git config user.name phoenix-founder-validation
