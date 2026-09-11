@@ -274,7 +274,11 @@ async function reachDiscovery(page, browserName) {
   await semanticNode(page, '1/5 Story', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
-  await page.touchscreen.tap(22, 58);
+  if (await semanticExists(page, 'Dismiss', { role: 'button', timeout: 800 })) {
+    await tapSemanticAction(page, 'Dismiss', `${browserName}:dismiss-word-detail`);
+  } else {
+    await page.touchscreen.tap(22, 58);
+  }
   await semanticNode(page, '2/5', { prefix: true, timeout: 15000 });
   await semanticNode(page, '2/5 Vocabulary', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
