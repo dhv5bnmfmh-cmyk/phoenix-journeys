@@ -63,7 +63,10 @@ void main() {
   Future<void> waitForStoryStart(WidgetTester tester) async {
     for (var attempt = 0; attempt < 30; attempt += 1) {
       await tester.pump(const Duration(milliseconds: 100));
-      if (find.byKey(const ValueKey('故事')).evaluate().isNotEmpty) return;
+      final storyVisible =
+          find.byKey(const ValueKey('故事')).evaluate().isNotEmpty;
+      final oldChallengeGone = find.text('挑战 1/12').evaluate().isEmpty;
+      if (storyVisible && oldChallengeGone) return;
     }
   }
 
