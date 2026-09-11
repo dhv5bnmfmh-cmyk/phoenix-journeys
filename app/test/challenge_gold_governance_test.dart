@@ -43,8 +43,8 @@ void main() {
       '**Semantic Sentence Rebuild / 语义块复原** × 2',
       '**Grammar Repair / 语病修复** × 2',
       '**Context Completion / 情境补全** × 2',
-      '**Story Evidence / Understanding / 故事证据与理解** × 2',
-      '**Knowledge & Spatial Reasoning / 知识与空间推理** × 2',
+      '**Story Evidence / Story Understanding / 故事证据与理解** × 2',
+      '**Beijing / Forbidden City Knowledge & Spatial Reasoning / 北京·紫禁城知识与空间推理** × 2',
       '**Scenario / Route Decision / 情境与路线决策** × 2',
     ]) {
       expect(authority, contains(required), reason: required);

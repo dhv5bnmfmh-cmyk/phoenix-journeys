@@ -54,13 +54,26 @@ void main() {
     return state;
   }
 
+  Future<void> waitForStoryStart(WidgetTester tester) async {
+    for (var attempt = 0; attempt < 30; attempt += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.text('故事').evaluate().isNotEmpty) return;
+    }
+  }
+
+  void disposeStateAfterWidget(WidgetTester tester, AppState state) {
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      state.dispose();
+    });
+  }
+
   testWidgets('Lv5 Challenge Q1 to Lv6 starts Lv6 Golden Story', (tester) async {
     final state = await pumpChallenge(tester, level: 5);
-    addTearDown(state.dispose);
+    disposeStateAfterWidget(tester, state);
 
     PhoenixLevelController.instance.setLevel(6);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await waitForStoryStart(tester);
 
     expect(state.beijingJourneyStep, 0);
     expect(find.byKey(const ValueKey('journey-session-level-badge')), findsOneWidget);
@@ -73,7 +86,7 @@ void main() {
 
   testWidgets('submitted Challenge and audio reset before Lv7 Story', (tester) async {
     final state = await pumpChallenge(tester, level: 3);
-    addTearDown(state.dispose);
+    disposeStateAfterWidget(tester, state);
 
     while (find.byType(ActionChip).evaluate().isNotEmpty) {
       await tester.tap(find.byType(ActionChip).first);
@@ -110,8 +123,7 @@ void main() {
     await tester.pump();
 
     PhoenixLevelController.instance.setLevel(7);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await waitForStoryStart(tester);
 
     expect(state.beijingJourneyStep, 0);
     expect(find.text('Lv.7'), findsWidgets);
@@ -124,12 +136,11 @@ void main() {
 
   testWidgets('multiple switches each restart at selected-level Story', (tester) async {
     final state = await pumpChallenge(tester, level: 3);
-    addTearDown(state.dispose);
+    disposeStateAfterWidget(tester, state);
 
     for (final level in <int>[6, 2]) {
       PhoenixLevelController.instance.setLevel(level);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await waitForStoryStart(tester);
       expect(state.beijingJourneyStep, 0, reason: 'Lv$level');
       expect(find.text('Lv.$level'), findsWidgets);
       expect(find.text('故事'), findsOneWidget);
