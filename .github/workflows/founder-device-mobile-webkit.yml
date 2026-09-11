@@ -6,6 +6,7 @@ on:
       - validation/founder-preview-closeout-853cd1
     paths:
       - '.github/workflows/founder-device-mobile-webkit.yml'
+      - '.github/scripts/verify_founder_challenge_device_webkit.mjs'
 
 permissions:
   contents: read
