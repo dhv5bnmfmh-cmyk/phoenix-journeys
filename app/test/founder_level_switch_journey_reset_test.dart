@@ -49,7 +49,7 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('挑战'), findsOneWidget);
+    expect(find.text('Challenge'), findsOneWidget);
     expect(find.text('挑战 1/12'), findsOneWidget);
     return state;
   }

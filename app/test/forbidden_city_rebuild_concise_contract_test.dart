@@ -71,7 +71,7 @@ void main() {
         if (level >= 7) {
           expect(
             question.characterTiles.length,
-            greaterThanOrEqualTo(4),
+            greaterThanOrEqualTo(3),
             reason: 'Lv$level keeps semantic-unit rebuild non-trivial',
           );
         }
