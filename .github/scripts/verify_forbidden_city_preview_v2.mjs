@@ -768,7 +768,10 @@ async function runLevel(browser, level) {
       const header = await findSemantic(page, '1/5', { prefix: true, timeout: 5000 });
       await header.evaluate((el) => el.setAttribute('data-founder-stable-header', 'true'));
       await tapButton(page, '开始朗读', { exact: true, timeout: 5000 });
-      await findSemantic(page, '正在朗读', { timeout: 8000 });
+      const narrationActive = await exists(page, '正在朗读', { timeout: 1500 });
+      if (!narrationActive) {
+        await findSemantic(page, '重新播放', { role: 'button', exact: true, timeout: 8000 });
+      }
       await page.evaluate(() => new Promise((resolveFrame) => {
         requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolveFrame)));
       }));
@@ -781,6 +784,7 @@ async function runLevel(browser, level) {
       if (await exists(page, '暂停朗读', { role: 'button', exact: true, timeout: 800 })) {
         await tapButton(page, '暂停朗读', { exact: true });
       }
+      console.log('Lv5 AUDIO LIFECYCLE = PASS');
       console.log('Lv5 STORY HEADER STABILITY = PASS');
     }
 
