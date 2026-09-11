@@ -63,7 +63,7 @@ void main() {
   Future<void> waitForStoryStart(WidgetTester tester) async {
     for (var attempt = 0; attempt < 30; attempt += 1) {
       await tester.pump(const Duration(milliseconds: 100));
-      if (find.text('故事').evaluate().isNotEmpty) return;
+      if (find.byKey(const ValueKey('故事')).evaluate().isNotEmpty) return;
     }
   }
 
@@ -84,7 +84,7 @@ void main() {
     expect(state.beijingJourneyStep, 0);
     expect(find.byKey(const ValueKey('journey-session-level-badge')), findsOneWidget);
     expect(find.text('Lv.6'), findsWidgets);
-    expect(find.text('故事'), findsOneWidget);
+    expect(find.byKey(const ValueKey('故事')), findsOneWidget);
     expect(find.text('挑战 1/12'), findsNothing);
     expect(find.text('回答正确'), findsNothing);
     expect(find.text('回答错误'), findsNothing);
@@ -94,13 +94,9 @@ void main() {
     final state = await pumpChallenge(tester, level: 3);
     disposeStateAfterWidget(tester, state);
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey(
-          'challenge-question-speaker-lv3-q1-sentenceRebuild',
-        ),
-      ),
-    );
+    final questionSpeaker = find.byTooltip('朗读题目');
+    expect(questionSpeaker, findsOneWidget);
+    await tester.tap(questionSpeaker);
     await tester.pump(const Duration(milliseconds: 200));
     while (find.byType(ActionChip).evaluate().isNotEmpty) {
       await tester.tap(find.byType(ActionChip).first);
@@ -109,13 +105,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pump();
     expect(find.textContaining('回答'), findsWidgets);
-    await tester.tap(
-      find.byKey(
-        const ValueKey(
-          'challenge-feedback-speaker-lv3-q1-sentenceRebuild',
-        ),
-      ),
-    );
+    final feedbackSpeaker = find.byTooltip('朗读答题反馈');
+    expect(feedbackSpeaker, findsOneWidget);
+    await tester.tap(feedbackSpeaker);
     await tester.pump(const Duration(milliseconds: 200));
     final stopsBeforeLevelSwitch =
         ttsCalls.where((method) => method == 'stop').length;
@@ -125,7 +117,7 @@ void main() {
 
     expect(state.beijingJourneyStep, 0);
     expect(find.text('Lv.7'), findsWidgets);
-    expect(find.text('故事'), findsOneWidget);
+    expect(find.byKey(const ValueKey('故事')), findsOneWidget);
     expect(find.text('挑战 1/12'), findsNothing);
     expect(find.text('回答正确'), findsNothing);
     expect(find.text('回答错误'), findsNothing);
@@ -145,7 +137,7 @@ void main() {
       await waitForStoryStart(tester);
       expect(state.beijingJourneyStep, 0, reason: 'Lv$level');
       expect(find.text('Lv.$level'), findsWidgets);
-      expect(find.text('故事'), findsOneWidget);
+      expect(find.byKey(const ValueKey('故事')), findsOneWidget);
       expect(find.text('挑战 1/12'), findsNothing);
     }
   });
