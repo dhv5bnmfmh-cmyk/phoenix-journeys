@@ -12,12 +12,13 @@ permissions:
 
 env:
   PRODUCT_SHA: 680a7b7c80d6ac3b504f60752a5777618f4e4198
+  VALIDATION_FIX_SHA: aea19a34443abb951d2a32b7fbffdb3e3153a118
   PREVIEW_URL: https://phoenix-journeys-pr-208.7hn5tyrjgh.workers.dev/
 
 jobs:
   founder-device-webkit:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     steps:
       - name: Check out validation carrier
         uses: actions/checkout@v6
@@ -25,8 +26,29 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Preflight exact mobile regression syntax
-        run: node --check .github/scripts/verify_founder_challenge_device_webkit.mjs
+      - name: Capture validation-only Founder regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$VALIDATION_FIX_SHA" HEAD
+          cp .github/scripts/verify_founder_challenge_device_webkit.mjs "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs"
+          node --check "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs"
+          echo "VALIDATION HARNESS BASE = $VALIDATION_FIX_SHA"
+
+      - name: Check out exact deployed product source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PRODUCT_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact product identity and mobile suite syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+          node --check .github/scripts/verify_mobile_interaction.mjs
+          node --check .github/scripts/journey_level_session_harness.mjs
+          echo "MOBILE PRODUCT SOURCE = $PRODUCT_SHA"
 
       - name: Verify exact deployed release before browser install
         shell: bash
@@ -42,19 +64,29 @@ jobs:
           echo "MOBILE EXACT HEALTH = PASS"
           echo "health.release = $PRODUCT_SHA"
 
-      - name: Install WebKit functional driver
+      - name: Install Chromium and WebKit functional drivers
         shell: bash
         run: |
           set -euo pipefail
           npm install --no-save --prefix "$RUNNER_TEMP/founder-device-mobile" playwright
-          "$RUNNER_TEMP/founder-device-mobile/node_modules/.bin/playwright" install --with-deps webkit
+          "$RUNNER_TEMP/founder-device-mobile/node_modules/.bin/playwright" install --with-deps chromium webkit
 
-      - name: Run Founder device deployed WebKit regression
+      - name: Run Founder A B C deployed WebKit regression
         shell: bash
         env:
           PLAYWRIGHT_PATH: ${{ runner.temp }}/founder-device-mobile/node_modules/playwright/index.mjs
         run: |
           set -euo pipefail
-          node .github/scripts/verify_founder_challenge_device_webkit.mjs \
+          node "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs" \
+            "$PREVIEW_URL" \
+            "$PRODUCT_SHA"
+
+      - name: Run existing deployed Mobile interaction coverage
+        shell: bash
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/founder-device-mobile/node_modules/playwright/index.mjs
+        run: |
+          set -euo pipefail
+          node .github/scripts/verify_mobile_interaction.mjs \
             "$PREVIEW_URL" \
             "$PRODUCT_SHA"
