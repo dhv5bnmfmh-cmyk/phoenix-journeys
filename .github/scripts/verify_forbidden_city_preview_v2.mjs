@@ -9,7 +9,7 @@ import {
   tapSemanticChoice,
 } from './journey_level_session_harness.mjs';
 
-const { chromium } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
+const { chromium, webkit } = await import(pathToFileURL(process.env.PLAYWRIGHT_PATH).href);
 const baseUrl = process.argv[2];
 const sourceSha = process.argv[3];
 const grammarOnly = process.argv[4] === 'grammar-only';
@@ -20,6 +20,7 @@ const levels = (process.env.PHOENIX_TARGET_LEVELS ?? '1,3,5,8,10')
   .map((value) => Number(value.trim()))
   .filter((value) => Number.isInteger(value) && value >= 1 && value <= 10);
 if (!levels.length) throw new Error('PHOENIX_TARGET_LEVELS resolved to no valid levels');
+const browserName = process.env.PHOENIX_BROWSER === 'webkit' ? 'webkit' : 'chromium';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
 const photoFixture = resolve('app/assets/images/phoenix-flight-cycle-v2.webp');
@@ -265,6 +266,31 @@ async function visibleRebuildTiles(page) {
   }).sort((a, b) => a.y - b.y || a.index - b.index);
 }
 
+const challengeFamilies = [
+  '语义块复原',
+  '语病修复',
+  '情境补全',
+  '故事证据',
+  '空间推理',
+  '情境决策',
+];
+
+async function assertCurrentChallengeShell(page, before, seenFamilies) {
+  const present = challengeFamilies.filter((family) => before.includes(family));
+  if (present.length !== 1) {
+    throw new Error(`Challenge family identity mismatch: ${present.join(',') || 'none'}`);
+  }
+  seenFamilies.add(present[0]);
+  await findSemantic(page, present[0], { timeout: 5000 });
+  await findSemantic(page, '上一步', { role: 'button', exact: true, timeout: 5000 });
+  await findSemantic(page, '提交', { role: 'button', exact: true, timeout: 5000 });
+  for (const deadCta of ['进入下一种挑战', '完成三连挑战', '继续挑战']) {
+    if (await exists(page, deadCta, { role: 'button', timeout: 250 })) {
+      throw new Error(`Dead-page CTA is active: ${deadCta}`);
+    }
+  }
+}
+
 function recoverRebuildAnswer(displayed, modeIndex) {
   if (displayed.length < 2) throw new Error('rebuild semantic chunks missing');
   const shift = (modeIndex + 1) % displayed.length;
@@ -278,6 +304,12 @@ function recoverRebuildAnswer(displayed, modeIndex) {
 async function solveRebuild(page, modeIndex, level) {
   const tiles = await visibleRebuildTiles(page);
   const displayed = tiles.map((r) => recText(r));
+  if (displayed.length < 3) {
+    throw new Error(`Semantic Rebuild rendered only ${displayed.length} semantic units`);
+  }
+  if (displayed.every((tile) => hanOnly(tile).length === 1)) {
+    throw new Error('Semantic Rebuild fragmented into character-by-character tiles');
+  }
   if (level === 5) {
     const answer = recoverRebuildAnswer(displayed, modeIndex).join('');
     if (hanOnly(answer).length < 10 || hanOnly(answer).length > 30) {
@@ -355,10 +387,12 @@ async function advanceGrammarToStep2(page) {
 }
 
 async function completeHskChallenge(page, level) {
+  const seenFamilies = new Set();
   for (let question = 1; question <= 12; question += 1) {
     await findSemantic(page, `挑战 ${question}/12`, { timeout: 15000 });
     await findSemantic(page, '朗读当前题目', { role: 'button', exact: true, timeout: 5000 });
     const before = await visibleText(page);
+    await assertCurrentChallengeShell(page, before, seenFamilies);
     const modeIndex = (question - 1) % 4;
 
     if (before.includes('句子复原')) {
@@ -412,6 +446,12 @@ async function completeHskChallenge(page, level) {
       question === 12 ? { exact: true } : { prefix: true },
     );
   }
+  if (seenFamilies.size !== challengeFamilies.length) {
+    throw new Error(
+      `Lv${level} covered ${seenFamilies.size}/6 Challenge families: ${[...seenFamilies].join(',')}`,
+    );
+  }
+  console.log(`Lv${level} GOLDEN CHALLENGE 2x6 MOBILE = PASS | ${[...seenFamilies].join(' | ')}`);
   await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
   if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
 }
@@ -802,10 +842,13 @@ async function runLevel(browser, level) {
   }
 }
 
-const browser = await chromium.launch({ headless: true });
+const browserType = browserName === 'webkit' ? webkit : chromium;
+const browser = await browserType.launch({ headless: true });
 try {
   for (const level of levels) await runLevel(browser, level);
-  console.log(`FORBIDDEN CITY ACTUAL PREVIEW E2E = PASS | SHA=${sourceSha} | LEVELS=${levels.join(',')}`);
+  console.log(
+    `FORBIDDEN CITY ACTUAL MOBILE ${browserName.toUpperCase()} E2E = PASS | SHA=${sourceSha} | LEVELS=${levels.join(',')}`,
+  );
 } finally {
   await browser.close();
 }
