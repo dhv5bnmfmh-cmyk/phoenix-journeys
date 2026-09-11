@@ -214,6 +214,7 @@ async function advanceToQuestion(page, nextNumber) {
 async function installSpeechCaptureBoundary(context) {
   await context.addInitScript(() => {
     window.__phoenixCapturedSpeech = [];
+    window.__phoenixSpeechBoundaryEvents = [];
     window.__phoenixSpeechCaptureMeta = {
       installed: false,
       mode: 'pending',
@@ -228,70 +229,78 @@ async function installSpeechCaptureBoundary(context) {
       return;
     }
 
-    if (synth.__phoenixCaptureInstalled) {
+    const proto = Object.getPrototypeOf(synth);
+    const speakDescriptor = proto
+      ? Object.getOwnPropertyDescriptor(proto, 'speak')
+      : null;
+    if (!proto || typeof speakDescriptor?.value !== 'function' || !speakDescriptor.configurable) {
       window.__phoenixSpeechCaptureMeta = {
-        installed: true,
-        mode: 'real-api-existing-wrapper',
+        installed: false,
+        mode: 'real-api-prototype-not-wrappable',
       };
       return;
     }
 
-    const original = synth.speak.bind(synth);
-    const wrapped = (utterance) => {
-      window.__phoenixCapturedSpeech.push(String(utterance?.text ?? ''));
+    if (proto.__phoenixCaptureInstalled) {
+      window.__phoenixSpeechCaptureMeta = {
+        installed: true,
+        mode: 'real-api-existing-prototype-wrapper',
+      };
+      return;
+    }
+
+    const originalSpeak = speakDescriptor.value;
+    const wrappedSpeak = function(utterance) {
+      const text = String(utterance?.text ?? '');
+      window.__phoenixCapturedSpeech.push(text);
+      window.__phoenixSpeechBoundaryEvents.push({ method: 'speak', text });
       try {
-        return original(utterance);
+        return Reflect.apply(originalSpeak, this, [utterance]);
       } catch (_) {
         return undefined;
       }
     };
 
-    let mode = '';
-    try {
-      Object.defineProperty(synth, 'speak', {
-        configurable: true,
-        writable: true,
-        value: wrapped,
-      });
-      mode = 'real-api-instance-defineProperty';
-    } catch (_) {
-      const proto = Object.getPrototypeOf(synth);
-      const descriptor = proto ? Object.getOwnPropertyDescriptor(proto, 'speak') : null;
-      if (proto && descriptor?.configurable) {
-        Object.defineProperty(proto, 'speak', {
-          ...descriptor,
-          value: wrapped,
-        });
-        mode = 'real-api-prototype-defineProperty';
-      } else {
+    Object.defineProperty(proto, 'speak', {
+      ...speakDescriptor,
+      value: wrappedSpeak,
+    });
+
+    let cancelWrapped = false;
+    const cancelDescriptor = Object.getOwnPropertyDescriptor(proto, 'cancel');
+    if (typeof cancelDescriptor?.value === 'function' && cancelDescriptor.configurable) {
+      const originalCancel = cancelDescriptor.value;
+      const wrappedCancel = function() {
+        window.__phoenixSpeechBoundaryEvents.push({ method: 'cancel' });
         try {
-          synth.speak = wrapped;
-          mode = 'real-api-instance-assignment';
+          return Reflect.apply(originalCancel, this, []);
         } catch (_) {
-          window.__phoenixSpeechCaptureMeta = {
-            installed: false,
-            mode: 'real-api-wrapper-install-failed',
-          };
-          return;
+          return undefined;
         }
-      }
+      };
+      Object.defineProperty(proto, 'cancel', {
+        ...cancelDescriptor,
+        value: wrappedCancel,
+      });
+      cancelWrapped = proto.cancel === wrappedCancel;
     }
 
-    if (synth.speak !== wrapped) {
+    if (proto.speak !== wrappedSpeak) {
       window.__phoenixSpeechCaptureMeta = {
         installed: false,
-        mode: 'real-api-wrapper-not-observable',
+        mode: 'real-api-prototype-wrapper-not-observable',
       };
       return;
     }
 
-    Object.defineProperty(synth, '__phoenixCaptureInstalled', {
+    Object.defineProperty(proto, '__phoenixCaptureInstalled', {
       configurable: true,
       value: true,
     });
     window.__phoenixSpeechCaptureMeta = {
       installed: true,
-      mode,
+      mode: 'real-api-prototype-defineProperty',
+      cancelWrapped,
     };
   });
 }
@@ -302,14 +311,22 @@ async function assertSpeechCaptureBoundary(page) {
     throw new Error(`WebKit Web Speech capture boundary unavailable: ${JSON.stringify(meta)}`);
   }
   console.log(`WEBKIT SPEECH CAPTURE MODE = ${meta.mode}`);
+  console.log(`WEBKIT SPEECH CANCEL CAPTURE = ${meta.cancelWrapped ? 'YES' : 'NO'}`);
 }
 
 async function clearSpeech(page) {
-  await page.evaluate(() => { window.__phoenixCapturedSpeech = []; });
+  await page.evaluate(() => {
+    window.__phoenixCapturedSpeech = [];
+    window.__phoenixSpeechBoundaryEvents = [];
+  });
 }
 
 async function capturedSpeech(page) {
   return page.evaluate(() => [...(window.__phoenixCapturedSpeech ?? [])]);
+}
+
+async function speechBoundaryEvents(page) {
+  return page.evaluate(() => [...(window.__phoenixSpeechBoundaryEvents ?? [])]);
 }
 
 async function waitForSpeech(page, timeout = 8000) {
@@ -319,7 +336,10 @@ async function waitForSpeech(page, timeout = 8000) {
     if (spoken.length) return spoken;
     await sleep(100);
   }
-  throw new Error('WebKit captured no Web Speech utterance');
+  const boundary = await speechBoundaryEvents(page);
+  throw new Error(
+    `WebKit captured no Web Speech utterance; boundary=${JSON.stringify(boundary)}`,
+  );
 }
 
 async function dump(page) {
@@ -336,6 +356,7 @@ async function dump(page) {
   }));
   console.error(`WEBKIT SEMANTICS SNAPSHOT = ${JSON.stringify(snapshot)}`);
   console.error(`WEBKIT SPEECH SNAPSHOT = ${JSON.stringify(await capturedSpeech(page).catch(() => []))}`);
+  console.error(`WEBKIT SPEECH BOUNDARY = ${JSON.stringify(await speechBoundaryEvents(page).catch(() => []))}`);
 }
 
 const browser = await webkit.launch({ headless: true });
@@ -380,6 +401,8 @@ try {
   await findRecord(page, '正确答案：', { timeout: 1000 });
   await findRecord(page, '为什么：', { timeout: 1000 });
   console.log('DEVICE REGRESSION B UI = PASS');
+  console.log(`Q11 PRE-CLICK SPEECH = ${JSON.stringify(await capturedSpeech(page))}`);
+  console.log(`Q11 PRE-CLICK BOUNDARY = ${JSON.stringify(await speechBoundaryEvents(page))}`);
   await clearSpeech(page);
   await tapText(page, '朗读答题反馈', { prefix: true });
   const q11Feedback = await waitForSpeech(page);
