@@ -160,7 +160,10 @@ void main() {
     expect(journey, contains('late ChineseProficiencyProfile _sessionLanguageProfile;'));
     expect(journey, contains('addListener(_handlePhoenixLevelChange)'));
     expect(journey, contains('_resetJourneyForSelectedLevel'));
-    expect(journey, isNot(contains('_phoenixLevelController.addListener')));
+    expect(
+      journey,
+      contains('_phoenixLevelController.addListener(_handlePhoenixLevelChange)'),
+    );
     expect(
       journey,
       contains('_experience = requireDailyJourneyExperience(journeyId);'),

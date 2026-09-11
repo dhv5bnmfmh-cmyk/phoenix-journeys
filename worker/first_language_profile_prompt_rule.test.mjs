@@ -29,10 +29,10 @@ test('legacy exam settings migrate without showing a blocking picker', () => {
   assert.doesNotMatch(journeyScreen, /SnackBarAction/);
 });
 
-test('AppState initializes the configured level and Journey snapshots it once', () => {
+test('AppState initializes level and Journey resets when it changes', () => {
   assert.match(appState, /initializePhoenixLevel\(\)/);
   assert.match(journeyScreen, /snapshotJourneySessionProfile/);
-  assert.match(journeyScreen, /late final ChineseProficiencyProfile _sessionLanguageProfile/);
-  assert.doesNotMatch(journeyScreen, /_phoenixLevelController\.addListener/);
-  assert.doesNotMatch(journeyScreen, /_applyPhoenixLevelChange/);
+  assert.match(journeyScreen, /late ChineseProficiencyProfile _sessionLanguageProfile/);
+  assert.match(journeyScreen, /_phoenixLevelController\.addListener\(_handlePhoenixLevelChange\)/);
+  assert.match(journeyScreen, /_resetJourneyForSelectedLevel/);
 });

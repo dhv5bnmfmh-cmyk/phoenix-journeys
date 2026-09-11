@@ -361,7 +361,7 @@ class _PhoenixLevelGuideSheet extends StatelessWidget {
               ),
             ),
             child: const Text(
-              '新的等级将在下一次进入旅程时应用；已经打开的旅程会保持当前等级。',
+              '切换等级会从新等级的 Story 重新开始旅程。',
               style: TextStyle(
                 color: Color(0xFF5B4237),
                 fontSize: 11.5,

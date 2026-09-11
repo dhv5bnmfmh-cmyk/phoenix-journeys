@@ -25,15 +25,16 @@ test('Summer Palace keeps persistent fallback journey levels', () => {
   assert.match(state, /_key\('difficulty'\)/);
 });
 
-test('Me owns configured level while each journey snapshots one session level', () => {
+test('Me owns configured level and a change restarts the active journey', () => {
   assert.equal((me.match(/JourneyLevelSelectorButton\(/g) ?? []).length, 1);
   assert.doesNotMatch(me, /_chooseLevel|HSK／TOCFL 能力设置/);
   assert.match(screen, /snapshotJourneySessionProfile/);
   assert.match(screen, /_sessionLanguageProfile/);
   assert.match(screen, /journey-session-level-badge/);
   assert.match(screen, /resolveAdaptiveJourneyLevel/);
-  assert.doesNotMatch(screen, /_phoenixLevelController\.addListener/);
-  assert.doesNotMatch(screen, /_handlePhoenixLevelChanged/);
+  assert.match(screen, /_phoenixLevelController\.addListener\(_handlePhoenixLevelChange\)/);
+  assert.match(screen, /_resetJourneyForSelectedLevel/);
+  assert.match(screen, /step = 0/);
   assert.doesNotMatch(screen, /JourneyLevelSelectorButton\(compact: true\)/);
   assert.doesNotMatch(screen, /journey-difficulty-selector/);
   assert.doesNotMatch(screen, /_showLanguageProfilePicker/);

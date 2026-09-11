@@ -65,7 +65,7 @@ test('Me owns one ten-level control and explains next-entry application', () => 
   assert.ok(selector.includes('phoenix-level-plus'));
   assert.ok(selector.includes("'Lv.$level'"));
   assert.ok(selector.includes('phoenix-level-guide'));
-  assert.ok(selector.includes('新的等级将在下一次进入旅程时应用'));
+  assert.ok(selector.includes('切换等级会从新等级的 Story 重新开始旅程'));
   assert.doesNotMatch(selector, /HSK|TOCFL|考试等级/);
 });
 
@@ -77,12 +77,12 @@ test('compact narration exposes paragraph percent and remaining text', () => {
   assert.ok(narrationPlayer.includes('minHeight: 4'));
 });
 
-test('every journey step keeps one read-only session level in the app bar', () => {
+test('every journey step shows one level and level changes restart Story', () => {
   assert.match(journeyScreen, /journey-session-level-badge/);
   assert.match(journeyScreen, /Lv\.\$\{_sessionLanguageProfile\.phoenixLevel\}/);
   assert.doesNotMatch(journeyScreen, /JourneyLevelSelectorButton\(compact: true\)/);
-  assert.doesNotMatch(journeyScreen, /_phoenixLevelController\.addListener/);
-  assert.doesNotMatch(journeyScreen, /_handlePhoenixLevelChanged/);
+  assert.match(journeyScreen, /_phoenixLevelController\.addListener\(_handlePhoenixLevelChange\)/);
+  assert.match(journeyScreen, /_resetJourneyForSelectedLevel/);
   assert.doesNotMatch(journeyScreen, /phoenix-level-minus|phoenix-level-plus/);
 });
 
