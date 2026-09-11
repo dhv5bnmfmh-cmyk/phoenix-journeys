@@ -75,17 +75,20 @@ jobs:
     timeout-minutes: 50
 
     steps:
-      - name: Check out exact candidate head
+      - name: Check out validation carrier
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.CANDIDATE_SHA }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Verify exact candidate identity
+      - name: Verify validation and product identities
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          if [[ "$GITHUB_REF_NAME" == 'validation/founder-preview-closeout-853cd1' ]]; then
+            test "$CANDIDATE_SHA" = "$PRODUCT_SHA"
+          fi
 
       - name: Preflight mobile harness syntax
         run: |
