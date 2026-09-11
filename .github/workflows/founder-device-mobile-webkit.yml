@@ -38,11 +38,29 @@ jobs:
 
           path = Path(os.environ['RUNNER_TEMP']) / 'verify_founder_challenge_device_webkit.mjs'
           text = path.read_text()
-          needle = "  await setLevel2(page);\n  await enterChallenge(page);"
-          replacement = "  console.log('WEBKIT FOUNDER REGRESSION USES CURRENT CONFIGURED LEVEL = PASS');\n  await enterChallenge(page);"
-          if needle not in text:
+
+          level_needle = "  await setLevel2(page);\n  await enterChallenge(page);"
+          level_replacement = "  console.log('WEBKIT FOUNDER REGRESSION USES CURRENT CONFIGURED LEVEL = PASS');\n  await enterChallenge(page);"
+          if level_needle not in text:
               raise SystemExit('expected Founder level-setup sequence not found')
-          path.write_text(text.replace(needle, replacement, 1))
+          text = text.replace(level_needle, level_replacement, 1)
+
+          choice_needle = """    .filter((record) => ['button', 'checkbox'].includes(record.role) && !record.disabled && !excludedAction(record.text))
+              .filter((record) => record.y > 100)
+              .sort((a, b) => a.y - b.y || a.x - b.x || a.area - b.area);"""
+          choice_replacement = """    .filter((record) => ['button', 'checkbox'].includes(record.role) && !record.disabled && !excludedAction(record.text))
+              .filter((record) => record.y > 100)
+              .sort((a, b) => {
+                const aRole = a.role === 'checkbox' ? 0 : 1;
+                const bRole = b.role === 'checkbox' ? 0 : 1;
+                if (aRole !== bRole) return aRole - bRole;
+                return a.y - b.y || a.x - b.x || a.area - b.area;
+              });"""
+          if choice_needle not in text:
+              raise SystemExit('expected Founder answer-candidate sequence not found')
+          text = text.replace(choice_needle, choice_replacement, 1)
+
+          path.write_text(text)
           PY
           node --check "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs"
           echo "VALIDATION HARNESS BASE = $VALIDATION_FIX_SHA"
