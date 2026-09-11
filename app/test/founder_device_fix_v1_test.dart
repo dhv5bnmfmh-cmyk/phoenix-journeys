@@ -42,7 +42,7 @@ void main() {
     WidgetTester tester,
     StoryChallengeQuestion question, {
     required List<String> narration,
-    required List<bool> feedback,
+    required List<String> feedback,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -59,7 +59,7 @@ void main() {
               displayText: (value) => value,
               onCompleted: () async {},
               onNarrate: (_, text) async => narration.add(text),
-              onFeedbackAudio: (_, correct) async => feedback.add(correct),
+              onFeedbackAudio: (_, text) async => feedback.add(text),
             ),
           ),
         ),
@@ -88,12 +88,14 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('Challenge question speaker is available before submit without feedback leak', (
+  testWidgets(
+      'Challenge question speaker is available before submit without feedback leak',
+      (
     tester,
   ) async {
     final question = rebuildQuestion();
     final narration = <String>[];
-    final feedback = <bool>[];
+    final feedback = <String>[];
     await pumpRebuild(
       tester,
       question,
@@ -101,7 +103,8 @@ void main() {
       feedback: feedback,
     );
 
-    final speaker = find.byKey(ValueKey('challenge-question-speaker-${question.id}'));
+    final speaker =
+        find.byKey(ValueKey('challenge-question-speaker-${question.id}'));
     expect(speaker, findsOneWidget);
     expect(
       find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
@@ -116,12 +119,13 @@ void main() {
     expect(feedback, isEmpty);
   });
 
-  testWidgets('Challenge feedback speaker appears after correct Rebuild submit', (
+  testWidgets('Challenge feedback speaker appears after correct Rebuild submit',
+      (
     tester,
   ) async {
     final question = rebuildQuestion();
     final narration = <String>[];
-    final feedback = <bool>[];
+    final feedback = <String>[];
     await pumpRebuild(
       tester,
       question,
@@ -130,12 +134,15 @@ void main() {
     );
     await submitRebuild(tester, question, correct: true);
 
-    final speaker = find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
+    final speaker =
+        find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
     expect(speaker, findsOneWidget);
-    expect(feedback, <bool>[true]);
+    expect(feedback, hasLength(1));
+    expect(feedback.single, contains('正确答案：${question.answer}'));
     await tester.tap(speaker);
     await tester.pump();
-    expect(feedback, <bool>[true, true]);
+    expect(feedback, hasLength(2));
+    expect(feedback.last, contains('正确答案：${question.answer}'));
   });
 
   testWidgets('Challenge feedback speaker reports wrong Rebuild submit', (
@@ -143,7 +150,7 @@ void main() {
   ) async {
     final question = rebuildQuestion();
     final narration = <String>[];
-    final feedback = <bool>[];
+    final feedback = <String>[];
     await pumpRebuild(
       tester,
       question,
@@ -152,19 +159,23 @@ void main() {
     );
     await submitRebuild(tester, question, correct: false);
 
-    final speaker = find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
+    final speaker =
+        find.byKey(ValueKey('challenge-feedback-speaker-${question.id}'));
     expect(speaker, findsOneWidget);
-    expect(feedback, <bool>[false]);
+    expect(feedback, hasLength(1));
+    expect(feedback.single, contains('正确答案：${question.answer}'));
     await tester.tap(speaker);
     await tester.pump();
-    expect(feedback, <bool>[false, false]);
+    expect(feedback, hasLength(2));
+    expect(feedback.last, contains('正确答案：${question.answer}'));
   });
 
   Uint8List previewPng() => base64Decode(
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZC7sAAAAASUVORK5CYII=',
       );
 
-  testWidgets('Photo Memory shows add state and local-only hint', (tester) async {
+  testWidgets('Photo Memory shows add state and local-only hint',
+      (tester) async {
     var picks = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -179,7 +190,8 @@ void main() {
       ),
     );
 
-    expect(find.byKey(const ValueKey('journey-memory-photo-add')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('journey-memory-photo-add')), findsOneWidget);
     expect(find.text('照片仅保存在此设备'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('journey-memory-photo-add')));
     expect(picks, 1);
@@ -218,7 +230,8 @@ void main() {
     expect(find.text('local-photo-ref'), findsNothing);
   });
 
-  testWidgets('Photo Memory busy state blocks duplicate taps and reports failure', (
+  testWidgets(
+      'Photo Memory busy state blocks duplicate taps and reports failure', (
     tester,
   ) async {
     var picks = 0;

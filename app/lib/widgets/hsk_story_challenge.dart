@@ -13,6 +13,7 @@ class HskStoryChallenge extends StatefulWidget {
     required this.onCompleted,
     required this.onNarrate,
     this.onFeedbackAudio,
+    this.onQuestionChanged,
     this.onBackStage,
   });
 
@@ -20,7 +21,9 @@ class HskStoryChallenge extends StatefulWidget {
   final String Function(String) displayText;
   final Future<void> Function() onCompleted;
   final Future<void> Function(String questionId, String text) onNarrate;
-  final Future<void> Function(String questionId, bool correct)? onFeedbackAudio;
+  final Future<void> Function(String questionId, String feedbackText)?
+      onFeedbackAudio;
+  final VoidCallback? onQuestionChanged;
   final VoidCallback? onBackStage;
 
   @override
@@ -34,6 +37,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   int? selectedError;
   bool grammarLocationSubmitted = false;
   bool submitted = false;
+  bool challengeCompleted = false;
   final List<String> built = <String>[];
   late List<String> remaining;
 
@@ -72,10 +76,31 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         question.options[selectedOption!] == question.answer;
   }
 
+  String get _feedbackAudioText {
+    final parts = <String>[
+      '正确答案：${widget.displayText(question.answer)}',
+    ];
+    if (!_correct &&
+        selectedOption != null &&
+        selectedOption! < question.distractorRationales.length) {
+      final rationale = question.distractorRationales[selectedOption!];
+      if (rationale.isNotEmpty) {
+        parts.add('错误原因：${widget.displayText(rationale)}');
+      }
+    }
+    if (question.whyCorrect.isNotEmpty) {
+      parts.add('解释：${widget.displayText(question.whyCorrect)}');
+    } else if (question.grammarRevisionRule?.isNotEmpty ?? false) {
+      parts.add('解释：${widget.displayText(question.grammarRevisionRule!)}');
+    }
+    return parts.join('。');
+  }
+
   bool get _canSubmit {
     if (submitted) return false;
     if (question.mode == StoryChallengeMode.sentenceRebuild) {
-      return remaining.isEmpty && built.length == question.characterTiles.length;
+      return remaining.isEmpty &&
+          built.length == question.characterTiles.length;
     }
     if (question.mode == StoryChallengeMode.grammarRepair) {
       return grammarStep == 0 ? selectedError != null : selectedOption != null;
@@ -89,6 +114,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     selectedError = null;
     grammarLocationSubmitted = false;
     submitted = false;
+    challengeCompleted = false;
     built.clear();
     remaining = List<String>.of(question.characterTiles);
   }
@@ -104,17 +130,18 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       return;
     }
 
-    final correct = _correct;
     setState(() => submitted = true);
     final feedbackAudio = widget.onFeedbackAudio;
     if (feedbackAudio != null) {
-      unawaited(feedbackAudio(question.id, correct));
+      unawaited(feedbackAudio(question.id, _feedbackAudioText));
     }
   }
 
   Future<void> _next() async {
-    if (!submitted) return;
+    if (!submitted || challengeCompleted) return;
+    widget.onQuestionChanged?.call();
     if (index == widget.challenge.questions.length - 1) {
+      setState(() => challengeCompleted = true);
       await widget.onCompleted();
       return;
     }
@@ -125,6 +152,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
   }
 
   void _previous() {
+    widget.onQuestionChanged?.call();
     if (index == 0) {
       widget.onBackStage?.call();
       return;
@@ -180,47 +208,49 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         ],
       );
 
-  Widget _bottomActions() => SizedBox(
-        height: 40,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: OutlinedButton.icon(
-                key: const ValueKey('challenge-back'),
-                onPressed: index > 0 || widget.onBackStage != null
-                    ? _previous
-                    : null,
-                icon: const Icon(Icons.arrow_back_rounded, size: 17),
-                label: const Text('上一步'),
+  Widget _bottomActions() => challengeCompleted
+      ? const SizedBox.shrink()
+      : SizedBox(
+          height: 40,
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: OutlinedButton.icon(
+                  key: const ValueKey('challenge-back'),
+                  onPressed: index > 0 || widget.onBackStage != null
+                      ? _previous
+                      : null,
+                  icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                  label: const Text('上一步'),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 2,
-              child: FilledButton.icon(
-                key: ValueKey(
-                  submitted ? 'challenge-next' : 'challenge-submit',
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: FilledButton.icon(
+                  key: ValueKey(
+                    submitted ? 'challenge-next' : 'challenge-submit',
+                  ),
+                  onPressed: submitted
+                      ? () => unawaited(_next())
+                      : _canSubmit
+                          ? _submit
+                          : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: PhoenixTheme.red,
+                  ),
+                  icon: Icon(
+                    submitted
+                        ? Icons.arrow_forward_rounded
+                        : Icons.check_rounded,
+                    size: 17,
+                  ),
+                  label: Text(submitted ? '下一题' : '提交'),
                 ),
-                onPressed: submitted
-                    ? () => unawaited(_next())
-                    : _canSubmit
-                        ? _submit
-                        : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: PhoenixTheme.red,
-                ),
-                icon: Icon(
-                  submitted
-                      ? Icons.arrow_forward_rounded
-                      : Icons.check_rounded,
-                  size: 17,
-                ),
-                label: Text(submitted ? '下一题' : '提交'),
               ),
-            ),
-          ],
-        ),
-      );
+            ],
+          ),
+        );
 
   Widget _questionBody() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +298,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
               key: ValueKey('challenge-feedback-speaker-${question.id}'),
               tooltip: '朗读答题反馈',
               onPressed: () => unawaited(
-                widget.onFeedbackAudio!(question.id, _correct),
+                widget.onFeedbackAudio!(question.id, _feedbackAudioText),
               ),
               icon: const Icon(
                 Icons.volume_up_rounded,
@@ -490,9 +520,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                   selectedOption == i &&
                   question.options[i] != question.answer,
               text: '${String.fromCharCode(65 + i)}  ${question.options[i]}',
-              onTap: submitted
-                  ? null
-                  : () => setState(() => selectedOption = i),
+              onTap:
+                  submitted ? null : () => setState(() => selectedOption = i),
             ),
         ],
       ],
@@ -525,7 +554,9 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           for (var i = 0; i < segments.length; i++)
             TextSpan(
               text: segments[i],
-              style: grammarLocationSubmitted && selectedError == i && i != errorIndex
+              style: grammarLocationSubmitted &&
+                      selectedError == i &&
+                      i != errorIndex
                   ? const TextStyle(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w900,
@@ -573,9 +604,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
                   selectedOption == i &&
                   question.options[i] != question.answer,
               text: '${String.fromCharCode(65 + i)}  ${question.options[i]}',
-              onTap: submitted
-                  ? null
-                  : () => setState(() => selectedOption = i),
+              onTap:
+                  submitted ? null : () => setState(() => selectedOption = i),
             ),
         ],
       );
@@ -646,12 +676,10 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     final errorIndex = question.errorSegmentIndex ?? 0;
     final actual = question.errorSegments[errorIndex];
     final locationCorrect = selectedError == errorIndex;
-    final selectedLocation = selectedError == null
-        ? '未选择'
-        : question.errorSegments[selectedError!];
-    final selectedRepair = selectedOption == null
-        ? '未选择'
-        : question.options[selectedOption!];
+    final selectedLocation =
+        selectedError == null ? '未选择' : question.errorSegments[selectedError!];
+    final selectedRepair =
+        selectedOption == null ? '未选择' : question.options[selectedOption!];
     final repairCorrect = selectedOption != null &&
         question.options[selectedOption!] == question.answer;
     final explanation = selectedOption != null &&
