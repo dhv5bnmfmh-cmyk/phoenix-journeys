@@ -164,7 +164,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
           flutter build web --release
-          digest="$(find build/web -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          digest="$(cd build/web && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
           echo "tree_digest=$digest" >> "$GITHUB_OUTPUT"
           echo "BUILD COUNT = 1"
           echo "BUILD SHA = $PRODUCT_SHA"
@@ -195,7 +195,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f app/build/web/index.html
-          digest="$(find app/build/web -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
+          digest="$(cd app/build/web && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')"
           test "$digest" = "${{ steps.build.outputs.tree_digest }}"
           echo "ARTIFACT ID = ${{ steps.artifact.outputs.artifact-id }}"
           echo "ARTIFACT DIGEST = ${{ steps.artifact.outputs.artifact-digest }}"
