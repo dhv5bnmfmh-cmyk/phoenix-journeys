@@ -85,9 +85,11 @@ async function countVisible(page, needle, { role = null, exact = false, prefix =
 }
 
 async function tapRecord(page, record) {
-  const x = record.x + record.width / 2;
-  const y = record.y + record.height / 2;
-  await page.touchscreen.tap(x, y);
+  const locator = page.locator('flt-semantics').nth(record.index);
+  await locator.scrollIntoViewIfNeeded().catch(() => {});
+  const box = await locator.boundingBox();
+  if (!box) throw new Error(`semantic action has no tappable box: ${record.text}`);
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 }
 
 async function tapText(page, needle, options = {}) {
@@ -178,7 +180,7 @@ function excludedAction(text) {
 
 async function firstAnswerCandidate(page) {
   const candidates = (await visibleRecords(page))
-    .filter((record) => record.role === 'button' && !record.disabled && !excludedAction(record.text))
+    .filter((record) => ['button', 'checkbox'].includes(record.role) && !record.disabled && !excludedAction(record.text))
     .filter((record) => record.y > 100)
     .sort((a, b) => a.y - b.y || a.x - b.x || a.area - b.area);
   return candidates[0] ?? null;
@@ -207,8 +209,13 @@ async function submitCurrentQuestion(page, questionNumber) {
       continue;
     }
 
-    await page.mouse.wheel(0, 360);
-    await sleep(180);
+    const snapshot = (await visibleRecords(page))
+      .map((record) => `${record.role}:${clean(record.text)}:${record.disabled ? 'disabled' : 'enabled'}`)
+      .join(' | ');
+    throw new Error(
+      `Challenge ${questionNumber}/12 has no actionable answer candidate; ` +
+      `snapshot=${snapshot.slice(0, 1800)}`,
+    );
   }
   throw new Error(`Challenge ${questionNumber}/12 could not reach submitted state`);
 }
