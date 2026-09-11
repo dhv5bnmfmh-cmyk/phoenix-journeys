@@ -364,15 +364,11 @@ async function advanceGrammarToStep2(page) {
   if (!locationCorrect && !locationWrong) {
     throw new Error('HSK grammar STEP 1 did not show location feedback');
   }
-  await findSemantic(page, 'STEP 1 · 哪里错？', { timeout: 1000 });
+  await findSemantic(page, '正确错误位置：', { timeout: 1000 });
   if (locationWrong) {
-    await findSemantic(page, '正确错误位置：', { timeout: 1000 });
-    await findSemantic(page, '本身在这个句子里语法成立', { timeout: 1000 });
-    await findSemantic(page, '真正的问题：', { timeout: 1000 });
-  } else {
-    await findSemantic(page, '为什么这里错：', { timeout: 1000 });
+    await findSemantic(page, '你的选择（错误位置）：', { timeout: 1000 });
   }
-  await findSemantic(page, '语法点：', { timeout: 1000 });
+  await findSemantic(page, '为什么这里错：', { timeout: 1000 });
   await findSemantic(page, 'STEP 2 · 怎么改？', { timeout: 1500 });
 }
 
@@ -411,9 +407,9 @@ async function completeHskChallenge(page, level) {
     }
     await findSemantic(page, after.includes('回答正确') ? '回答正确' : '回答错误', { timeout: 5000 });
     if (before.includes('语病修复')) {
-      await findSemantic(page, '修改错误', { timeout: 5000 });
-      await findSemantic(page, '为什么不对：', { timeout: 5000 });
-      await findSemantic(page, '修改原则：', { timeout: 5000 });
+      await findSemantic(page, '你的修改（', { timeout: 5000 });
+      await findSemantic(page, '为什么错：', { timeout: 5000 });
+      await findSemantic(page, '修正规则：', { timeout: 5000 });
     }
     if (grammarOnly && question === 8) {
       console.log('Lv5 GRAMMAR 4/4 EXPLANATION TARGETED = PASS');
