@@ -327,10 +327,6 @@ class _JourneyScreenState extends State<JourneyScreen>
   Future<void> _resetJourneyForSelectedLevel(int selectedLevel) async {
     final epoch = ++_levelResetEpoch;
     _resetChallengeAudio();
-    await _stopJourneyNarration();
-    await _appState.restartJourney();
-    if (!mounted || epoch != _levelResetEpoch) return;
-
     final profile = _phoenixLevelController.profile;
     final preparedBundle = JourneyPreparationCoordinator.instance.prepareNow(
       journeyId: _experience.id,
@@ -370,6 +366,14 @@ class _JourneyScreenState extends State<JourneyScreen>
       _challengeSeed += 1;
       step = 0;
     });
+
+    // Reset the visible journey immediately. Speech-engine cleanup and
+    // persistence can be asynchronous, but must never leave the old Challenge
+    // mounted under the newly selected level label.
+    final restart = _appState.restartJourney();
+    await _stopJourneyNarration();
+    await restart;
+    if (!mounted || epoch != _levelResetEpoch) return;
     await _narration.setSpeechRate(
       _languageLevelAgent.planFor(profile).speechRate,
     );

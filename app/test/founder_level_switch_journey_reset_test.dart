@@ -11,12 +11,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const journeyId = 'beijing-forbidden-city';
   const flutterTtsChannel = MethodChannel('flutter_tts');
+  final ttsCalls = <String>[];
 
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     PhoenixLevelController.instance.setLevel(5);
+    ttsCalls.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(flutterTtsChannel, (call) async => 1);
+        .setMockMethodCallHandler(flutterTtsChannel, (call) async {
+      ttsCalls.add(call.method);
+      if (call.method == 'getVoices') return <dynamic>[];
+      return 1;
+    });
   });
 
   tearDown(() {
@@ -88,39 +94,31 @@ void main() {
     final state = await pumpChallenge(tester, level: 3);
     disposeStateAfterWidget(tester, state);
 
+    await tester.tap(
+      find.byKey(
+        const ValueKey(
+          'challenge-question-speaker-lv3-q1-sentenceRebuild',
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
     while (find.byType(ActionChip).evaluate().isNotEmpty) {
       await tester.tap(find.byType(ActionChip).first);
       await tester.pump();
     }
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('challenge-next')));
-    await tester.pump();
-    await tester.tap(
-      find.byKey(
-        const ValueKey(
-          'challenge-question-speaker-beijing-forbidden-city-lv3-q2',
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('grammar-location-0')));
-    await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-    await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('grammar-repair-0')));
-    await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('challenge-submit')));
-    await tester.pump();
     expect(find.textContaining('回答'), findsWidgets);
     await tester.tap(
       find.byKey(
         const ValueKey(
-          'challenge-feedback-speaker-beijing-forbidden-city-lv3-q2',
+          'challenge-feedback-speaker-lv3-q1-sentenceRebuild',
         ),
       ),
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final stopsBeforeLevelSwitch =
+        ttsCalls.where((method) => method == 'stop').length;
 
     PhoenixLevelController.instance.setLevel(7);
     await waitForStoryStart(tester);
@@ -132,6 +130,10 @@ void main() {
     expect(find.text('回答正确'), findsNothing);
     expect(find.text('回答错误'), findsNothing);
     expect(find.byKey(const ValueKey('challenge-inline-feedback')), findsNothing);
+    expect(
+      ttsCalls.where((method) => method == 'stop').length,
+      greaterThan(stopsBeforeLevelSwitch),
+    );
   });
 
   testWidgets('multiple switches each restart at selected-level Story', (tester) async {
