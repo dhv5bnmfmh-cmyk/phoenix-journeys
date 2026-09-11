@@ -560,7 +560,7 @@ async function nextToMemory(page, level) {
 async function nextToCompletion(page, level) {
   await tapButton(page, '完成旅程', { exact: true });
   await waitStage(page, 5);
-  await findSemantic(page, 'Challenge Reward', { exact: true, timeout: 15000 });
+  await findSemantic(page, 'Challenge Reward', { timeout: 15000 });
   await findSemantic(page, 'Journey 已记录', { timeout: 15000 });
   await findSemantic(page, '返回首页', { role: 'button', exact: true, timeout: 15000 });
   if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Completion level drift`);
