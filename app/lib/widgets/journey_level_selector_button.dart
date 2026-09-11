@@ -3,12 +3,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 import '../services/language_level_preference_store.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/phoenix_story_length_policy.dart';
-import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
 @visibleForTesting
@@ -86,9 +84,6 @@ class _JourneyLevelSelectorButtonState
         .toInt();
     if (next == current) return;
 
-    // A level change starts a fresh Journey. Reset persisted stage/feedback
-    // before notifying live Journey screens of the selected level.
-    unawaited(context.read<AppState>().restartJourney());
     _controller.setLevel(next);
     unawaited(HapticFeedback.selectionClick());
 
