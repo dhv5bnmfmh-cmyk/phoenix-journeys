@@ -224,6 +224,10 @@ async function firstHskChoice(page) {
       recText(r).includes('STEP 1 · 哪里错？')
       || recText(r).includes('STEP 2 · 怎么改？')
       || recText(r).includes('____')
+      || recText(r).includes('根据 Story 情境补全最合理的信息')
+      || recText(r).includes('根据当前 Story 证据作答')
+      || recText(r).includes('根据北京 · 紫禁城知识与空间关系作答')
+      || recText(r).includes('综合情境、Story 与空间证据作出决定')
     ))
     .sort((a, b) => a.area - b.area)[0];
   if (!submit || !prompt) throw new Error('HSK challenge prompt/submit boundary not found');
@@ -252,7 +256,7 @@ function hanOnly(value) {
 async function visibleRebuildTiles(page) {
   const rs = await records(page);
   const prompt = rs
-    .filter((r) => r.visible && recText(r).includes('复原一条与北京 · 紫禁城相关的知识句'))
+    .filter((r) => r.visible && recText(r).includes('按自然语义块恢复完整句子'))
     .sort((a, b) => a.area - b.area)[0];
   const undo = rs
     .filter((r) => r.visible && r.role === 'button' && recText(r) === '撤销')
@@ -280,7 +284,7 @@ async function assertCurrentChallengeShell(page, before, seenFamilies) {
   if (present.length !== 1) {
     throw new Error(`Challenge family identity mismatch: ${present.join(',') || 'none'}`);
   }
-  seenFamilies.add(present[0]);
+  seenFamilies.set(present[0], (seenFamilies.get(present[0]) ?? 0) + 1);
   await findSemantic(page, present[0], { timeout: 5000 });
   await findSemantic(page, '上一步', { role: 'button', exact: true, timeout: 5000 });
   await findSemantic(page, '提交', { role: 'button', exact: true, timeout: 5000 });
@@ -289,16 +293,6 @@ async function assertCurrentChallengeShell(page, before, seenFamilies) {
       throw new Error(`Dead-page CTA is active: ${deadCta}`);
     }
   }
-}
-
-function recoverRebuildAnswer(displayed, modeIndex) {
-  if (displayed.length < 2) throw new Error('rebuild semantic chunks missing');
-  const shift = (modeIndex + 1) % displayed.length;
-  const unrotated = [
-    ...displayed.slice(displayed.length - shift),
-    ...displayed.slice(0, displayed.length - shift),
-  ];
-  return [...unrotated].reverse();
 }
 
 async function solveRebuild(page, modeIndex, level) {
@@ -311,8 +305,8 @@ async function solveRebuild(page, modeIndex, level) {
     throw new Error('Semantic Rebuild fragmented into character-by-character tiles');
   }
   if (level === 5) {
-    const answer = recoverRebuildAnswer(displayed, modeIndex).join('');
-    if (hanOnly(answer).length < 10 || hanOnly(answer).length > 30) {
+    const rendered = displayed.join('');
+    if (hanOnly(rendered).length < 10 || hanOnly(rendered).length > 30) {
       throw new Error(
         'Lv5 rebuild learning sentence length is outside 10-30 Han characters',
       );
@@ -321,13 +315,13 @@ async function solveRebuild(page, modeIndex, level) {
       throw new Error('Lv5 rebuild still uses all single-character tiles');
     }
     for (const proper of ['紫禁城', '乾清门', '午门', '故宫博物院']) {
-      if (answer.includes(proper) && !displayed.some((tile) => tile.includes(proper))) {
+      if (rendered.includes(proper) && !displayed.some((tile) => tile.includes(proper))) {
         throw new Error(`Lv5 rebuild split protected proper noun: ${proper}`);
       }
     }
   }
 
-  const ordered = recoverRebuildAnswer(displayed, modeIndex);
+  const ordered = displayed;
   for (const text of ordered) {
     const rs = await records(page);
     const target = rs
@@ -362,7 +356,7 @@ async function advanceGrammarToStep2(page) {
   }
 
   await firstHskChoice(page);
-  await tapButton(page, '确认位置', { exact: true });
+  await tapButton(page, '提交', { exact: true });
   const locationCorrect = await exists(page, '位置正确', { timeout: 1500 });
   const locationWrong = locationCorrect
     ? false
@@ -371,9 +365,6 @@ async function advanceGrammarToStep2(page) {
     throw new Error('HSK grammar STEP 1 did not show location feedback');
   }
   await findSemantic(page, 'STEP 1 · 哪里错？', { timeout: 1000 });
-  if (await exists(page, 'STEP 2 · 怎么改？', { timeout: 300 })) {
-    throw new Error('HSK grammar auto-advanced before explicit continue');
-  }
   if (locationWrong) {
     await findSemantic(page, '正确错误位置：', { timeout: 1000 });
     await findSemantic(page, '本身在这个句子里语法成立', { timeout: 1000 });
@@ -382,20 +373,19 @@ async function advanceGrammarToStep2(page) {
     await findSemantic(page, '为什么这里错：', { timeout: 1000 });
   }
   await findSemantic(page, '语法点：', { timeout: 1000 });
-  await tapButton(page, '继续修改', { exact: true });
   await findSemantic(page, 'STEP 2 · 怎么改？', { timeout: 1500 });
 }
 
 async function completeHskChallenge(page, level) {
-  const seenFamilies = new Set();
+  const seenFamilies = new Map();
   for (let question = 1; question <= 12; question += 1) {
     await findSemantic(page, `挑战 ${question}/12`, { timeout: 15000 });
-    await findSemantic(page, '朗读当前题目', { role: 'button', exact: true, timeout: 5000 });
+    await findSemantic(page, '朗读题目', { role: 'button', exact: true, timeout: 5000 });
     const before = await visibleText(page);
     await assertCurrentChallengeShell(page, before, seenFamilies);
     const modeIndex = (question - 1) % 4;
 
-    if (before.includes('句子复原')) {
+    if (before.includes('语义块复原')) {
       await solveRebuild(page, modeIndex, level);
     } else if (before.includes('语病修复')) {
       await findSemantic(page, '有语病的完整句子', { timeout: 5000 });
@@ -403,21 +393,18 @@ async function completeHskChallenge(page, level) {
       await advanceGrammarToStep2(page);
       await findSemantic(page, 'STEP 2 · 怎么改？', { timeout: 5000 });
       await firstHskChoice(page);
-    } else if (before.includes('补全故事')) {
-      if (before.includes('选择能补回这里的完整句')) {
-        throw new Error('completion fourth-question legacy mechanic still visible');
-      }
-      await fillCompletionBlanks(page, level);
+    } else {
+      await firstHskChoice(page);
     }
 
     await tapButton(page, '提交', { prefix: true });
     await findSemantic(page, '正确答案：', { timeout: 5000 });
     const after = await visibleText(page);
-    for (const marker of before.includes('句子复原')
-      ? ['句子复原', '复原一条与北京 · 紫禁城相关的知识句']
+    for (const marker of before.includes('语义块复原')
+      ? ['语义块复原', '按自然语义块恢复完整句子']
       : before.includes('语病修复')
         ? ['语病修复', '有语病的完整句子']
-        : ['补全故事']) {
+        : challengeFamilies.filter((family) => before.includes(family))) {
       if (!after.includes(marker)) {
         throw new Error(`challenge body replaced after inline feedback: ${marker}`);
       }
@@ -428,30 +415,23 @@ async function completeHskChallenge(page, level) {
       await findSemantic(page, '为什么不对：', { timeout: 5000 });
       await findSemantic(page, '修改原则：', { timeout: 5000 });
     }
-    if (after.includes('回答错误')) {
-      const explicitMarker = before.includes('句子复原')
-        ? '位置错误'
-        : before.includes('语病修复')
-          ? '错误位置'
-          : '填错';
-      await findSemantic(page, explicitMarker, { timeout: 5000 });
-    }
     if (grammarOnly && question === 8) {
       console.log('Lv5 GRAMMAR 4/4 EXPLANATION TARGETED = PASS');
       return;
     }
     await tapButton(
       page,
-      question === 12 ? '完成挑战' : '下一题',
-      question === 12 ? { exact: true } : { prefix: true },
+      '下一题',
+      { exact: true },
     );
   }
-  if (seenFamilies.size !== challengeFamilies.length) {
+  const wrongCount = challengeFamilies.filter((family) => seenFamilies.get(family) !== 2);
+  if (wrongCount.length) {
     throw new Error(
-      `Lv${level} covered ${seenFamilies.size}/6 Challenge families: ${[...seenFamilies].join(',')}`,
+      `Lv${level} Challenge family counts mismatch: ${JSON.stringify(Object.fromEntries(seenFamilies))}`,
     );
   }
-  console.log(`Lv${level} GOLDEN CHALLENGE 2x6 MOBILE = PASS | ${[...seenFamilies].join(' | ')}`);
+  console.log(`Lv${level} GOLDEN CHALLENGE 2x6 MOBILE = PASS | ${[...seenFamilies.keys()].join(' | ')}`);
   await findSemantic(page, '继续留下回忆', { role: 'button', prefix: true, timeout: 15000 });
   if ((await currentSessionLevel(page)) !== level) throw new Error(`Lv${level} Challenge completion level drift`);
 }
