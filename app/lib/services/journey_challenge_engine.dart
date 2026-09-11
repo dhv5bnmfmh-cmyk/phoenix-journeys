@@ -289,13 +289,15 @@ class ChallengeAntiTemplateAuditor {
     }
 
     if (question.mode == StoryChallengeMode.grammarRepair) {
-      const punctuation = <String>{'。', '，', '！', '？', '：', '；'};
       if (question.errorSegments.length != 4 ||
           question.errorSegmentIndex == null ||
           question.errorSegments.join() != question.prompt ||
           question.errorSegments.any(
-            (segment) =>
-                segment.trim().isEmpty || punctuation.contains(segment.trim()),
+            (segment) => !_isMeaningfulGrammarUnit(segment),
+          ) ||
+          _hasGrammarFragmentationLeak(
+            question.errorSegments,
+            question.errorSegmentIndex!,
           )) {
         failures.add('grammar-step1:${question.id}');
       }
@@ -361,6 +363,39 @@ bool _singleHanFragment(String value) {
 bool _looksLikeCompleteSentence(String value) {
   final text = value.trim();
   return text.length >= 8 && RegExp(r'[。？！]$').hasMatch(text);
+}
+
+bool _isMeaningfulGrammarUnit(String value) {
+  final text = value.trim();
+  if (text.isEmpty || RegExp(r'^[。，“”！？：；、…]+$').hasMatch(text)) {
+    return false;
+  }
+  final core = text.replaceAll(RegExp(r'[。，“”！？：；、…]+$'), '');
+  if (core.isEmpty) return false;
+  const meaninglessTails = <String>{
+    '的', '了', '在', '写', '往', '着', '过',
+    '但是', '所以', '而且', '完整', '了起来', '了下来',
+  };
+  if (RegExp(r'[。！？，；：]$').hasMatch(text) &&
+      meaninglessTails.contains(core)) {
+    return false;
+  }
+  return !RegExp(r'^[的了在写往着过把被]+$').hasMatch(core);
+}
+
+bool _hasGrammarFragmentationLeak(List<String> segments, int errorIndex) {
+  final error = segments[errorIndex].trim();
+  if (!_isMeaningfulGrammarUnit(error)) return true;
+  final core = error.replaceAll(RegExp(r'[。，“”！？：；、…]+$'), '');
+  final danglingTail = RegExp(
+    r'(的|了|着|过|起来|下来|上去|完整|但是|所以|而且)$',
+  ).hasMatch(core) && RegExp(r'[。！？，；：]$').hasMatch(error);
+  return danglingTail &&
+      segments
+          .asMap()
+          .entries
+          .where((entry) => entry.key != errorIndex)
+          .every((entry) => _isMeaningfulGrammarUnit(entry.value));
 }
 
 bool _trivialAdjacentVariation(

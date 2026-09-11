@@ -157,7 +157,9 @@ void main() {
     expect(resolver, contains('final profile = _languageProfile;'));
     expect(resolver, contains('identical(_cachedLevelProfile, profile)'));
     expect(journey, contains('snapshotJourneySessionProfile('));
-    expect(journey, contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'));
+    expect(journey, contains('late ChineseProficiencyProfile _sessionLanguageProfile;'));
+    expect(journey, contains('addListener(_handlePhoenixLevelChange)'));
+    expect(journey, contains('_resetJourneyForSelectedLevel'));
     expect(journey, isNot(contains('_phoenixLevelController.addListener')));
     expect(
       journey,

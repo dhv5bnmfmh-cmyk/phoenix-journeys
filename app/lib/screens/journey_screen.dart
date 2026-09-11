@@ -172,7 +172,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       PhoenixLanguageLevelAgent();
   static final PhoenixLevelController _phoenixLevelController =
       PhoenixLevelController.instance;
-  late final ChineseProficiencyProfile _sessionLanguageProfile;
+  late ChineseProficiencyProfile _sessionLanguageProfile;
   ChineseProficiencyProfile? get _languageProfile => _sessionLanguageProfile;
   Timer? _narrationCheckpointTimer;
   int _lastSavedNarrationOffset = 0;
@@ -184,8 +184,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   List<NarrationItem>? _cachedStoryNarrationItems;
   JourneyLevelContent? _cachedDiscoveryNarrationContent;
   List<NarrationItem>? _cachedDiscoveryNarrationItems;
-  late final JourneyPreparedBundle _preparedBundle;
-  late final StoryChallengeSet _preparedChallenge;
+  late JourneyPreparedBundle _preparedBundle;
+  late StoryChallengeSet _preparedChallenge;
+  int _levelResetEpoch = 0;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -197,6 +198,7 @@ class _JourneyScreenState extends State<JourneyScreen>
     WidgetsBinding.instance.addObserver(this);
     _narration = NarrationController();
     _narration.addListener(_handleNarrationCheckpoint);
+    _phoenixLevelController.addListener(_handlePhoenixLevelChange);
     _sessionLanguageProfile = snapshotJourneySessionProfile(
       _phoenixLevelController,
     );
@@ -286,6 +288,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       unawaited(_persistProgress());
     }
     _narration.removeListener(_handleNarrationCheckpoint);
+    _phoenixLevelController.removeListener(_handlePhoenixLevelChange);
     _narrationCheckpointTimer?.cancel();
     _stageNarrationIntent += 1;
     _stageNarrationRequestedId = null;
@@ -309,6 +312,66 @@ class _JourneyScreenState extends State<JourneyScreen>
       wonder: wonderController.text,
       express: expressController.text,
       memory: memoryController.text,
+    );
+  }
+
+  void _handlePhoenixLevelChange() {
+    if (!_initialized ||
+        _sessionLanguageProfile.phoenixLevel ==
+            _phoenixLevelController.level) {
+      return;
+    }
+    unawaited(_resetJourneyForSelectedLevel(_phoenixLevelController.level));
+  }
+
+  Future<void> _resetJourneyForSelectedLevel(int selectedLevel) async {
+    final epoch = ++_levelResetEpoch;
+    _resetChallengeAudio();
+    await _stopJourneyNarration();
+    await _appState.restartJourney();
+    if (!mounted || epoch != _levelResetEpoch) return;
+
+    final profile = _phoenixLevelController.profile;
+    final preparedBundle = JourneyPreparationCoordinator.instance.prepareNow(
+      journeyId: _experience.id,
+      profile: profile,
+      scriptMode: _appState.scriptMode.name,
+      knownWords: _appState.savedWords,
+    );
+    final preparedChallenge = const JourneyChallengeEngine().build(
+      journeyId: _experience.id,
+      sessionLevel: selectedLevel,
+      storyParagraphs: preparedBundle.challengeSourceMaterial,
+    );
+
+    wonderController.clear();
+    expressController.clear();
+    memoryController.clear();
+    setState(() {
+      _sessionLanguageProfile = profile;
+      _preparedBundle = preparedBundle;
+      _preparedChallenge = preparedChallenge;
+      _cachedLevelContent = null;
+      _cachedLevelProfile = null;
+      _cachedStoryNarrationContent = null;
+      _cachedStoryNarrationItems = null;
+      _cachedDiscoveryNarrationContent = null;
+      _cachedDiscoveryNarrationItems = null;
+      _guideFeedback = null;
+      _writingFeedback = null;
+      _guideLoading = false;
+      _writingLoading = false;
+      _memoryPhotoBusy = false;
+      _memoryPhotoError = null;
+      _challengeResolved = false;
+      _forbiddenCityFinaleCompleted = false;
+      _pilotChallengeVisible = false;
+      _pilotMemoryVisible = false;
+      _challengeSeed += 1;
+      step = 0;
+    });
+    await _narration.setSpeechRate(
+      _languageLevelAgent.planFor(profile).speechRate,
     );
   }
 
@@ -2154,6 +2217,9 @@ class _JourneyScreenState extends State<JourneyScreen>
       showActions: _challengeResolved,
       child: _isForbiddenCity
           ? HskStoryChallenge(
+              key: ValueKey(
+                'forbidden-city-challenge-${_sessionLanguageProfile.phoenixLevel}-$_challengeSeed',
+              ),
               challenge: _preparedChallenge,
               displayText: state.displayText,
               onNarrate: _speakChallengeNarration,

@@ -3,6 +3,7 @@ import 'package:phoenix_journeys/models/journey_challenge.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
 import 'package:phoenix_journeys/services/journey_preparation_coordinator.dart';
+import 'package:phoenix_journeys/services/forbidden_city_challenge_level_standard.dart';
 
 void main() {
   const engine = JourneyChallengeEngine();
@@ -66,14 +67,30 @@ void main() {
     }
   });
 
-  test('Grammar Repair keeps complete authored feedback', () {
-    for (final level in <int>[1, 5, 10]) {
+  test('Grammar Repair 20/20 has meaningful Step 1 and complete Step 2', () {
+    var total = 0;
+    for (var level = 1; level <= 10; level++) {
       final questions = challenge(level).questions
           .where((q) => q.mode == StoryChallengeMode.grammarRepair);
       expect(questions, hasLength(2));
       for (final q in questions) {
+        total += 1;
         expect(q.errorSegments, hasLength(4));
         expect(q.errorSegmentIndex, inInclusiveRange(0, 3));
+        expect(q.errorSegments.join(), q.prompt, reason: q.id);
+        expect(
+          q.errorSegments.every(isMeaningfulGrammarSegment),
+          isTrue,
+          reason: '${q.id}: meaningful grammatical units',
+        );
+        expect(
+          hasTrivialGrammarFragmentationLeak(
+            q.errorSegments,
+            q.errorSegmentIndex!,
+          ),
+          isFalse,
+          reason: '${q.id}: fragmentation-style answer leak',
+        );
         expect(q.options, hasLength(4));
         expect(q.options.toSet(), hasLength(4));
         expect(q.options.where((value) => value == q.answer), hasLength(1));
@@ -82,6 +99,35 @@ void main() {
         expect(q.grammarOptionExplanations, hasLength(4));
       }
     }
+    expect(total, 20);
+  });
+
+  test('Grammar gate rejects punctuation and giveaway tail fragments', () {
+    for (final fragment in <String>[
+      '。',
+      '，',
+      '的。',
+      '了。',
+      '在。',
+      '写。',
+      '往。',
+      '但是。',
+      '完整。',
+      '了起来。',
+    ]) {
+      expect(
+        isMeaningfulGrammarSegment(fragment),
+        isFalse,
+        reason: fragment,
+      );
+    }
+    expect(
+      hasTrivialGrammarFragmentationLeak(
+        const <String>['阿宁带沈砚', '回看刚才', '经过位置', '的。'],
+        3,
+      ),
+      isTrue,
+    );
   });
 
   test('Choice questions have one answer and authored rationales', () {

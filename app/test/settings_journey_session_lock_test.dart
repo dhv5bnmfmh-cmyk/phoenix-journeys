@@ -38,7 +38,7 @@ void main() {
     expect(secondSession.phoenixLevel, 7);
   });
 
-  test('mounted Journey and narration stay bound to the Lv5 session snapshot',
+  test('mounted Journey adopts a new level as a fresh session',
       () async {
     const store = LanguageLevelPreferenceStore();
     const agent = PhoenixLanguageLevelAgent();
@@ -62,7 +62,7 @@ void main() {
     final journey = File('lib/screens/journey_screen.dart').readAsStringSync();
     expect(
       journey,
-      contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'),
+      contains('late ChineseProficiencyProfile _sessionLanguageProfile;'),
     );
     expect(
       journey,
@@ -78,8 +78,11 @@ void main() {
     );
     expect(
       journey,
-      isNot(contains('addListener(_handlePhoenixLevelChanged)')),
+      contains('addListener(_handlePhoenixLevelChange)'),
     );
+    expect(journey, contains('_resetJourneyForSelectedLevel'));
+    expect(journey, contains('step = 0;'));
+    expect(journey, contains('_resetChallengeAudio();'));
   });
 
   testWidgets('Me exposes one canonical level and language preferences', (
@@ -150,9 +153,8 @@ void main() {
 
     expect(journey, contains("ValueKey('journey-session-level-badge')"));
     expect(journey, contains('snapshotJourneySessionProfile('));
-    expect(journey, isNot(contains('addListener(_handlePhoenixLevelChanged)')));
-    expect(journey, isNot(contains('_applyPhoenixLevelChange')));
-    expect(journey, isNot(contains('_settlePhoenixLevelChange')));
+    expect(journey, contains('addListener(_handlePhoenixLevelChange)'));
+    expect(journey, contains('_resetJourneyForSelectedLevel'));
     expect(journey, isNot(contains("ValueKey('phoenix-level-minus')")));
     expect(journey, isNot(contains("ValueKey('phoenix-level-plus')")));
     expect(journey, contains('final page = switch (step) {'));
