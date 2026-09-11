@@ -32,6 +32,24 @@ jobs:
           set -euo pipefail
           git merge-base --is-ancestor "$VALIDATION_FIX_SHA" HEAD
           cp .github/scripts/verify_founder_challenge_device_webkit.mjs "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ['RUNNER_TEMP']) / 'verify_founder_challenge_device_webkit.mjs'
+          text = path.read_text()
+          needle = ".sort((a, b) => a.y - b.y || a.x - b.x || a.area - b.area);"
+          replacement = """.sort((a, b) => {
+            const aRole = a.role === 'checkbox' ? 0 : 1;
+            const bRole = b.role === 'checkbox' ? 0 : 1;
+            if (aRole !== bRole) return aRole - bRole;
+            return a.y - b.y || a.x - b.x || a.area - b.area;
+          });"""
+          if needle not in text:
+              raise SystemExit('expected Founder answer-candidate sort not found')
+          text = text.replace(needle, replacement, 1)
+          path.write_text(text)
+          PY
           node --check "$RUNNER_TEMP/verify_founder_challenge_device_webkit.mjs"
           echo "VALIDATION HARNESS BASE = $VALIDATION_FIX_SHA"
 
