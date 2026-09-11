@@ -1,0 +1,450 @@
+name: Founder Device Product Fix
+
+on:
+  push:
+    branches:
+      - validation/founder-preview-closeout-853cd1
+    paths:
+      - '.github/workflows/founder-device-product-fix.yml'
+
+permissions:
+  contents: write
+
+env:
+  PRODUCT_SHA: 853cd1e627ef43363f9d795f3dcac6720e99190f
+  PRODUCT_BRANCH: product/city-standard-v1-beijing-forbidden-city
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact product SHA
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PRODUCT_SHA }}
+          fetch-depth: 0
+
+      - name: Verify exact product identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCT_SHA"
+
+      - name: Apply minimal Founder device product fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected one match, found {count}: {old[:80]!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          hsk = 'app/lib/widgets/hsk_story_challenge.dart'
+          journey = 'app/lib/screens/journey_screen.dart'
+
+          replace_once(
+              hsk,
+              "    this.onFeedbackAudio,\n    this.onBackStage,\n",
+              "    this.onFeedbackAudio,\n    this.onQuestionChanged,\n    this.onBackStage,\n",
+          )
+          replace_once(
+              hsk,
+              "  final Future<void> Function(String questionId, bool correct)? onFeedbackAudio;\n  final VoidCallback? onBackStage;\n",
+              "  final Future<void> Function(String questionId, String feedbackText)? onFeedbackAudio;\n  final VoidCallback? onQuestionChanged;\n  final VoidCallback? onBackStage;\n",
+          )
+          replace_once(
+              hsk,
+              "  bool submitted = false;\n  final List<String> built = <String>[];\n",
+              "  bool submitted = false;\n  bool challengeCompleted = false;\n  final List<String> built = <String>[];\n",
+          )
+          replace_once(
+              hsk,
+              "  bool get _canSubmit {\n",
+              "  String get _feedbackAudioText {\n"
+              "    final parts = <String>[\n"
+              "      '正确答案：${widget.displayText(question.answer)}',\n"
+              "    ];\n"
+              "    if (!_correct &&\n"
+              "        selectedOption != null &&\n"
+              "        selectedOption! < question.distractorRationales.length) {\n"
+              "      final rationale = question.distractorRationales[selectedOption!];\n"
+              "      if (rationale.isNotEmpty) {\n"
+              "        parts.add('错误原因：${widget.displayText(rationale)}');\n"
+              "      }\n"
+              "    }\n"
+              "    if (question.whyCorrect.isNotEmpty) {\n"
+              "      parts.add('解释：${widget.displayText(question.whyCorrect)}');\n"
+              "    } else if (question.grammarRevisionRule?.isNotEmpty ?? false) {\n"
+              "      parts.add('解释：${widget.displayText(question.grammarRevisionRule!)}');\n"
+              "    }\n"
+              "    return parts.join('。');\n"
+              "  }\n\n"
+              "  bool get _canSubmit {\n",
+          )
+          replace_once(
+              hsk,
+              "    submitted = false;\n    built.clear();\n",
+              "    submitted = false;\n    challengeCompleted = false;\n    built.clear();\n",
+          )
+          replace_once(
+              hsk,
+              "    final correct = _correct;\n    setState(() => submitted = true);\n    final feedbackAudio = widget.onFeedbackAudio;\n    if (feedbackAudio != null) {\n      unawaited(feedbackAudio(question.id, correct));\n    }\n",
+              "    setState(() => submitted = true);\n    final feedbackAudio = widget.onFeedbackAudio;\n    if (feedbackAudio != null) {\n      unawaited(feedbackAudio(question.id, _feedbackAudioText));\n    }\n",
+          )
+          replace_once(
+              hsk,
+              "  Future<void> _next() async {\n    if (!submitted) return;\n    if (index == widget.challenge.questions.length - 1) {\n      await widget.onCompleted();\n      return;\n    }\n    setState(() {\n      index += 1;\n      _resetQuestion();\n    });\n  }\n",
+              "  Future<void> _next() async {\n    if (!submitted || challengeCompleted) return;\n    widget.onQuestionChanged?.call();\n    if (index == widget.challenge.questions.length - 1) {\n      setState(() => challengeCompleted = true);\n      await widget.onCompleted();\n      return;\n    }\n    setState(() {\n      index += 1;\n      _resetQuestion();\n    });\n  }\n",
+          )
+          replace_once(
+              hsk,
+              "  void _previous() {\n    if (index == 0) {\n",
+              "  void _previous() {\n    widget.onQuestionChanged?.call();\n    if (index == 0) {\n",
+          )
+          replace_once(
+              hsk,
+              "  Widget _bottomActions() => SizedBox(\n",
+              "  Widget _bottomActions() => challengeCompleted\n      ? const SizedBox.shrink()\n      : SizedBox(\n",
+          )
+          replace_once(
+              hsk,
+              "                widget.onFeedbackAudio!(question.id, _correct),\n",
+              "                widget.onFeedbackAudio!(question.id, _feedbackAudioText),\n",
+          )
+
+          replace_once(
+              journey,
+              "  Future<void> _playChallengeFeedbackAudio(String _, bool correct) async {\n    await _narration.speakTemporaryText(\n      correct ? '回答正确' : '回答错误，请查看红色标记',\n      languageCode: journeyStageNarrationLanguageCode(_appState.isTraditional),\n    );\n  }\n",
+              "  void _resetChallengeAudio() {\n"
+              "    _stageNarrationIntent += 1;\n"
+              "    _stageNarrationRequestedId = null;\n"
+              "    _narration.cancelPlaybackImmediately();\n"
+              "  }\n\n"
+              "  Future<void> _playChallengeFeedbackAudio(\n"
+              "    String questionId,\n"
+              "    String feedbackText,\n"
+              "  ) async {\n"
+              "    final text = feedbackText.trim();\n"
+              "    if (text.isEmpty) return;\n"
+              "    final contentId = 'challenge-feedback-$questionId';\n"
+              "    _stageNarrationIntent += 1;\n"
+              "    _stageNarrationRequestedId = null;\n"
+              "    await _narration.stop();\n"
+              "    if (!mounted) return;\n"
+              "    await _narration.play(\n"
+              "      contentId: contentId,\n"
+              "      items: [NarrationItem(id: contentId, text: text, label: '答题反馈')],\n"
+              "      languageCode: journeyStageNarrationLanguageCode(_appState.isTraditional),\n"
+              "    );\n"
+              "  }\n",
+          )
+          replace_once(
+              journey,
+              "              onNarrate: _speakChallengeNarration,\n              onFeedbackAudio: _playChallengeFeedbackAudio,\n              onCompleted: () async {\n",
+              "              onNarrate: _speakChallengeNarration,\n              onFeedbackAudio: _playChallengeFeedbackAudio,\n              onQuestionChanged: _resetChallengeAudio,\n              onCompleted: () async {\n",
+          )
+
+          Path('app/test/founder_challenge_device_regression_test.dart').write_text(r'''import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/models/journey_challenge.dart';
+import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
+
+QuestionDesignSignature _signature(String id) => QuestionDesignSignature(
+      journeyId: 'beijing-forbidden-city',
+      sessionLevel: 2,
+      mode: StoryChallengeMode.scenarioDecision,
+      sourceParagraphIndex: 0,
+      sourceSentenceIndex: 0,
+      sourceHash: id,
+      syntaxPattern: 'scenario-decision',
+      operationType: 'choose',
+      errorFamily: null,
+      gapType: null,
+      answerShape: 'choice',
+      distractorStrategy: 'contrast',
+      templateSignature: id,
+      semanticSignature: id,
+    );
+
+StoryChallengeQuestion _question({
+  required String id,
+  required String prompt,
+  required String narration,
+  required String answer,
+  required List<String> options,
+  required List<String> rationales,
+  required String whyCorrect,
+}) =>
+    StoryChallengeQuestion(
+      id: id,
+      mode: StoryChallengeMode.scenarioDecision,
+      sourceSentence: prompt,
+      prompt: prompt,
+      answer: answer,
+      options: options,
+      signature: _signature(id),
+      narrationText: narration,
+      distractorRationales: rationales,
+      whyCorrect: whyCorrect,
+      learningObjective: 'device regression',
+      difficulty: 'Lv2',
+    );
+
+class _ChallengeHost extends StatefulWidget {
+  const _ChallengeHost({
+    required this.questionAudio,
+    required this.feedbackAudio,
+    required this.onResetAudio,
+  });
+
+  final List<String> questionAudio;
+  final List<String> feedbackAudio;
+  final VoidCallback onResetAudio;
+
+  @override
+  State<_ChallengeHost> createState() => _ChallengeHostState();
+}
+
+class _ChallengeHostState extends State<_ChallengeHost> {
+  bool resolved = false;
+
+  late final StoryChallengeSet challenge = StoryChallengeSet(
+    journeyId: 'beijing-forbidden-city',
+    sessionLevel: 2,
+    questions: <StoryChallengeQuestion>[
+      _question(
+        id: 'q1',
+        prompt: '第一题',
+        narration: '题目音频一',
+        answer: '正确答案一',
+        options: const ['错误选项一', '正确答案一', '干扰二', '干扰三'],
+        rationales: const ['错误选项一忽略了路线条件', '', '', ''],
+        whyCorrect: '正确答案一保留了完整条件',
+      ),
+      _question(
+        id: 'q2',
+        prompt: '第二题',
+        narration: '题目音频二',
+        answer: '正确答案二',
+        options: const ['干扰一', '正确答案二', '干扰二', '干扰三'],
+        rationales: const ['', '', '', ''],
+        whyCorrect: '正确答案二符合当前情境',
+      ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: HskStoryChallenge(
+                challenge: challenge,
+                displayText: (value) => value,
+                onNarrate: (questionId, text) async {
+                  widget.questionAudio.add('$questionId:$text');
+                },
+                onFeedbackAudio: (questionId, text) async {
+                  widget.feedbackAudio.add('$questionId:$text');
+                },
+                onQuestionChanged: widget.onResetAudio,
+                onCompleted: () async {
+                  setState(() => resolved = true);
+                },
+              ),
+            ),
+            if (resolved)
+              SafeArea(
+                top: false,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: OutlinedButton(
+                        key: const ValueKey('outer-stage-back'),
+                        onPressed: () {},
+                        child: const Text('上一步'),
+                      ),
+                    ),
+                    Expanded(
+                      child: FilledButton(
+                        key: const ValueKey('outer-stage-continue'),
+                        onPressed: () {},
+                        child: const Text('继续留下回忆'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void main() {
+  testWidgets(
+    'Founder device challenge navigation and feedback audio remain isolated',
+    (tester) async {
+      final questionAudio = <String>[];
+      final feedbackAudio = <String>[];
+      var resetCount = 0;
+
+      await tester.pumpWidget(
+        _ChallengeHost(
+          questionAudio: questionAudio,
+          feedbackAudio: feedbackAudio,
+          onResetAudio: () => resetCount += 1,
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
+        findsNothing,
+      );
+      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
+
+      await tester.tap(
+        find.byKey(const ValueKey('challenge-question-speaker-q1')),
+      );
+      await tester.pump();
+      expect(questionAudio, ['q1:题目音频一']);
+
+      await tester.tap(find.byKey(const ValueKey('challenge-option-0')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
+        findsOneWidget,
+      );
+      expect(feedbackAudio, hasLength(1));
+      expect(feedbackAudio.last, contains('正确答案：正确答案一'));
+      expect(feedbackAudio.last, contains('错误原因：错误选项一忽略了路线条件'));
+      expect(feedbackAudio.last, contains('解释：正确答案一保留了完整条件'));
+      expect(feedbackAudio.last, isNot(contains('题目音频一')));
+
+      await tester.tap(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
+      );
+      await tester.pump();
+      expect(feedbackAudio, hasLength(2));
+      expect(feedbackAudio.last, contains('正确答案：正确答案一'));
+
+      await tester.tap(find.byKey(const ValueKey('challenge-next')));
+      await tester.pumpAndSettle();
+      expect(resetCount, 1);
+      expect(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q2')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('challenge-question-speaker-q2')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('challenge-option-1')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('challenge-feedback-speaker-q2')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('challenge-next')), findsOneWidget);
+      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('challenge-next')));
+      await tester.pumpAndSettle();
+
+      expect(resetCount, 2);
+      expect(find.byKey(const ValueKey('challenge-next')), findsNothing);
+      expect(find.byKey(const ValueKey('challenge-back')), findsNothing);
+      expect(find.byKey(const ValueKey('outer-stage-back')), findsOneWidget);
+      expect(find.byKey(const ValueKey('outer-stage-continue')), findsOneWidget);
+    },
+  );
+}
+''')
+          PY
+
+      - name: Canonical format and diff guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            app/lib/screens/journey_screen.dart \
+            app/lib/widgets/hsk_story_challenge.dart \
+            app/test/founder_challenge_device_regression_test.dart
+          dart format --output=none --set-exit-if-changed \
+            app/lib/screens/journey_screen.dart \
+            app/lib/widgets/hsk_story_challenge.dart \
+            app/test/founder_challenge_device_regression_test.dart
+          git diff --check
+          git diff --name-only | sort > /tmp/actual.txt
+          printf '%s\n' \
+            app/lib/screens/journey_screen.dart \
+            app/lib/widgets/hsk_story_challenge.dart \
+            app/test/founder_challenge_device_regression_test.dart \
+            | sort > /tmp/expected.txt
+          diff -u /tmp/expected.txt /tmp/actual.txt
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted Founder device regression
+        working-directory: app
+        run: flutter test --reporter expanded test/founder_challenge_device_regression_test.dart
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze
+
+      - name: Relevant Challenge Flutter tests
+        working-directory: app
+        run: |
+          flutter test --reporter expanded \
+            test/founder_challenge_device_regression_test.dart \
+            test/authoritative_story_challenge_contract_test.dart
+
+      - name: Create single product commit and fast-forward canonical
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "$PRODUCT_BRANCH"
+          test "$(git rev-parse "origin/$PRODUCT_BRANCH")" = "$PRODUCT_SHA"
+          git add \
+            app/lib/screens/journey_screen.dart \
+            app/lib/widgets/hsk_story_challenge.dart \
+            app/test/founder_challenge_device_regression_test.dart
+          git diff --cached --name-only | sort > /tmp/staged.txt
+          diff -u /tmp/expected.txt /tmp/staged.txt
+          git config user.name phoenix-founder-validation
+          git config user.email phoenix-founder-validation@users.noreply.github.com
+          git commit -m "fix(challenge): isolate completion nav and feedback audio"
+          new_sha="$(git rev-parse HEAD)"
+          echo "NEW EXACT PRODUCT SHA = $new_sha"
+          git push origin "HEAD:refs/heads/$PRODUCT_BRANCH"
