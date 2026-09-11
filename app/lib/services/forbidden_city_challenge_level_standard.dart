@@ -428,7 +428,7 @@ bool hasTrivialGrammarFragmentationLeak(
   if (!isMeaningfulGrammarSegment(error)) return true;
   final errorCore = error.replaceAll(RegExp(r'[。，“”！？：；、…]+$'), '');
   final looksLikeDanglingTail = RegExp(
-    r'(的|了|着|过|起来|下来|上去|完整|但是|所以|而且)$',
+    r'^(的|了|着|过|起来|下来|上去|完整|但是|所以|而且)$',
   ).hasMatch(errorCore) && RegExp(r'[。！？，；：]$').hasMatch(error);
   if (!looksLikeDanglingTail) return false;
   return segments

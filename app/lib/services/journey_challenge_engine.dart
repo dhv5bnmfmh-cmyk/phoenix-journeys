@@ -388,7 +388,7 @@ bool _hasGrammarFragmentationLeak(List<String> segments, int errorIndex) {
   if (!_isMeaningfulGrammarUnit(error)) return true;
   final core = error.replaceAll(RegExp(r'[。，“”！？：；、…]+$'), '');
   final danglingTail = RegExp(
-    r'(的|了|着|过|起来|下来|上去|完整|但是|所以|而且)$',
+    r'^(的|了|着|过|起来|下来|上去|完整|但是|所以|而且)$',
   ).hasMatch(core) && RegExp(r'[。！？，；：]$').hasMatch(error);
   return danglingTail &&
       segments
