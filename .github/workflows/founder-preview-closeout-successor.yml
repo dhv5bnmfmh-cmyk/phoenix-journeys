@@ -176,6 +176,7 @@ jobs:
         with:
           name: founder-preview-web-853cd1e627ef43363f9d795f3dcac6720e99190f
           path: app/build/web
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
 
