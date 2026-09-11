@@ -553,7 +553,8 @@ async function nextToMemory(page, level) {
       tapButton(page, '添加照片', { prefix: true }),
     ]);
     await chooser.setFiles(photoFixture);
-    await findSemantic(page, '已添加 1 张照片', { timeout: 15000 });
+    await findSemantic(page, '更换照片', { role: 'button', exact: true, timeout: 15000 });
+    await findSemantic(page, '删除', { role: 'button', exact: true, timeout: 15000 });
   }
 }
 
