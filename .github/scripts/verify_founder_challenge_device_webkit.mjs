@@ -113,25 +113,11 @@ async function configuredLevel(page) {
 }
 
 async function setLevel2(page) {
-  await tapText(page, '我的', { role: 'button', prefix: true });
-  await findRecord(page, '学习设置');
-  for (let guard = 0; guard < 12; guard += 1) {
-    const before = await configuredLevel(page);
-    if (before === 2) break;
-    await tapText(page, before < 2 ? '提高当前难度' : '降低当前难度', {
-      role: 'button',
-      prefix: true,
-    });
-    const deadline = Date.now() + 5000;
-    while (Date.now() < deadline) {
-      const after = await configuredLevel(page).catch(() => before);
-      if (after !== before) break;
-      await sleep(100);
-    }
-  }
-  if ((await configuredLevel(page)) !== 2) throw new Error('failed to configure Lv2');
-  await tapText(page, '探索', { role: 'button', prefix: true });
-  await findRecord(page, 'PHOENIX JOURNEYS');
+  const mobileHarness = await import(
+    pathToFileURL(`${process.cwd()}/.github/scripts/journey_level_session_harness.mjs`).href,
+  );
+  await mobileHarness.setConfiguredLevel(page, 2);
+  await mobileHarness.returnToExplore(page);
   console.log('WEBKIT LV2 CONFIGURATION = PASS');
 }
 
