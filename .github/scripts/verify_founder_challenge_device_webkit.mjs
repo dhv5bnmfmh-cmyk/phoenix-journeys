@@ -211,14 +211,31 @@ async function advanceToQuestion(page, nextNumber) {
   await findRecord(page, `挑战 ${nextNumber}/12`, { timeout: 15000 });
 }
 
-async function installSpeechCapture(page) {
-  await page.evaluate(() => {
+async function installSpeechCaptureBoundary(context) {
+  await context.addInitScript(() => {
     window.__phoenixCapturedSpeech = [];
+    window.__phoenixSpeechCaptureMeta = {
+      installed: false,
+      mode: 'pending',
+    };
+
     const synth = window.speechSynthesis;
     if (!synth || typeof synth.speak !== 'function') {
-      throw new Error('window.speechSynthesis.speak unavailable in WebKit');
+      window.__phoenixSpeechCaptureMeta = {
+        installed: false,
+        mode: 'real-api-unavailable',
+      };
+      return;
     }
-    if (synth.__phoenixCaptureInstalled) return;
+
+    if (synth.__phoenixCaptureInstalled) {
+      window.__phoenixSpeechCaptureMeta = {
+        installed: true,
+        mode: 'real-api-existing-wrapper',
+      };
+      return;
+    }
+
     const original = synth.speak.bind(synth);
     const wrapped = (utterance) => {
       window.__phoenixCapturedSpeech.push(String(utterance?.text ?? ''));
@@ -228,19 +245,63 @@ async function installSpeechCapture(page) {
         return undefined;
       }
     };
+
+    let mode = '';
     try {
-      synth.speak = wrapped;
-    } catch (_) {
       Object.defineProperty(synth, 'speak', {
         configurable: true,
+        writable: true,
         value: wrapped,
       });
+      mode = 'real-api-instance-defineProperty';
+    } catch (_) {
+      const proto = Object.getPrototypeOf(synth);
+      const descriptor = proto ? Object.getOwnPropertyDescriptor(proto, 'speak') : null;
+      if (proto && descriptor?.configurable) {
+        Object.defineProperty(proto, 'speak', {
+          ...descriptor,
+          value: wrapped,
+        });
+        mode = 'real-api-prototype-defineProperty';
+      } else {
+        try {
+          synth.speak = wrapped;
+          mode = 'real-api-instance-assignment';
+        } catch (_) {
+          window.__phoenixSpeechCaptureMeta = {
+            installed: false,
+            mode: 'real-api-wrapper-install-failed',
+          };
+          return;
+        }
+      }
     }
+
+    if (synth.speak !== wrapped) {
+      window.__phoenixSpeechCaptureMeta = {
+        installed: false,
+        mode: 'real-api-wrapper-not-observable',
+      };
+      return;
+    }
+
     Object.defineProperty(synth, '__phoenixCaptureInstalled', {
       configurable: true,
       value: true,
     });
+    window.__phoenixSpeechCaptureMeta = {
+      installed: true,
+      mode,
+    };
   });
+}
+
+async function assertSpeechCaptureBoundary(page) {
+  const meta = await page.evaluate(() => window.__phoenixSpeechCaptureMeta ?? null);
+  if (!meta?.installed) {
+    throw new Error(`WebKit Web Speech capture boundary unavailable: ${JSON.stringify(meta)}`);
+  }
+  console.log(`WEBKIT SPEECH CAPTURE MODE = ${meta.mode}`);
 }
 
 async function clearSpeech(page) {
@@ -288,6 +349,7 @@ try {
     locale: 'zh-CN',
     reducedMotion: 'reduce',
   });
+  await installSpeechCaptureBoundary(context);
   page = await context.newPage();
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error?.stack || error?.message || String(error)));
@@ -298,9 +360,9 @@ try {
   await page.goto(candidateUrl, { waitUntil: 'load', timeout: 140000 });
   await page.waitForFunction(() => document.querySelector('flutter-view') != null, null, { timeout: 140000 });
   await page.waitForFunction(() => document.getElementById('phoenix-loading') == null, null, { timeout: 40000 });
+  await assertSpeechCaptureBoundary(page);
   await enableSemantics(page);
   await findRecord(page, 'PHOENIX JOURNEYS', { timeout: 20000 });
-  await installSpeechCapture(page);
 
   await setLevel2(page);
   await enterChallenge(page);
@@ -315,6 +377,9 @@ try {
   if (!(await exists(page, '朗读答题反馈', { timeout: 1000 }))) {
     throw new Error('Q11 post-submit feedback speaker missing');
   }
+  await findRecord(page, '正确答案：', { timeout: 1000 });
+  await findRecord(page, '为什么：', { timeout: 1000 });
+  console.log('DEVICE REGRESSION B UI = PASS');
   await clearSpeech(page);
   await tapText(page, '朗读答题反馈', { prefix: true });
   const q11Feedback = await waitForSpeech(page);
@@ -357,6 +422,8 @@ try {
   if (!(await exists(page, '朗读答题反馈', { timeout: 1000 }))) {
     throw new Error('DEVICE REGRESSION C: feedback speaker missing after submit');
   }
+  await findRecord(page, '正确答案：', { timeout: 1000 });
+  await findRecord(page, '为什么：', { timeout: 1000 });
   await clearSpeech(page);
   await tapText(page, '朗读答题反馈', { prefix: true });
   const feedbackSpeech = await waitForSpeech(page);
@@ -372,6 +439,7 @@ try {
   }
   console.log(`QUESTION AUDIO CAPTURE = ${questionText}`);
   console.log(`FEEDBACK AUDIO CAPTURE = ${feedbackText}`);
+  console.log('DEVICE REGRESSION B AUDIO = PASS');
   console.log('DEVICE REGRESSION C = PASS');
 
   await tapText(page, '下一题', { role: 'button', exact: true });
