@@ -6,6 +6,19 @@ import '../theme/phoenix_theme.dart';
 String journeyStageNarrationLanguageCode(bool isTraditional) =>
     isTraditional ? 'zh-TW' : 'zh-CN';
 
+List<String> _memorySummaryNarrationLines(List<String> cleanLines) {
+  if (cleanLines.length != 3) return cleanLines;
+  return <String>[
+    '文化发现',
+    cleanLines[0],
+    '学习结果',
+    cleanLines[1],
+    'Memory Anchor',
+    cleanLines[2],
+    '这段旅程，你最想留下什么？',
+  ];
+}
+
 List<NarrationItem> buildJourneyStageNarrationItems({
   required String stage,
   required List<String> displayedLines,
@@ -14,11 +27,14 @@ List<NarrationItem> buildJourneyStageNarrationItems({
       .map((line) => line.trim())
       .where((line) => line.isNotEmpty)
       .toList(growable: false);
+  final narrationLines = stage == 'memory'
+      ? _memorySummaryNarrationLines(cleanLines)
+      : cleanLines;
   return [
-    for (var index = 0; index < cleanLines.length; index++)
+    for (var index = 0; index < narrationLines.length; index++)
       NarrationItem(
         id: '$stage-$index',
-        text: cleanLines[index],
+        text: narrationLines[index],
         label: '${stage == 'memory' ? '回忆' : '完成'} ${index + 1}',
       ),
   ];

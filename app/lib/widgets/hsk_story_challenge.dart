@@ -5,6 +5,154 @@ import 'package:flutter/material.dart';
 import '../models/journey_challenge.dart';
 import '../theme/phoenix_theme.dart';
 
+enum ChallengeFeedbackFieldKind {
+  userChoice,
+  correctAnswer,
+  errorLocation,
+  explanation,
+}
+
+class ChallengeFeedbackField {
+  const ChallengeFeedbackField({
+    required this.kind,
+    required this.label,
+    required this.value,
+  });
+
+  final ChallengeFeedbackFieldKind kind;
+  final String label;
+  final String value;
+
+  String text(String Function(String) displayText) =>
+      '${displayText(label)}：${displayText(value)}';
+}
+
+class ChallengeFeedbackPresentation {
+  const ChallengeFeedbackPresentation({
+    required this.correct,
+    required this.fields,
+  });
+
+  final bool correct;
+  final List<ChallengeFeedbackField> fields;
+
+  String get statusText => correct ? '回答正确' : '回答错误';
+
+  List<String> lines(String Function(String) displayText) => <String>[
+        displayText(statusText),
+        ...fields.map((field) => field.text(displayText)),
+      ];
+
+  String narrationText(String Function(String) displayText) =>
+      lines(displayText).join('。');
+}
+
+String _feedbackExplanation(StoryChallengeQuestion question) {
+  final why = question.whyCorrect.trim();
+  if (why.isNotEmpty) return why;
+  final grammarWhy = question.grammarWhyWrong?.trim() ?? '';
+  if (grammarWhy.isNotEmpty) return grammarWhy;
+  final rule = question.grammarRevisionRule?.trim() ?? '';
+  if (rule.isNotEmpty) return rule;
+  return '请根据 Story、空间关系和题目条件核对答案。';
+}
+
+ChallengeFeedbackPresentation grammarLocationFeedbackPresentation(
+  StoryChallengeQuestion question,
+  int selectedError,
+) {
+  final errorIndex = question.errorSegmentIndex ?? 0;
+  final actual = question.errorSegments[errorIndex];
+  final selected = question.errorSegments[selectedError];
+  final correct = selectedError == errorIndex;
+  final grammarWhy = question.grammarWhyWrong?.trim() ?? '';
+  final explanation =
+      grammarWhy.isNotEmpty ? grammarWhy : _feedbackExplanation(question);
+  return ChallengeFeedbackPresentation(
+    correct: correct,
+    fields: <ChallengeFeedbackField>[
+      if (!correct)
+        ChallengeFeedbackField(
+          kind: ChallengeFeedbackFieldKind.userChoice,
+          label: '你的选择',
+          value: selected,
+        ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.errorLocation,
+        label: correct ? '错误位置' : '真正错误位置',
+        value: actual,
+      ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.explanation,
+        label: '为什么这里错',
+        value: explanation,
+      ),
+    ],
+  );
+}
+
+ChallengeFeedbackPresentation grammarRepairFeedbackPresentation(
+  StoryChallengeQuestion question,
+  int selectedOption,
+) {
+  final selected = question.options[selectedOption];
+  final correct = selected == question.answer;
+  return ChallengeFeedbackPresentation(
+    correct: correct,
+    fields: <ChallengeFeedbackField>[
+      if (!correct)
+        ChallengeFeedbackField(
+          kind: ChallengeFeedbackFieldKind.userChoice,
+          label: '你的修改',
+          value: selected,
+        ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.correctAnswer,
+        label: '正确答案',
+        value: question.answer,
+      ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.explanation,
+        label: '为什么这样改才对',
+        value: _feedbackExplanation(question),
+      ),
+    ],
+  );
+}
+
+ChallengeFeedbackPresentation singleStepFeedbackPresentation(
+  StoryChallengeQuestion question, {
+  required String selectedAnswer,
+}) {
+  final correct = selectedAnswer == question.answer;
+  final evidence = question.storyEvidence.trim();
+  final why = _feedbackExplanation(question);
+  final explanation = !correct && evidence.isNotEmpty && !why.contains(evidence)
+      ? '题目里的依据是“$evidence”。$why'
+      : why;
+  return ChallengeFeedbackPresentation(
+    correct: correct,
+    fields: <ChallengeFeedbackField>[
+      if (!correct)
+        ChallengeFeedbackField(
+          kind: ChallengeFeedbackFieldKind.userChoice,
+          label: '你的选择',
+          value: selectedAnswer,
+        ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.correctAnswer,
+        label: '正确答案',
+        value: question.answer,
+      ),
+      ChallengeFeedbackField(
+        kind: ChallengeFeedbackFieldKind.explanation,
+        label: correct ? '为什么这个答案对' : '为什么这个答案才对',
+        value: explanation,
+      ),
+    ],
+  );
+}
+
 class HskStoryChallenge extends StatefulWidget {
   const HskStoryChallenge({
     super.key,
@@ -63,38 +211,34 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       .where((item) => item.mode == question.mode)
       .length;
 
-  bool get _correct {
+  ChallengeFeedbackPresentation? get _activeFeedbackPresentation {
+    if (question.mode == StoryChallengeMode.grammarRepair &&
+        grammarStep == 1 &&
+        selectedError != null) {
+      return grammarLocationFeedbackPresentation(question, selectedError!);
+    }
+    if (!submitted) return null;
+    if (question.mode == StoryChallengeMode.grammarRepair &&
+        selectedOption != null) {
+      return grammarRepairFeedbackPresentation(question, selectedOption!);
+    }
     if (question.mode == StoryChallengeMode.sentenceRebuild) {
-      return built.join() == question.answer;
+      return singleStepFeedbackPresentation(
+        question,
+        selectedAnswer: built.join(),
+      );
     }
-    if (question.mode == StoryChallengeMode.grammarRepair) {
-      return selectedError == question.errorSegmentIndex &&
-          selectedOption != null &&
-          question.options[selectedOption!] == question.answer;
+    if (selectedOption != null && question.options.isNotEmpty) {
+      return singleStepFeedbackPresentation(
+        question,
+        selectedAnswer: question.options[selectedOption!],
+      );
     }
-    return selectedOption != null &&
-        question.options[selectedOption!] == question.answer;
+    return null;
   }
 
-  String get _feedbackAudioText {
-    final parts = <String>[
-      '正确答案：${widget.displayText(question.answer)}',
-    ];
-    if (!_correct &&
-        selectedOption != null &&
-        selectedOption! < question.distractorRationales.length) {
-      final rationale = question.distractorRationales[selectedOption!];
-      if (rationale.isNotEmpty) {
-        parts.add('错误原因：${widget.displayText(rationale)}');
-      }
-    }
-    if (question.whyCorrect.isNotEmpty) {
-      parts.add('解释：${widget.displayText(question.whyCorrect)}');
-    } else if (question.grammarRevisionRule?.isNotEmpty ?? false) {
-      parts.add('解释：${widget.displayText(question.grammarRevisionRule!)}');
-    }
-    return parts.join('。');
-  }
+  String get _feedbackAudioText =>
+      _activeFeedbackPresentation?.narrationText(widget.displayText) ?? '';
 
   bool get _canSubmit {
     if (submitted) return false;
@@ -103,7 +247,9 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           built.length == question.characterTiles.length;
     }
     if (question.mode == StoryChallengeMode.grammarRepair) {
-      return grammarStep == 0 ? selectedError != null : selectedOption != null;
+      if (grammarStep == 0) return selectedError != null;
+      if (grammarStep == 2) return selectedOption != null;
+      return false;
     }
     return selectedOption != null;
   }
@@ -132,9 +278,21 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
 
     setState(() => submitted = true);
     final feedbackAudio = widget.onFeedbackAudio;
-    if (feedbackAudio != null) {
-      unawaited(feedbackAudio(question.id, _feedbackAudioText));
+    final feedbackText = _feedbackAudioText;
+    if (feedbackAudio != null && feedbackText.isNotEmpty) {
+      unawaited(feedbackAudio(question.id, feedbackText));
     }
+  }
+
+  void _advanceGrammarStep2() {
+    if (question.mode != StoryChallengeMode.grammarRepair || grammarStep != 1) {
+      return;
+    }
+    widget.onQuestionChanged?.call();
+    setState(() {
+      grammarStep = 2;
+      selectedOption = null;
+    });
   }
 
   Future<void> _next() async {
@@ -208,49 +366,63 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         ],
       );
 
-  Widget _bottomActions() => challengeCompleted
-      ? const SizedBox.shrink()
-      : SizedBox(
-          height: 40,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const ValueKey('challenge-back'),
-                  onPressed: index > 0 || widget.onBackStage != null
-                      ? _previous
-                      : null,
-                  icon: const Icon(Icons.arrow_back_rounded, size: 17),
-                  label: const Text('上一步'),
-                ),
+  Widget _bottomActions() {
+    if (challengeCompleted) return const SizedBox.shrink();
+    final stepOneFeedback = question.mode == StoryChallengeMode.grammarRepair &&
+        grammarStep == 1 &&
+        !submitted;
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const ValueKey('challenge-back'),
+              onPressed: index > 0 || widget.onBackStage != null
+                  ? _previous
+                  : null,
+              icon: const Icon(Icons.arrow_back_rounded, size: 17),
+              label: const Text('上一步'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: FilledButton.icon(
+              key: ValueKey(
+                stepOneFeedback
+                    ? 'grammar-step1-continue'
+                    : submitted
+                        ? 'challenge-next'
+                        : 'challenge-submit',
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: FilledButton.icon(
-                  key: ValueKey(
-                    submitted ? 'challenge-next' : 'challenge-submit',
-                  ),
-                  onPressed: submitted
+              onPressed: stepOneFeedback
+                  ? _advanceGrammarStep2
+                  : submitted
                       ? () => unawaited(_next())
                       : _canSubmit
                           ? _submit
                           : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: PhoenixTheme.red,
-                  ),
-                  icon: Icon(
-                    submitted
-                        ? Icons.arrow_forward_rounded
-                        : Icons.check_rounded,
-                    size: 17,
-                  ),
-                  label: Text(submitted ? '下一题' : '提交'),
-                ),
+              style: FilledButton.styleFrom(backgroundColor: PhoenixTheme.red),
+              icon: Icon(
+                stepOneFeedback || submitted
+                    ? Icons.arrow_forward_rounded
+                    : Icons.check_rounded,
+                size: 17,
               ),
-            ],
+              label: Text(
+                stepOneFeedback
+                    ? '进入 STEP 2'
+                    : submitted
+                        ? '下一题'
+                        : '提交',
+              ),
+            ),
           ),
-        );
+        ],
+      ),
+    );
+  }
 
   Widget _questionBody() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,7 +465,8 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
               color: Colors.white70,
             ),
           ),
-          if (submitted && widget.onFeedbackAudio != null)
+          if (_activeFeedbackPresentation != null &&
+              widget.onFeedbackAudio != null)
             IconButton(
               key: ValueKey('challenge-feedback-speaker-${question.id}'),
               tooltip: '朗读答题反馈',
@@ -437,96 +610,61 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     );
   }
 
-  Widget _grammar() {
-    final errorIndex = question.errorSegmentIndex ?? 0;
-    final locationCorrect = selectedError == errorIndex;
-    return Column(
-      key: const ValueKey('challenge-grammar-body'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Text(
-          '有语病的完整句子',
-          style: TextStyle(
-            color: Colors.white70,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 4),
-        _grammarSentence(),
-        const SizedBox(height: 12),
-        if (grammarStep == 0) ...<Widget>[
+  Widget _grammar() => Column(
+        key: const ValueKey('challenge-grammar-body'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
           const Text(
-            'STEP 1 · 哪里错？',
-            style: TextStyle(color: PhoenixTheme.gold),
-          ),
-          const SizedBox(height: 8),
-          for (var i = 0; i < question.errorSegments.length; i++)
-            _choice(
-              key: ValueKey('grammar-location-$i'),
-              selected: selectedError == i,
-              text:
-                  '${String.fromCharCode(65 + i)}  ${question.errorSegments[i]}',
-              onTap: () => setState(() => selectedError = i),
-            ),
-        ] else ...<Widget>[
-          Text(
-            locationCorrect ? '位置正确' : '位置错误',
-            key: const ValueKey('grammar-location-feedback'),
+            '有语病的完整句子',
             style: TextStyle(
-              color: locationCorrect ? Colors.greenAccent : Colors.redAccent,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '正确错误位置：${question.errorSegments[errorIndex]}',
-            key: const ValueKey('grammar-correct-location'),
-            style: const TextStyle(
-              color: Colors.greenAccent,
+              color: Colors.white70,
               fontWeight: FontWeight.w800,
             ),
           ),
-          if (!locationCorrect && selectedError != null) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              '你的选择（错误位置）：${question.errorSegments[selectedError!]}',
-              key: const ValueKey('grammar-wrong-location'),
-              style: const TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.w800,
+          const SizedBox(height: 4),
+          _grammarSentence(),
+          const SizedBox(height: 12),
+          if (grammarStep == 0) ...<Widget>[
+            const Text(
+              'STEP 1 · 哪里错？',
+              style: TextStyle(color: PhoenixTheme.gold),
+            ),
+            const SizedBox(height: 8),
+            for (var i = 0; i < question.errorSegments.length; i++)
+              _choice(
+                key: ValueKey('grammar-location-$i'),
+                selected: selectedError == i,
+                text:
+                    '${String.fromCharCode(65 + i)}  ${question.errorSegments[i]}',
+                onTap: () => setState(() => selectedError = i),
               ),
+          ] else if (grammarStep == 1) ...<Widget>[
+            _feedbackBlock(
+              grammarLocationFeedbackPresentation(question, selectedError!),
+              prefix: 'grammar-step1',
             ),
+          ] else ...<Widget>[
+            const Text(
+              'STEP 2 · 怎么改？',
+              style: TextStyle(color: PhoenixTheme.gold),
+            ),
+            const SizedBox(height: 8),
+            for (var i = 0; i < question.options.length; i++)
+              _choice(
+                key: ValueKey('grammar-repair-$i'),
+                selected: selectedOption == i,
+                correct: submitted && question.options[i] == question.answer,
+                wrong: submitted &&
+                    selectedOption == i &&
+                    question.options[i] != question.answer,
+                text: '${String.fromCharCode(65 + i)}  ${question.options[i]}',
+                onTap: submitted
+                    ? null
+                    : () => setState(() => selectedOption = i),
+              ),
           ],
-          if (question.grammarWhyWrong?.isNotEmpty ?? false) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              '为什么这里错：${question.grammarWhyWrong}',
-              key: const ValueKey('grammar-step1-why-wrong'),
-              style: const TextStyle(color: Colors.white70, height: 1.45),
-            ),
-          ],
-          const SizedBox(height: 10),
-          const Text(
-            'STEP 2 · 怎么改？',
-            style: TextStyle(color: PhoenixTheme.gold),
-          ),
-          const SizedBox(height: 8),
-          for (var i = 0; i < question.options.length; i++)
-            _choice(
-              key: ValueKey('grammar-repair-$i'),
-              selected: selectedOption == i,
-              correct: submitted && question.options[i] == question.answer,
-              wrong: submitted &&
-                  selectedOption == i &&
-                  question.options[i] != question.answer,
-              text: '${String.fromCharCode(65 + i)}  ${question.options[i]}',
-              onTap:
-                  submitted ? null : () => setState(() => selectedOption = i),
-            ),
         ],
-      ],
-    );
-  }
+      );
 
   Widget _grammarSentence() {
     final segments = question.errorSegments;
@@ -611,140 +749,89 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
       );
 
   Widget _finalFeedback() {
-    final selected = selectedOption == null || question.options.isEmpty
-        ? null
-        : question.options[selectedOption!];
-    final selectedRationale = selectedOption != null &&
-            selectedOption! < question.distractorRationales.length
-        ? question.distractorRationales[selectedOption!]
-        : null;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 12),
-        const Divider(color: Colors.white24),
-        Text(
-          _correct ? '回答正确' : '回答错误',
-          key: const ValueKey('challenge-inline-feedback'),
-          style: TextStyle(
-            color: _correct ? Colors.greenAccent : Colors.redAccent,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        if (question.mode == StoryChallengeMode.grammarRepair)
-          _grammarFinalFeedback()
-        else if (!_correct && selected != null) ...<Widget>[
-          const SizedBox(height: 6),
-          Text(
-            '你的选择：$selected',
-            key: const ValueKey('challenge-selected-wrong-answer'),
-            style: const TextStyle(
-              color: Colors.redAccent,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          if (selectedRationale?.isNotEmpty ?? false)
-            Text(
-              selectedRationale!,
-              key: const ValueKey('challenge-selected-rationale'),
-              style: const TextStyle(color: Colors.white70, height: 1.45),
-            ),
-        ],
-        const SizedBox(height: 6),
-        Text(
-          '正确答案：${question.answer}',
-          key: const ValueKey('challenge-inline-correct-answer'),
-          style: const TextStyle(
-            color: Colors.greenAccent,
-            height: 1.45,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        if (question.whyCorrect.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 5),
-          Text(
-            '为什么：${question.whyCorrect}',
-            key: const ValueKey('challenge-why-correct'),
-            style: const TextStyle(color: Colors.white70, height: 1.45),
+    final presentation = _activeFeedbackPresentation;
+    if (presentation == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Divider(color: Colors.white24),
+          _feedbackBlock(
+            presentation,
+            prefix: question.mode == StoryChallengeMode.grammarRepair
+                ? 'grammar-step2'
+                : 'challenge',
           ),
         ],
-      ],
+      ),
     );
   }
 
-  Widget _grammarFinalFeedback() {
-    final errorIndex = question.errorSegmentIndex ?? 0;
-    final actual = question.errorSegments[errorIndex];
-    final locationCorrect = selectedError == errorIndex;
-    final selectedLocation =
-        selectedError == null ? '未选择' : question.errorSegments[selectedError!];
-    final selectedRepair =
-        selectedOption == null ? '未选择' : question.options[selectedOption!];
-    final repairCorrect = selectedOption != null &&
-        question.options[selectedOption!] == question.answer;
-    final explanation = selectedOption != null &&
-            selectedOption! < question.grammarOptionExplanations.length
-        ? question.grammarOptionExplanations[selectedOption!]
-        : '';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        if (!locationCorrect) ...<Widget>[
-          const SizedBox(height: 6),
+  Widget _feedbackBlock(
+    ChallengeFeedbackPresentation presentation, {
+    required String prefix,
+  }) =>
+      Column(
+        key: ValueKey('$prefix-feedback-block'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
           Text(
-            '你的选择（错误位置）：$selectedLocation',
-            key: const ValueKey('grammar-wrong-location-final'),
-            style: const TextStyle(
-              color: Colors.redAccent,
+            widget.displayText(presentation.statusText),
+            key: ValueKey(
+              prefix == 'challenge'
+                  ? 'challenge-inline-feedback'
+                  : '$prefix-status',
+            ),
+            style: TextStyle(
+              color:
+                  presentation.correct ? Colors.greenAccent : Colors.redAccent,
               fontWeight: FontWeight.w900,
             ),
           ),
+          for (final field in presentation.fields) ...<Widget>[
+            const SizedBox(height: 5),
+            Text(
+              field.text(widget.displayText),
+              key: ValueKey(_feedbackFieldKey(prefix, field.kind)),
+              style: TextStyle(
+                color: switch (field.kind) {
+                  ChallengeFeedbackFieldKind.userChoice => Colors.redAccent,
+                  ChallengeFeedbackFieldKind.correctAnswer => Colors.greenAccent,
+                  ChallengeFeedbackFieldKind.errorLocation => Colors.greenAccent,
+                  ChallengeFeedbackFieldKind.explanation => Colors.white70,
+                },
+                height: 1.45,
+                fontWeight: field.kind == ChallengeFeedbackFieldKind.explanation
+                    ? FontWeight.w600
+                    : FontWeight.w800,
+              ),
+            ),
+          ],
         ],
-        const SizedBox(height: 4),
-        Text(
-          '真正错误位置：$actual',
-          key: const ValueKey('grammar-correct-location-final'),
-          style: const TextStyle(
-            color: Colors.greenAccent,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        if (question.grammarWhyWrong?.isNotEmpty ?? false) ...<Widget>[
-          const SizedBox(height: 4),
-          Text(
-            '为什么错：${question.grammarWhyWrong}',
-            key: const ValueKey('grammar-final-why-wrong'),
-            style: const TextStyle(color: Colors.white70, height: 1.45),
-          ),
-        ],
-        if (question.grammarRevisionRule?.isNotEmpty ?? false) ...<Widget>[
-          const SizedBox(height: 4),
-          Text(
-            '修正规则：${question.grammarRevisionRule}',
-            key: const ValueKey('grammar-revision-rule'),
-            style: const TextStyle(color: PhoenixTheme.gold, height: 1.45),
-          ),
-        ],
-        const SizedBox(height: 4),
-        Text(
-          repairCorrect
-              ? '你的修改（正确）：$selectedRepair'
-              : '你的修改（错误）：$selectedRepair',
-          key: const ValueKey('grammar-selected-repair'),
-          style: TextStyle(
-            color: repairCorrect ? Colors.greenAccent : Colors.redAccent,
-            height: 1.45,
-          ),
-        ),
-        if (explanation.isNotEmpty)
-          Text(
-            explanation,
-            key: const ValueKey('grammar-option-explanation'),
-            style: const TextStyle(color: Colors.white70, height: 1.45),
-          ),
-      ],
-    );
+      );
+
+  String _feedbackFieldKey(
+    String prefix,
+    ChallengeFeedbackFieldKind kind,
+  ) {
+    if (prefix == 'challenge') {
+      return switch (kind) {
+        ChallengeFeedbackFieldKind.userChoice =>
+          'challenge-selected-wrong-answer',
+        ChallengeFeedbackFieldKind.correctAnswer =>
+          'challenge-inline-correct-answer',
+        ChallengeFeedbackFieldKind.errorLocation =>
+          'challenge-feedback-error-location',
+        ChallengeFeedbackFieldKind.explanation => 'challenge-why-correct',
+      };
+    }
+    return '$prefix-${switch (kind) {
+      ChallengeFeedbackFieldKind.userChoice => 'user-choice',
+      ChallengeFeedbackFieldKind.correctAnswer => 'correct-answer',
+      ChallengeFeedbackFieldKind.errorLocation => 'error-location',
+      ChallengeFeedbackFieldKind.explanation => 'explanation',
+    }}';
   }
 
   Widget _choice({

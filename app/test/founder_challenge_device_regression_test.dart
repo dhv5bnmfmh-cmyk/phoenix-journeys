@@ -40,6 +40,7 @@ StoryChallengeQuestion _question({
       narrationText: narration,
       distractorRationales: rationales,
       whyCorrect: whyCorrect,
+      storyEvidence: '路线条件写在 Story 里',
       learningObjective: 'device regression',
       difficulty: 'Lv2',
     );
@@ -72,8 +73,8 @@ class _ChallengeHostState extends State<_ChallengeHost> {
         narration: '题目音频一',
         answer: '正确答案一',
         options: const ['错误选项一', '正确答案一', '干扰二', '干扰三'],
-        rationales: const ['错误选项一忽略了路线条件', '', '', ''],
-        whyCorrect: '正确答案一保留了完整条件',
+        rationales: const ['错误：不满足“从目标推导行动”或与“路线证据”证据不一致。', '', '', ''],
+        whyCorrect: '正确答案一保留了完整路线条件',
       ),
       _question(
         id: 'q2',
@@ -140,7 +141,7 @@ class _ChallengeHostState extends State<_ChallengeHost> {
 
 void main() {
   testWidgets(
-    'Founder device challenge navigation and feedback audio remain isolated',
+    'Founder device single-choice feedback is natural and audio matches full UI core',
     (tester) async {
       final questionAudio = <String>[];
       final feedbackAudio = <String>[];
@@ -154,15 +155,8 @@ void main() {
         ),
       );
 
-      expect(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
-        findsNothing,
-      );
-      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
-
-      await tester.tap(
-        find.byKey(const ValueKey('challenge-question-speaker-q1')),
-      );
+      expect(find.byKey(const ValueKey('challenge-feedback-speaker-q1')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('challenge-question-speaker-q1')));
       await tester.pump();
       expect(questionAudio, ['q1:题目音频一']);
 
@@ -171,61 +165,51 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
 
-      expect(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
-        findsOneWidget,
-      );
-      expect(feedbackAudio, hasLength(1));
-      expect(feedbackAudio.last, contains('正确答案：正确答案一'));
-      expect(feedbackAudio.last, contains('错误原因：错误选项一忽略了路线条件'));
-      expect(feedbackAudio.last, contains('解释：正确答案一保留了完整条件'));
-      expect(feedbackAudio.last, isNot(contains('题目音频一')));
+      expect(find.text('回答错误'), findsOneWidget);
+      expect(find.text('你的选择：错误选项一'), findsOneWidget);
+      expect(find.text('正确答案：正确答案一'), findsOneWidget);
+      expect(find.textContaining('为什么这个答案才对：'), findsOneWidget);
+      expect(find.textContaining('不满足“'), findsNothing);
+      expect(find.textContaining('证据不一致'), findsNothing);
 
-      await tester.tap(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
-      );
+      expect(feedbackAudio, hasLength(1));
+      final automatic = feedbackAudio.single;
+      expect(automatic, contains('回答错误'));
+      expect(automatic, contains('你的选择：错误选项一'));
+      expect(automatic, contains('正确答案：正确答案一'));
+      expect(automatic, contains('为什么这个答案才对：'));
+      expect(automatic, contains('正确答案一保留了完整路线条件'));
+      expect(automatic, isNot(contains('不满足“')));
+      expect(automatic, isNot(contains('证据不一致')));
+      expect(automatic, isNot(contains('题目音频一')));
+
+      await tester.tap(find.byKey(const ValueKey('challenge-feedback-speaker-q1')));
       await tester.pump();
       expect(feedbackAudio, hasLength(2));
-      expect(feedbackAudio.last, contains('正确答案：正确答案一'));
+      expect(feedbackAudio.last, automatic);
 
       await tester.tap(find.byKey(const ValueKey('challenge-next')));
       await tester.pumpAndSettle();
       expect(resetCount, 1);
-      expect(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q1')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q2')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey('challenge-question-speaker-q2')),
-        findsOneWidget,
-      );
-      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
+      expect(find.byKey(const ValueKey('challenge-question-speaker-q2')), findsOneWidget);
+      expect(find.byKey(const ValueKey('challenge-feedback-speaker-q2')), findsNothing);
 
       await tester.tap(find.byKey(const ValueKey('challenge-option-1')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-
-      expect(
-        find.byKey(const ValueKey('challenge-feedback-speaker-q2')),
-        findsOneWidget,
-      );
-      expect(find.byKey(const ValueKey('challenge-next')), findsOneWidget);
-      expect(find.byKey(const ValueKey('outer-stage-continue')), findsNothing);
+      expect(find.text('回答正确'), findsOneWidget);
+      expect(find.text('正确答案：正确答案二'), findsOneWidget);
+      expect(find.textContaining('为什么这个答案对：'), findsOneWidget);
+      expect(find.byKey(const ValueKey('challenge-selected-wrong-answer')), findsNothing);
 
       await tester.tap(find.byKey(const ValueKey('challenge-next')));
       await tester.pumpAndSettle();
-
       expect(resetCount, 2);
       expect(find.byKey(const ValueKey('challenge-next')), findsNothing);
       expect(find.byKey(const ValueKey('challenge-back')), findsNothing);
       expect(find.byKey(const ValueKey('outer-stage-back')), findsOneWidget);
-      expect(
-          find.byKey(const ValueKey('outer-stage-continue')), findsOneWidget);
+      expect(find.byKey(const ValueKey('outer-stage-continue')), findsOneWidget);
     },
   );
 }

@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
 
 void main() {
   testWidgets(
-    'correct Grammar location plus wrong repair keeps final feedback unambiguous',
+    'Grammar Step 1 is a feedback stage and Step 2 stays deduplicated',
     (tester) async {
       const correct = '因为紫禁城沿中轴展开，所以层次清楚。';
       const broken = '虽然紫禁城沿中轴展开，所以层次清楚。';
@@ -41,6 +41,7 @@ void main() {
               '错。关联词不配对。',
               '错。因果与转折混用。',
             ],
+            whyCorrect: '“因为……所以……”准确表达前因后果，和句子逻辑一致。',
             narrationText: broken,
             signature: QuestionDesignSignature(
               journeyId: 'beijing-forbidden-city',
@@ -82,7 +83,15 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('challenge-submit')));
       await tester.pump();
-      expect(find.text('位置正确'), findsOneWidget);
+
+      expect(find.text('回答正确'), findsOneWidget);
+      expect(find.text('错误位置：虽然'), findsOneWidget);
+      expect(find.textContaining('为什么这里错：'), findsOneWidget);
+      expect(find.text('STEP 2 · 怎么改？'), findsNothing);
+      expect(find.byKey(const ValueKey('grammar-step1-continue')), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('grammar-step1-continue')));
+      await tester.pump();
       expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('grammar-repair-0')));
@@ -91,11 +100,12 @@ void main() {
       await tester.pump();
 
       expect(find.text('回答错误'), findsOneWidget);
-      expect(find.byKey(const ValueKey('grammar-wrong-location-final')), findsNothing);
-      expect(find.byKey(const ValueKey('grammar-correct-location-final')), findsOneWidget);
-      expect(find.byKey(const ValueKey('grammar-selected-repair')), findsOneWidget);
-      expect(find.byKey(const ValueKey('grammar-option-explanation')), findsOneWidget);
-      expect(find.textContaining('正确答案：$correct'), findsOneWidget);
+      expect(find.textContaining('你的修改：'), findsOneWidget);
+      expect(find.text('正确答案：$correct'), findsOneWidget);
+      expect(find.textContaining('为什么这样改才对：'), findsOneWidget);
+      expect(find.textContaining('修正规则：'), findsNothing);
+      expect(find.textContaining('你的修改（正确）'), findsNothing);
+      expect(find.textContaining('为什么错：'), findsNothing);
     },
   );
 }
