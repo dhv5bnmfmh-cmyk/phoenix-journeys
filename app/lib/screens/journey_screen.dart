@@ -133,6 +133,13 @@ PilotN1CompositePage resolvePilotN1CompositePage({
 }
 
 @visibleForTesting
+bool shouldReleaseOuterChallengeNavigation({
+  required int currentStep,
+  required int targetStep,
+}) =>
+    currentStep > 3 && targetStep == 3;
+
+@visibleForTesting
 const forbiddenCityFinalMemoryPrompt = '这段旅程，你最想留下什么？';
 
 @visibleForTesting
@@ -826,6 +833,10 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   Future<void> _goToStep(int targetStep) async {
     final safeStep = targetStep.clamp(0, AppState.journeyLastStep);
+    final releaseOuterChallengeNavigation = shouldReleaseOuterChallengeNavigation(
+      currentStep: step,
+      targetStep: safeStep,
+    );
     if (_isSummerPalacePilot && safeStep == step + 1) {
       if (step == 3 && _guideFeedback != null && !_pilotChallengeVisible) {
         setState(() => _pilotChallengeVisible = true);
@@ -844,6 +855,9 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
     if (safeStep != step) {
       _checkpointNarrationBeforeStepChange();
+    }
+    if (releaseOuterChallengeNavigation && _challengeResolved) {
+      setState(() => _challengeResolved = false);
     }
     if (step == 0 && safeStep == 1) {
       _stageNarrationIntent += 1;
@@ -1578,6 +1592,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               if (!keyboardVisible && showActions) ...[
                 SizedBox(height: compact ? 4 : 7),
                 SizedBox(
+                  key: const ValueKey('journey-bottom-actions'),
                   height: compact ? 36 : 40,
                   child: Row(
                     children: [

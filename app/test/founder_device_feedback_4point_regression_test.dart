@@ -89,6 +89,26 @@ void main() {
     debugPrint('FINAL MEMORY AUDIO: PASS');
   });
 
+  test('Final Memory back releases outer Challenge navigation ownership', () {
+    expect(
+      shouldReleaseOuterChallengeNavigation(currentStep: 4, targetStep: 3),
+      isTrue,
+    );
+    expect(
+      shouldReleaseOuterChallengeNavigation(currentStep: 5, targetStep: 3),
+      isTrue,
+    );
+    expect(
+      shouldReleaseOuterChallengeNavigation(currentStep: 3, targetStep: 2),
+      isFalse,
+    );
+    expect(
+      shouldReleaseOuterChallengeNavigation(currentStep: 3, targetStep: 4),
+      isFalse,
+    );
+    debugPrint('BACK FROM FINAL MEMORY: PASS');
+  });
+
   Future<void> pumpQuestion(
     WidgetTester tester,
     StoryChallengeQuestion question, {
@@ -163,6 +183,54 @@ void main() {
     expect(find.byKey(const ValueKey('challenge-why-correct')), findsOneWidget);
   });
 
+  testWidgets('Challenge keeps exactly one internal bottom navigation row', (
+    tester,
+  ) async {
+    final question = const JourneyChallengeEngine()
+        .build(
+          journeyId: 'beijing-forbidden-city',
+          sessionLevel: 8,
+          storyParagraphs: forbiddenCityStoryParagraphsByLevel[7],
+        )
+        .questions
+        .firstWhere((item) => item.mode == StoryChallengeMode.storyCompletion);
+    await pumpQuestion(tester, question);
+
+    expect(
+      find.byKey(const ValueKey('challenge-bottom-actions')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('challenge-submit')), findsOneWidget);
+    expect(find.text('上一步'), findsOneWidget);
+    expect(find.text('继续留下回忆'), findsNothing);
+    expect(find.text('完成旅程'), findsNothing);
+
+    final answerIndex = question.options.indexOf(question.answer);
+    await tester.tap(find.byKey(ValueKey('challenge-option-$answerIndex')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('challenge-submit')));
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('challenge-bottom-actions')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('challenge-next')), findsOneWidget);
+    expect(find.text('上一步'), findsOneWidget);
+    expect(find.text('继续留下回忆'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('challenge-next')));
+    await tester.pump();
+    expect(
+      find.byKey(const ValueKey('challenge-bottom-actions')),
+      findsNothing,
+    );
+    expect(find.text('上一步'), findsNothing);
+    debugPrint('BOTTOM NAV ROW COUNT: 1 MAX');
+    debugPrint('DUPLICATE 上一步: 0');
+    debugPrint('STALE OUTER CTA: 0');
+  });
+
   group('Grammar feedback semantic matrix', () {
     final set = const JourneyChallengeEngine().build(
       journeyId: 'beijing-forbidden-city',
@@ -186,7 +254,7 @@ void main() {
     });
 
     testWidgets(
-      'Case 1 Grammar Step 1 wrong gives feedback before Step 2 and audio matches',
+      'Case 1 Grammar Step 1 wrong stays inline with locked question and audio matches',
       (tester) async {
         final audio = <String>[];
         final question = grammarQuestions.last;
@@ -203,6 +271,18 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
         await tester.pump();
 
+        expect(
+          find.byKey(const ValueKey('grammar-broken-sentence')),
+          findsOneWidget,
+        );
+        expect(find.text('STEP 1 · 哪里错？'), findsOneWidget);
+        for (var i = 0; i < question.errorSegments.length; i += 1) {
+          expect(find.byKey(ValueKey('grammar-location-$i')), findsOneWidget);
+        }
+        final lockedChoice = tester.widget<InkWell>(
+          find.byKey(ValueKey('grammar-location-$wrongLocation')),
+        );
+        expect(lockedChoice.onTap, isNull);
         expect(find.byKey(const ValueKey('grammar-step1-status')), findsOneWidget);
         expect(find.text('回答错误'), findsOneWidget);
         expect(
@@ -217,11 +297,26 @@ void main() {
           find.byKey(const ValueKey('grammar-step1-explanation')),
           findsOneWidget,
         );
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('challenge-grammar-body')),
+            matching:
+                find.byKey(const ValueKey('grammar-step1-feedback-block')),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('STEP 2 · 怎么改？'), findsNothing);
         expect(
           find.byKey(const ValueKey('grammar-step1-continue')),
           findsOneWidget,
         );
+        expect(
+          find.byKey(const ValueKey('challenge-bottom-actions')),
+          findsOneWidget,
+        );
+        expect(find.text('上一步'), findsOneWidget);
+        expect(find.text('继续留下回忆'), findsNothing);
+        expect(find.text('完成旅程'), findsNothing);
         expect(
           find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
           findsOneWidget,
@@ -250,11 +345,13 @@ void main() {
           find.byKey(const ValueKey('grammar-step1-feedback-block')),
           findsNothing,
         );
+        debugPrint('GRAMMAR STEP 1 INLINE FEEDBACK: PASS');
+        debugPrint('STANDALONE FEEDBACK PAGE: 0');
       },
     );
 
     testWidgets(
-      'Case 2 Grammar Step 1 correct gives explicit teaching feedback first',
+      'Case 2 Grammar Step 1 correct stays inline with locked question',
       (tester) async {
         final question = grammarQuestions.first;
         await pumpQuestion(tester, question);
@@ -266,6 +363,18 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
         await tester.pump();
 
+        expect(
+          find.byKey(const ValueKey('grammar-broken-sentence')),
+          findsOneWidget,
+        );
+        expect(find.text('STEP 1 · 哪里错？'), findsOneWidget);
+        for (var i = 0; i < question.errorSegments.length; i += 1) {
+          expect(find.byKey(ValueKey('grammar-location-$i')), findsOneWidget);
+        }
+        final lockedChoice = tester.widget<InkWell>(
+          find.byKey(ValueKey('grammar-location-$correctLocation')),
+        );
+        expect(lockedChoice.onTap, isNull);
         expect(find.text('回答正确'), findsOneWidget);
         expect(
           find.textContaining(
@@ -275,11 +384,20 @@ void main() {
         );
         expect(find.textContaining('为什么这里错：'), findsOneWidget);
         expect(find.text('STEP 2 · 怎么改？'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('grammar-step1-continue')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('challenge-bottom-actions')),
+          findsOneWidget,
+        );
+        expect(find.text('上一步'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'Cases 3 and 4 Grammar Step 2 shows one non-duplicated teaching block',
+      'Cases 3 and 4 Grammar Step 2 keeps task/options with one teaching block',
       (tester) async {
         final question = grammarQuestions.first;
         await pumpQuestion(tester, question);
@@ -301,6 +419,23 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
         await tester.pump();
 
+        expect(
+          find.byKey(const ValueKey('grammar-broken-sentence')),
+          findsOneWidget,
+        );
+        expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
+        for (var i = 0; i < question.options.length; i += 1) {
+          expect(find.byKey(ValueKey('grammar-repair-$i')), findsOneWidget);
+        }
+        final root = find.byKey(ValueKey('hsk-challenge-question-${question.id}'));
+        expect(
+          find.descendant(
+            of: root,
+            matching:
+                find.byKey(const ValueKey('grammar-step2-feedback-block')),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('回答错误'), findsOneWidget);
         expect(
           find.byKey(const ValueKey('grammar-step2-user-choice')),
@@ -317,6 +452,10 @@ void main() {
         expect(find.textContaining('修正规则：'), findsNothing);
         expect(find.textContaining('你的修改（正确）'), findsNothing);
         expect(find.textContaining('为什么错：'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('challenge-bottom-actions')),
+          findsOneWidget,
+        );
 
         await pumpQuestion(tester, question);
         final correctRepair = question.options.indexOf(question.answer);
@@ -333,6 +472,10 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
         await tester.pump();
 
+        expect(find.text('STEP 2 · 怎么改？'), findsOneWidget);
+        for (var i = 0; i < question.options.length; i += 1) {
+          expect(find.byKey(ValueKey('grammar-repair-$i')), findsOneWidget);
+        }
         expect(find.text('回答正确'), findsOneWidget);
         expect(
           find.byKey(const ValueKey('grammar-step2-user-choice')),
@@ -346,6 +489,7 @@ void main() {
           find.byKey(const ValueKey('grammar-step2-explanation')),
           findsOneWidget,
         );
+        debugPrint('GRAMMAR STEP 2 INLINE FEEDBACK: PASS');
       },
     );
   });

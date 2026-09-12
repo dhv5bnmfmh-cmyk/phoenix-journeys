@@ -372,6 +372,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         grammarStep == 1 &&
         !submitted;
     return SizedBox(
+      key: const ValueKey('challenge-bottom-actions'),
       height: 40,
       child: Row(
         children: <Widget>[
@@ -624,7 +625,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
           const SizedBox(height: 4),
           _grammarSentence(),
           const SizedBox(height: 12),
-          if (grammarStep == 0) ...<Widget>[
+          if (grammarStep <= 1) ...<Widget>[
             const Text(
               'STEP 1 · 哪里错？',
               style: TextStyle(color: PhoenixTheme.gold),
@@ -634,15 +635,25 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
               _choice(
                 key: ValueKey('grammar-location-$i'),
                 selected: selectedError == i,
+                correct: grammarLocationSubmitted &&
+                    i == question.errorSegmentIndex,
+                wrong: grammarLocationSubmitted &&
+                    selectedError == i &&
+                    i != question.errorSegmentIndex,
                 text:
                     '${String.fromCharCode(65 + i)}  ${question.errorSegments[i]}',
-                onTap: () => setState(() => selectedError = i),
+                onTap: grammarLocationSubmitted
+                    ? null
+                    : () => setState(() => selectedError = i),
               ),
-          ] else if (grammarStep == 1) ...<Widget>[
-            _feedbackBlock(
-              grammarLocationFeedbackPresentation(question, selectedError!),
-              prefix: 'grammar-step1',
-            ),
+            if (grammarStep == 1) ...<Widget>[
+              const SizedBox(height: 6),
+              const Divider(color: Colors.white24),
+              _feedbackBlock(
+                grammarLocationFeedbackPresentation(question, selectedError!),
+                prefix: 'grammar-step1',
+              ),
+            ],
           ] else ...<Widget>[
             const Text(
               'STEP 2 · 怎么改？',
