@@ -113,9 +113,16 @@ Future<void> _answerCorrectly(
       await _tapSubmit(tester);
       expect(
         find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
-        findsNothing,
-        reason: '${question.id}: Step 1 is not final feedback',
+        findsOneWidget,
+        reason: '${question.id}: Step 1 teaching feedback speaker',
       );
+      expect(
+        find.byKey(const ValueKey('grammar-step1-continue')),
+        findsOneWidget,
+        reason: '${question.id}: Step 1 feedback must precede Step 2',
+      );
+      await tester.tap(find.byKey(const ValueKey('grammar-step1-continue')));
+      await tester.pump();
       final correct = question.options.indexOf(question.answer);
       await tester.tap(find.byKey(ValueKey('grammar-repair-$correct')));
       await tester.pump();
