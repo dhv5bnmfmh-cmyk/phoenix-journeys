@@ -90,9 +90,10 @@ void main() {
     expect(challenge, contains('await widget.onCompleted()'));
     expect(challenge, contains("? '下一题'"));
     expect(journey, contains("title: '回忆 · 完成'"));
-    expect(journey, contains("title: '文化发现'"));
-    expect(journey, contains("title: '学习结果'"));
-    expect(journey, contains("title: 'Memory Anchor'"));
+    expect(journey, contains('forbiddenCityFinalMemorySections('));
+    expect(journey, contains('title: summarySections[0].key'));
+    expect(journey, contains('title: summarySections[1].key'));
+    expect(journey, contains('title: summarySections[2].key'));
     expect(journey, contains("buttonText: _forbiddenCityFinaleCompleted ? '返回首页' : '完成旅程'"));
     expect(journey, contains("'Journey 完成'"));
     expect(journey, contains("'Challenge Reward'"));
