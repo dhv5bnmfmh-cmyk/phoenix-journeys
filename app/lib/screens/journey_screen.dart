@@ -140,12 +140,15 @@ List<MapEntry<String, String>> forbiddenCityFinalMemorySections({
   required String discovery,
   required String learning,
   required String anchor,
-}) =>
-    <MapEntry<String, String>>[
-      MapEntry<String, String>('文化发现', discovery),
-      MapEntry<String, String>('学习结果', learning),
-      MapEntry<String, String>('Memory Anchor', anchor),
-    ];
+  String Function(String)? displayText,
+}) {
+  final resolvedDisplayText = displayText ?? (value) => value;
+  return <MapEntry<String, String>>[
+    MapEntry<String, String>('文化发现', resolvedDisplayText(discovery)),
+    MapEntry<String, String>('学习结果', resolvedDisplayText(learning)),
+    MapEntry<String, String>('Memory Anchor', resolvedDisplayText(anchor)),
+  ];
+}
 
 @visibleForTesting
 List<String> forbiddenCityFinalMemoryNarrationLines(
@@ -599,6 +602,7 @@ class _JourneyScreenState extends State<JourneyScreen>
         discovery: completion.discovery,
         learning: completion.learning,
         anchor: memory.anchor,
+        displayText: _appState.displayText,
       );
       return buildJourneyStageNarrationItems(
         stage: 'memory',
@@ -2497,6 +2501,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       discovery: completion.discovery,
       learning: completion.learning,
       anchor: memory.anchor,
+      displayText: _appState.displayText,
     );
     final existing = _appState.journeyMemories
         .where((entry) => entry.journeyId == _experience.id && !entry.legacy);
