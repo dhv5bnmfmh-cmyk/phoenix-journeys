@@ -132,6 +132,30 @@ PilotN1CompositePage resolvePilotN1CompositePage({
   };
 }
 
+@visibleForTesting
+const forbiddenCityFinalMemoryPrompt = '这段旅程，你最想留下什么？';
+
+@visibleForTesting
+List<MapEntry<String, String>> forbiddenCityFinalMemorySections({
+  required String discovery,
+  required String learning,
+  required String anchor,
+}) =>
+    <MapEntry<String, String>>[
+      MapEntry<String, String>('文化发现', discovery),
+      MapEntry<String, String>('学习结果', learning),
+      MapEntry<String, String>('Memory Anchor', anchor),
+    ];
+
+@visibleForTesting
+List<String> forbiddenCityFinalMemoryNarrationLines(
+  List<MapEntry<String, String>> sections,
+) =>
+    <String>[
+      for (final section in sections) ...[section.key, section.value],
+      forbiddenCityFinalMemoryPrompt,
+    ];
+
 class JourneyScreen extends StatefulWidget {
   const JourneyScreen({super.key, this.journeyId});
 
@@ -560,20 +584,25 @@ class _JourneyScreenState extends State<JourneyScreen>
       final completion = forbiddenCityCompletionForLevel(
         _sessionLanguageProfile.phoenixLevel ?? 1,
       );
+      if (_forbiddenCityFinaleCompleted) {
+        return buildJourneyStageNarrationItems(
+          stage: 'memory',
+          displayedLines: [
+            'Journey 完成',
+            forbiddenCityChallengeRewardName,
+            forbiddenCityChallengeRewardMeaning,
+            'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
+          ],
+        );
+      }
+      final sections = forbiddenCityFinalMemorySections(
+        discovery: completion.discovery,
+        learning: completion.learning,
+        anchor: memory.anchor,
+      );
       return buildJourneyStageNarrationItems(
         stage: 'memory',
-        displayedLines: _forbiddenCityFinaleCompleted
-            ? [
-                'Journey 完成',
-                forbiddenCityChallengeRewardName,
-                forbiddenCityChallengeRewardMeaning,
-                'Lv.${_sessionLanguageProfile.phoenixLevel} Journey 已记录',
-              ]
-            : [
-                _appState.displayText(completion.discovery),
-                _appState.displayText(completion.learning),
-                _appState.displayText(memory.anchor),
-              ],
+        displayedLines: forbiddenCityFinalMemoryNarrationLines(sections),
       );
     }
     return buildJourneyStageNarrationItems(
@@ -2464,6 +2493,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     final completion = forbiddenCityCompletionForLevel(
       _sessionLanguageProfile.phoenixLevel ?? 1,
     );
+    final summarySections = forbiddenCityFinalMemorySections(
+      discovery: completion.discovery,
+      learning: completion.learning,
+      anchor: memory.anchor,
+    );
     final existing = _appState.journeyMemories
         .where((entry) => entry.journeyId == _experience.id && !entry.legacy);
     if (memoryController.text.isEmpty && existing.isNotEmpty) {
@@ -2526,22 +2560,22 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
           ] else ...[
             _ForbiddenCityCompleteCard(
-              title: '文化发现',
-              body: completion.discovery,
+              title: summarySections[0].key,
+              body: summarySections[0].value,
             ),
             const SizedBox(height: 6),
             _ForbiddenCityCompleteCard(
-              title: '学习结果',
-              body: completion.learning,
+              title: summarySections[1].key,
+              body: summarySections[1].value,
             ),
             const SizedBox(height: 6),
             _ForbiddenCityCompleteCard(
-              title: 'Memory Anchor',
-              body: memory.anchor,
+              title: summarySections[2].key,
+              body: summarySections[2].value,
             ),
             const SizedBox(height: 10),
             const Text(
-              '这段旅程，你最想留下什么？',
+              forbiddenCityFinalMemoryPrompt,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w900,

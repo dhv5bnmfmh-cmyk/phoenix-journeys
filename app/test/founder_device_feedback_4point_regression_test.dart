@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
 import 'package:phoenix_journeys/data/journey_data.dart';
 import 'package:phoenix_journeys/models/journey_challenge.dart';
+import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
 import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
 import 'package:phoenix_journeys/widgets/interactive_story_text.dart';
@@ -53,6 +54,41 @@ void main() {
     expect(fingerprints.length, greaterThanOrEqualTo(6));
   });
 
+  test('Final Memory narration follows rendered summary source and excludes controls', () {
+    const excluded = <String>['添加照片', '完成旅程', '照片仅保存在此设备'];
+    for (var level = 1; level <= 10; level += 1) {
+      final completion = forbiddenCityCompletionForLevel(level);
+      final memory = forbiddenCityMemoryForLevel(level);
+      final sections = forbiddenCityFinalMemorySections(
+        discovery: completion.discovery,
+        learning: completion.learning,
+        anchor: memory.anchor,
+      );
+      final narration = forbiddenCityFinalMemoryNarrationLines(sections);
+      expect(
+        narration,
+        <String>[
+          '文化发现',
+          completion.discovery,
+          '学习结果',
+          completion.learning,
+          'Memory Anchor',
+          memory.anchor,
+          forbiddenCityFinalMemoryPrompt,
+        ],
+        reason: 'Lv$level Final Memory narration order/content',
+      );
+      for (final controlText in excluded) {
+        expect(
+          narration,
+          isNot(contains(controlText)),
+          reason: 'Lv$level must not narrate control text: $controlText',
+        );
+      }
+    }
+    debugPrint('FINAL MEMORY AUDIO: PASS');
+  });
+
   Future<void> pumpQuestion(
     WidgetTester tester,
     StoryChallengeQuestion question, {
@@ -65,6 +101,7 @@ void main() {
             width: 390,
             height: 760,
             child: HskStoryChallenge(
+              key: UniqueKey(),
               challenge: StoryChallengeSet(
                 journeyId: 'beijing-forbidden-city',
                 sessionLevel: 8,
