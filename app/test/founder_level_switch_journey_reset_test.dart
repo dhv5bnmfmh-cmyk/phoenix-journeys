@@ -223,7 +223,11 @@ void main() {
     expect(back.onPressed, isNotNull);
 
     await tester.tap(find.byKey(const ValueKey('challenge-back')));
-    await tester.pump(const Duration(milliseconds: 700));
+    // First render the new Discovery child, then let AnimatedSwitcher retire
+    // the outgoing Challenge page. A single delayed pump starts the transition
+    // only at that delayed frame and can falsely observe both children.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
 
     expect(state.beijingJourneyStep, 2);
     expect(find.byKey(const ValueKey('发现')), findsOneWidget);
@@ -289,6 +293,33 @@ void main() {
     expect(find.text('挑战 1/12'), findsNothing);
     expect(find.text('继续留下回忆'), findsNothing);
     debugPrint('LEVEL SWITCH FROM MEMORY → STORY START: PASS');
+    debugPrint('LEVEL STATE LEAK: 0');
+  });
+
+  testWidgets('unmounted selector switch resets completion before next Journey mount', (
+    tester,
+  ) async {
+    final state = await stateAtStep(level: 3, step: 4);
+    disposeStateAfterWidget(tester, state);
+    await state.completeJourney('', sessionLevel: 3);
+    expect(state.journeyCompleted, isTrue);
+
+    await pumpLevelSelector(tester, state);
+    await tester.tap(levelPlus());
+    await tester.pump();
+
+    expect(PhoenixLevelController.instance.level, 4);
+    expect(state.beijingJourneyStep, 0);
+    expect(state.journeyCompleted, isFalse);
+
+    await pumpJourney(tester, state);
+    await waitForStoryStart(tester);
+    expect(find.text('Lv.4'), findsWidgets);
+    expect(find.byKey(const ValueKey('故事')), findsOneWidget);
+    expect(find.text('回忆 · 完成'), findsNothing);
+    expect(find.text('挑战 1/12'), findsNothing);
+    expect(find.text('继续留下回忆'), findsNothing);
+    debugPrint('LEVEL SWITCH FROM COMPLETION → STORY START: PASS');
     debugPrint('LEVEL STATE LEAK: 0');
   });
 }
