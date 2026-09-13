@@ -265,6 +265,14 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
     remaining = List<String>.of(question.characterTiles);
   }
 
+  void _playActiveFeedbackAudio() {
+    final feedbackAudio = widget.onFeedbackAudio;
+    final feedbackText = _feedbackAudioText;
+    if (feedbackAudio != null && feedbackText.isNotEmpty) {
+      unawaited(feedbackAudio(question.id, feedbackText));
+    }
+  }
+
   void _submit() {
     if (!_canSubmit) return;
     if (question.mode == StoryChallengeMode.grammarRepair && grammarStep == 0) {
@@ -273,15 +281,12 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
         grammarStep = 1;
         selectedOption = null;
       });
+      _playActiveFeedbackAudio();
       return;
     }
 
     setState(() => submitted = true);
-    final feedbackAudio = widget.onFeedbackAudio;
-    final feedbackText = _feedbackAudioText;
-    if (feedbackAudio != null && feedbackText.isNotEmpty) {
-      unawaited(feedbackAudio(question.id, feedbackText));
-    }
+    _playActiveFeedbackAudio();
   }
 
   void _advanceGrammarStep2() {
@@ -413,7 +418,7 @@ class _HskStoryChallengeState extends State<HskStoryChallenge> {
               ),
               label: Text(
                 stepOneFeedback
-                    ? '进入 STEP 2'
+                    ? '下一步'
                     : submitted
                         ? '下一题'
                         : '提交',

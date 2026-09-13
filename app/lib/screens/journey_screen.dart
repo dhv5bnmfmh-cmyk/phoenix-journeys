@@ -2277,6 +2277,7 @@ class _JourneyScreenState extends State<JourneyScreen>
               onNarrate: _speakChallengeNarration,
               onFeedbackAudio: _playChallengeFeedbackAudio,
               onQuestionChanged: _resetChallengeAudio,
+              onBackStage: () => unawaited(_goToStep(2)),
               onCompleted: () async {
                 if (!mounted || _challengeResolved) return;
                 setState(() => _challengeResolved = true);

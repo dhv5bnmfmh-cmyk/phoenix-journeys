@@ -3,10 +3,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../services/language_level_preference_store.dart';
 import '../services/phoenix_level_controller.dart';
 import '../services/phoenix_story_length_policy.dart';
+import '../state/app_state.dart';
 import '../theme/phoenix_theme.dart';
 
 @visibleForTesting
@@ -84,7 +86,12 @@ class _JourneyLevelSelectorButtonState
         .toInt();
     if (next == current) return;
 
+    // The selector can outlive JourneyScreen. Reset AppState synchronously
+    // before publishing the new level so the next Journey mount can never
+    // restore the previous level's Challenge/Memory/completion position.
+    final journeyReset = context.read<AppState?>()?.restartJourney();
     _controller.setLevel(next);
+    if (journeyReset != null) unawaited(journeyReset);
     unawaited(HapticFeedback.selectionClick());
 
     final previousPersistence = _levelPersistence;

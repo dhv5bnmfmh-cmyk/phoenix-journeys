@@ -254,7 +254,7 @@ void main() {
     });
 
     testWidgets(
-      'Case 1 Grammar Step 1 wrong stays inline with locked question and audio matches',
+      'Case 1 Grammar Step 1 wrong stays inline and auto narration matches feedback',
       (tester) async {
         final audio = <String>[];
         final question = grammarQuestions.last;
@@ -310,6 +310,8 @@ void main() {
           find.byKey(const ValueKey('grammar-step1-continue')),
           findsOneWidget,
         );
+        expect(find.text('下一步'), findsOneWidget);
+        expect(find.text('进入 STEP 2'), findsNothing);
         expect(
           find.byKey(const ValueKey('challenge-bottom-actions')),
           findsOneWidget,
@@ -322,21 +324,28 @@ void main() {
           findsOneWidget,
         );
 
+        expect(audio, hasLength(1));
+        final automaticFeedback = audio.single;
+        expect(automaticFeedback, contains('回答错误'));
+        expect(
+          automaticFeedback,
+          contains('你的选择：${question.errorSegments[wrongLocation]}'),
+        );
+        expect(
+          automaticFeedback,
+          contains('真正错误位置：${question.errorSegments[correctLocation]}'),
+        );
+        expect(
+          automaticFeedback,
+          contains('为什么这里错：${question.grammarWhyWrong}'),
+        );
+
         await tester.tap(
           find.byKey(ValueKey('challenge-feedback-speaker-${question.id}')),
         );
         await tester.pump();
-        expect(audio, hasLength(1));
-        expect(audio.single, contains('回答错误'));
-        expect(
-          audio.single,
-          contains('你的选择：${question.errorSegments[wrongLocation]}'),
-        );
-        expect(
-          audio.single,
-          contains('真正错误位置：${question.errorSegments[correctLocation]}'),
-        );
-        expect(audio.single, contains('为什么这里错：${question.grammarWhyWrong}'));
+        expect(audio, hasLength(2));
+        expect(audio.last, automaticFeedback);
 
         await tester.tap(find.byKey(const ValueKey('grammar-step1-continue')));
         await tester.pump();
@@ -346,15 +355,19 @@ void main() {
           findsNothing,
         );
         debugPrint('GRAMMAR STEP 1 INLINE FEEDBACK: PASS');
+        debugPrint('GRAMMAR STEP 1 AUTO FEEDBACK AUDIO: PASS');
+        debugPrint('GRAMMAR CTA LABEL: 下一步');
+        debugPrint('进入 STEP 2: 0');
         debugPrint('STANDALONE FEEDBACK PAGE: 0');
       },
     );
 
     testWidgets(
-      'Case 2 Grammar Step 1 correct stays inline with locked question',
+      'Case 2 Grammar Step 1 correct stays inline and auto narrates full feedback',
       (tester) async {
+        final audio = <String>[];
         final question = grammarQuestions.first;
-        await pumpQuestion(tester, question);
+        await pumpQuestion(tester, question, feedbackAudio: audio);
         final correctLocation = question.errorSegmentIndex!;
         await tester.tap(
           find.byKey(ValueKey('grammar-location-$correctLocation')),
@@ -388,19 +401,29 @@ void main() {
           find.byKey(const ValueKey('grammar-step1-continue')),
           findsOneWidget,
         );
+        expect(find.text('下一步'), findsOneWidget);
+        expect(find.text('进入 STEP 2'), findsNothing);
         expect(
           find.byKey(const ValueKey('challenge-bottom-actions')),
           findsOneWidget,
         );
         expect(find.text('上一步'), findsOneWidget);
+        expect(audio, hasLength(1));
+        expect(audio.single, contains('回答正确'));
+        expect(
+          audio.single,
+          contains('错误位置：${question.errorSegments[correctLocation]}'),
+        );
+        expect(audio.single, contains('为什么这里错：${question.grammarWhyWrong}'));
       },
     );
 
     testWidgets(
-      'Cases 3 and 4 Grammar Step 2 keeps task/options with one teaching block',
+      'Cases 3 and 4 Grammar Step 2 keeps task/options and auto narrates effective feedback',
       (tester) async {
+        final audio = <String>[];
         final question = grammarQuestions.first;
-        await pumpQuestion(tester, question);
+        await pumpQuestion(tester, question, feedbackAudio: audio);
         final correctLocation = question.errorSegmentIndex!;
         final wrongRepair = List<int>.generate(
           question.options.length,
@@ -412,8 +435,10 @@ void main() {
         await tester.pump();
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
         await tester.pump();
+        expect(audio, hasLength(1));
         await tester.tap(find.byKey(const ValueKey('grammar-step1-continue')));
         await tester.pump();
+        audio.clear();
         await tester.tap(find.byKey(ValueKey('grammar-repair-$wrongRepair')));
         await tester.pump();
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
@@ -456,8 +481,13 @@ void main() {
           find.byKey(const ValueKey('challenge-bottom-actions')),
           findsOneWidget,
         );
+        expect(audio, hasLength(1));
+        expect(audio.single, contains('回答错误'));
+        expect(audio.single, contains('你的修改：${question.options[wrongRepair]}'));
+        expect(audio.single, contains('正确答案：${question.answer}'));
+        expect(audio.single, contains('为什么这样改才对：'));
 
-        await pumpQuestion(tester, question);
+        await pumpQuestion(tester, question, feedbackAudio: audio);
         final correctRepair = question.options.indexOf(question.answer);
         await tester.tap(
           find.byKey(ValueKey('grammar-location-$correctLocation')),
@@ -467,6 +497,7 @@ void main() {
         await tester.pump();
         await tester.tap(find.byKey(const ValueKey('grammar-step1-continue')));
         await tester.pump();
+        audio.clear();
         await tester.tap(find.byKey(ValueKey('grammar-repair-$correctRepair')));
         await tester.pump();
         await tester.tap(find.byKey(const ValueKey('challenge-submit')));
@@ -489,7 +520,12 @@ void main() {
           find.byKey(const ValueKey('grammar-step2-explanation')),
           findsOneWidget,
         );
+        expect(audio, hasLength(1));
+        expect(audio.single, contains('回答正确'));
+        expect(audio.single, contains('正确答案：${question.answer}'));
+        expect(audio.single, contains('为什么这样改才对：'));
         debugPrint('GRAMMAR STEP 2 INLINE FEEDBACK: PASS');
+        debugPrint('GRAMMAR STEP 2 AUTO FEEDBACK AUDIO: PASS');
       },
     );
   });
