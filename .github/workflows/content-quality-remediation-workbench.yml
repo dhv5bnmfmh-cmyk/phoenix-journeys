@@ -1,0 +1,70 @@
+name: Content Quality Remediation Workbench
+
+on:
+  push:
+    branches:
+      - workbench/content-quality-remediation-208
+    paths:
+      - '.github/scripts/apply_content_quality_remediation.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-targeted-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out workbench
+        uses: actions/checkout@v6
+        with:
+          ref: workbench/content-quality-remediation-208
+          fetch-depth: 0
+
+      - name: Apply exact remediation patch
+        run: python3 .github/scripts/apply_content_quality_remediation.py
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format changed Dart
+        shell: bash
+        run: |
+          dart format \
+            app/lib/data/forbidden_city_content_cache.dart \
+            app/lib/data/forbidden_city_content_quality_remediation.dart \
+            app/lib/services/challenge_option_feedback.dart \
+            app/lib/services/forbidden_city_challenge_content_remediation.dart \
+            app/lib/services/journey_challenge_engine.dart \
+            app/lib/widgets/hsk_story_challenge.dart \
+            app/test/forbidden_city_content_quality_remediation_test.dart \
+            app/test/forbidden_city_grammar_feedback_marker_test.dart
+
+      - name: Install dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Targeted content and feedback tests
+        working-directory: app
+        run: |
+          flutter test --reporter expanded \
+            test/forbidden_city_content_quality_remediation_test.dart \
+            test/forbidden_city_grammar_feedback_marker_test.dart \
+            test/founder_level_switch_journey_reset_test.dart
+
+      - name: Analyze patched tree
+        working-directory: app
+        run: flutter analyze
+
+      - name: Commit tested workbench result
+        shell: bash
+        run: |
+          git config user.name "phoenix-content-workbench"
+          git config user.email "actions@users.noreply.github.com"
+          git add app
+          git diff --cached --check
+          git diff --cached --quiet && { echo "No app changes produced"; exit 1; }
+          git commit -m "[workbench-applied] remediate Forbidden City content quality"
+          git push origin HEAD:workbench/content-quality-remediation-208
