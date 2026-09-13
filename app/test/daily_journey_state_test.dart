@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/services/journey_access_policy.dart';
+import 'package:phoenix_journeys/data/journey_publication_catalog.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -67,7 +68,7 @@ void main() {
     expect(restored.memories.first, contains('我记住了今天的城市'));
   });
 
-  test('date change preserves only the resumable active exception', () async {
+  test('date change preserves the only published Reference Journey', () async {
     SharedPreferences.setMockInitialValues({});
     var currentDate = DateTime(2026, 7, 20, 10);
     final state = stateFor(
@@ -84,22 +85,14 @@ void main() {
       memory: '',
     );
 
-    do {
-      currentDate = DateTime(
-        currentDate.year,
-        currentDate.month,
-        currentDate.day + 1,
-        10,
-      );
-    } while (state.policyAccessibleRegularJourneyIds.contains(
-      resumableJourneyId,
-    ));
+    currentDate = DateTime(2026, 7, 21, 10);
     await state.load();
 
     expect(state.activeJourneyId, resumableJourneyId);
     expect(state.journeyStep, 2);
     expect(state.wonderDraft, '继续当前旅程');
-    expect(state.canOpenJourney(resumableJourneyId), isFalse);
+    expect(resumableJourneyId, referenceJourneyRuntimeId);
+    expect(state.canOpenJourney(resumableJourneyId), isTrue);
     expect(state.canResumeActiveJourney(resumableJourneyId), isTrue);
 
     await state.activateJourney(resumableJourneyId);
@@ -109,6 +102,6 @@ void main() {
     await state.refreshDailyJourney();
 
     expect(state.activeJourneyId, expectedDailyJourneyId);
-    expect(state.canResumeActiveJourney(resumableJourneyId), isFalse);
+    expect(state.canResumeActiveJourney(resumableJourneyId), isTrue);
   });
 }

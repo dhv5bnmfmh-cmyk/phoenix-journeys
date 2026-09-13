@@ -167,6 +167,82 @@ The following SHOULD be centralized or governed consistently where the existing 
 
 Consistency MUST NOT override Journey-specific content or visual identity.
 
+### 9.1 MULTIPLE CHOICE ANSWER POSITION CONTRACT
+
+This is a permanent product contract for every existing and future Phoenix Journey, City, Level, and learning interaction that finally renders four choices as `A / B / C / D`, including Grammar, Story Completion, Vocabulary multiple choice, Discovery / Challenge multiple choice, and future four-choice learning modes. It does not apply to non-four-choice interactions such as Sentence Rebuild.
+
+**QUALITY > POSITION BALANCE.** Question quality, one defensible answer, and three plausible distractors MUST be established before presentation order is balanced. Position mathematics MUST NOT be satisfied by weakening, duplicating, or replacing learning content.
+
+#### 9.1.1 FINAL RENDERED ORDER
+
+All position statistics, automated checks, Preview evidence, and acceptance decisions MUST use the final option order actually rendered to the explorer.
+
+Source-data answer index alone is insufficient evidence. Any generator, adapter, deterministic reorder, or presentation transform between authored data and rendering MUST be included in the audit path.
+
+#### 9.1.2 DETERMINISTIC
+
+Option ordering MUST be deterministic. The same effective inputs for Journey, Level, question, and blank MUST always produce the same option order.
+
+True runtime random shuffle on page open, reload, rebuild, or replay is prohibited. A stable deterministic permutation or equivalent reproducible scheduler MUST be used.
+
+#### 9.1.3 BALANCED
+
+Within a reasonable rendered question window, correct-answer positions MUST be as even as mathematically possible.
+
+- When the item count is divisible by four: `A = B = C = D`.
+- Otherwise: `max(positionCount) - min(positionCount) <= 1`.
+- Example: 12 items MUST distribute as `3 / 3 / 3 / 3`.
+- Example: 10 items MAY distribute as `3 / 3 / 2 / 2` in any deterministic position assignment.
+
+The window used for acceptance MUST reflect the real learner-facing set, not a convenient source-data subset.
+
+#### 9.1.4 NOT PREDICTABLE
+
+Balance MUST NOT expose an obvious mechanical answer key. A repeated sequence such as `A B C D A B C D` is prohibited when the window is long enough to reveal that pattern.
+
+Stable deterministic permutation SHOULD vary the apparent sequence while preserving the balance invariant. A learner MUST NOT be able to infer the next correct answer from a simple rotation rule.
+
+#### 9.1.5 STREAK LIMIT
+
+The same correct position MUST NOT appear more than twice consecutively in a reasonable rendered choice window.
+
+A sequence containing `B B B`, or the equivalent for any position, fails this contract.
+
+#### 9.1.6 CONTENT INTEGRITY
+
+Reordering MUST NOT change:
+
+- correct-answer content;
+- distractor content or distractor quality;
+- explanation meaning or option-to-explanation mapping;
+- scoring semantics;
+- Grammar `errorSegmentIndex` or correction semantics;
+- Story Completion blank answer;
+- narration;
+- learning content or cultural meaning.
+
+Every four-choice item MUST continue to contain exactly one correct option. Reordering MUST NOT duplicate a wrong answer or alter the authored answer merely to satisfy a distribution target.
+
+#### 9.1.7 LEVEL VARIATION
+
+Lv1 through Lv10 MUST NOT mechanically reuse one identical answer-position sequence.
+
+Stable variation MAY derive from Journey ID, Level, question ID, blank index, or another documented stable seed, but equal effective inputs MUST always reproduce equal output. Adjacent Levels SHOULD use different deterministic permutations while still satisfying balance, streak, and non-predictability requirements.
+
+#### 9.1.8 AUTOMATED CONTRACT
+
+Long-term regression coverage for four-choice learning modes MUST verify the final rendered ordering contract, including:
+
+- exactly one correct option per item;
+- balanced final rendered position distribution;
+- `max(positionCount) - min(positionCount) <= 1` for the accepted window;
+- same-position streak `<= 2`;
+- deterministic rebuild produces identical option ordering;
+- different Levels do not mechanically reuse one sequence;
+- reordering does not change answer, explanation, scoring, narration, or question semantics.
+
+These checks are part of future City / Journey content acceptance. A new four-choice generator is incomplete until it satisfies this contract with automated evidence.
+
 ## 10. Routing and data integrity
 
 For every Journey, reviewers MUST verify:

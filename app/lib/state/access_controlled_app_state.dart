@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_level_catalog.dart';
+import '../data/journey_publication_catalog.dart';
 import '../services/critical_persistence_store.dart';
 import '../services/journey_access_policy.dart';
 import '../services/journey_location_binding.dart';
@@ -46,8 +47,7 @@ class AccessControlledAppState extends AppState {
     ExplorerSeedPersister? explorerSeedPersister,
     CriticalPersistenceBackend? criticalPersistenceBackend,
   })  : _clock = clock ?? DateTime.now,
-        _preferencesLoader =
-            preferencesLoader ?? SharedPreferences.getInstance,
+        _preferencesLoader = preferencesLoader ?? SharedPreferences.getInstance,
         _runtimeUri = runtimeUri ?? Uri.base,
         _debugBuild = debugBuild ?? kDebugMode,
         _forcedAccessMode = accessMode,
@@ -151,7 +151,7 @@ class AccessControlledAppState extends AppState {
   bool get isDevelopmentExperience =>
       journeyAccessMode == JourneyAccessMode.developmentExperience;
 
-  List<String> get eligibleRegularJourneyIds => dailyJourneyIds;
+  List<String> get eligibleRegularJourneyIds => publishedJourneyRuntimeIds;
 
   DailyJourneyAssignment get dailyAssignment {
     if (!_isValidExplorerSeed(localExplorerSeed)) {
@@ -172,10 +172,9 @@ class AccessControlledAppState extends AppState {
     };
   }
 
-  JourneyReleaseSlot get currentDailySlot =>
-      _clock().hour >= 12
-          ? JourneyReleaseSlot.afternoon
-          : JourneyReleaseSlot.morning;
+  JourneyReleaseSlot get currentDailySlot => _clock().hour >= 12
+      ? JourneyReleaseSlot.afternoon
+      : JourneyReleaseSlot.morning;
 
   String get morningDailyJourneyId => dailyAssignment.morningJourneyId;
   String get afternoonDailyJourneyId => dailyAssignment.afternoonJourneyId;
@@ -358,8 +357,20 @@ class AccessControlledAppState extends AppState {
           '${committed.schemaVersion}.',
         );
       }
-      final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)
+      var snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)
         ..validate();
+      if (_isRegularJourneyId(snapshot.activeJourneyId) &&
+          !isJourneyDiscoverable(snapshot.activeJourneyId)) {
+        snapshot = snapshot.copyWith(
+          activeJourneyId: referenceJourneyRuntimeId,
+          activeJourneyNamespace:
+              _storageNamespaceForJourneyId(referenceJourneyRuntimeId),
+        )..validate();
+        committed = await _criticalStore!.commitPayload(
+          snapshot.toJson(),
+          expectedRevision: committed.revision,
+        );
+      }
       _applyCommitted(
         snapshot,
         revision: committed.revision,
@@ -542,12 +553,9 @@ class AccessControlledAppState extends AppState {
         ..remove(contentId);
       final clearsCurrent = existing.narrationContentId == contentId;
       final updated = existing.copyWith(
-        narrationContentId: clearsCurrent
-            ? null
-            : existing.narrationContentId,
-        narrationContentSignature: clearsCurrent
-            ? null
-            : existing.narrationContentSignature,
+        narrationContentId: clearsCurrent ? null : existing.narrationContentId,
+        narrationContentSignature:
+            clearsCurrent ? null : existing.narrationContentSignature,
         narrationOffset: clearsCurrent ? 0 : existing.narrationOffset,
         narrationSignatures: signatures,
         narrationOffsets: offsets,
@@ -608,10 +616,10 @@ class AccessControlledAppState extends AppState {
             guideFeedbackReply: '',
             guideFeedbackOffline: false,
             guideFeedbackInputIdentity: '',
-            compositeSubstage: journeyId == 'beijing-summer-palace' &&
-                    existing.step == 3
-                ? JourneyCompositeSubstage.reflection
-                : existing.compositeSubstage,
+            compositeSubstage:
+                journeyId == 'beijing-summer-palace' && existing.step == 3
+                    ? JourneyCompositeSubstage.reflection
+                    : existing.compositeSubstage,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -675,10 +683,10 @@ class AccessControlledAppState extends AppState {
             writingFeedbackEncouragement: '',
             writingFeedbackOffline: false,
             writingFeedbackInputIdentity: '',
-            compositeSubstage: journeyId == 'beijing-summer-palace' &&
-                    existing.step == 4
-                ? JourneyCompositeSubstage.writing
-                : existing.compositeSubstage,
+            compositeSubstage:
+                journeyId == 'beijing-summer-palace' && existing.step == 4
+                    ? JourneyCompositeSubstage.writing
+                    : existing.compositeSubstage,
             updatedAt: _clock().toIso8601String(),
           ),
         ),
@@ -692,27 +700,29 @@ class AccessControlledAppState extends AppState {
     final journeyId = activeJourneyId;
     await _transact<void>((current) {
       final existing = current.requireJourney(journeyId);
-      final restarted = existing.copyWith(
-        flowVersion: journeyFlowVersionFor(journeyId),
-        step: 0,
-        furthestStep: 0,
-        completed: false,
-        compositeSubstage: JourneyCompositeSubstage.none,
-        challengeAttemptId: '',
-        wonderDraft: '',
-        expressDraft: '',
-        memoryDraft: '',
-        guideFeedbackReply: '',
-        guideFeedbackOffline: false,
-        guideFeedbackInputIdentity: '',
-        writingFeedbackCorrected: '',
-        writingFeedbackExplanation: '',
-        writingFeedbackNatural: '',
-        writingFeedbackEncouragement: '',
-        writingFeedbackOffline: false,
-        writingFeedbackInputIdentity: '',
-        updatedAt: _clock().toIso8601String(),
-      ).clearNarration();
+      final restarted = existing
+          .copyWith(
+            flowVersion: journeyFlowVersionFor(journeyId),
+            step: 0,
+            furthestStep: 0,
+            completed: false,
+            compositeSubstage: JourneyCompositeSubstage.none,
+            challengeAttemptId: '',
+            wonderDraft: '',
+            expressDraft: '',
+            memoryDraft: '',
+            guideFeedbackReply: '',
+            guideFeedbackOffline: false,
+            guideFeedbackInputIdentity: '',
+            writingFeedbackCorrected: '',
+            writingFeedbackExplanation: '',
+            writingFeedbackNatural: '',
+            writingFeedbackEncouragement: '',
+            writingFeedbackOffline: false,
+            writingFeedbackInputIdentity: '',
+            updatedAt: _clock().toIso8601String(),
+          )
+          .clearNarration();
       return _SnapshotMutation<void>.changed(
         current.withJourney(restarted),
         null,
@@ -739,19 +749,21 @@ class AccessControlledAppState extends AppState {
             '${requireDailyJourneyExperience(journeyId).stampTitle}｜$trimmed';
         if (!nextMemories.contains(entry)) nextMemories.insert(0, entry);
       }
-      final completedJourney = existing.copyWith(
-        step: AppState.journeyLastStep,
-        furthestStep: AppState.journeyLastStep,
-        completed: true,
-        compositeSubstage: journeyId == 'beijing-summer-palace'
-            ? JourneyCompositeSubstage.completed
-            : JourneyCompositeSubstage.none,
-        challengeAttemptId: '',
-        wonderDraft: '',
-        expressDraft: '',
-        memoryDraft: '',
-        updatedAt: _clock().toIso8601String(),
-      ).clearNarration();
+      final completedJourney = existing
+          .copyWith(
+            step: AppState.journeyLastStep,
+            furthestStep: AppState.journeyLastStep,
+            completed: true,
+            compositeSubstage: journeyId == 'beijing-summer-palace'
+                ? JourneyCompositeSubstage.completed
+                : JourneyCompositeSubstage.none,
+            challengeAttemptId: '',
+            wonderDraft: '',
+            expressDraft: '',
+            memoryDraft: '',
+            updatedAt: _clock().toIso8601String(),
+          )
+          .clearNarration();
       return _SnapshotMutation<void>.changed(
         current.copyWith(
           journeys: <String, _JourneyCriticalState>{
@@ -1026,8 +1038,7 @@ class AccessControlledAppState extends AppState {
     scriptMode = preferences.getBool('traditional') == true
         ? ScriptMode.traditional
         : ScriptMode.simplified;
-    translationLanguage =
-        preferences.getString('translationLanguage') ?? '越南语';
+    translationLanguage = preferences.getString('translationLanguage') ?? '越南语';
     savedWords
       ..clear()
       ..addAll(preferences.getStringList('savedWords') ?? <String>[]);
@@ -1097,8 +1108,7 @@ class AccessControlledAppState extends AppState {
           'Persisted active Journey is missing or no longer registered.',
         );
       }
-      final expectedNamespace =
-          _storageNamespaceForJourneyId(initialJourneyId);
+      final expectedNamespace = _storageNamespaceForJourneyId(initialJourneyId);
       initialNamespace =
           preferences.getString(_activeJourneyNamespaceStorageKey) ?? '';
       final version = preferences.getInt(_activeJourneyVersionStorageKey);
@@ -1183,16 +1193,13 @@ class AccessControlledAppState extends AppState {
         (isBeijing ? preferences.getInt('beijingJourneyStep') : null) ??
         0;
     final rawFurthest = readInt('furthestStep') ??
-        (isBeijing
-            ? preferences.getInt('beijingJourneyFurthestStep')
-            : null) ??
+        (isBeijing ? preferences.getInt('beijingJourneyFurthestStep') : null) ??
         rawStep;
     final completed = readBool('completed') ??
         (isBeijing ? preferences.getBool('journeyCompleted') : null) ??
         false;
-    final step = completed
-        ? AppState.journeyLastStep
-        : _safeJourneyStep(rawStep);
+    final step =
+        completed ? AppState.journeyLastStep : _safeJourneyStep(rawStep);
     final furthest = completed
         ? AppState.journeyLastStep
         : math.max(step, _safeJourneyStep(rawFurthest)).toInt();
@@ -1205,8 +1212,7 @@ class AccessControlledAppState extends AppState {
         '';
     final guideReply = readString('guideFeedbackReply') ?? '';
     final writingCorrected = readString('writingFeedbackCorrected') ?? '';
-    final writingExplanation =
-        readString('writingFeedbackExplanation') ?? '';
+    final writingExplanation = readString('writingFeedbackExplanation') ?? '';
     final writingNatural = readString('writingFeedbackNatural') ?? '';
     final writingEncouragement =
         readString('writingFeedbackEncouragement') ?? '';
@@ -1225,10 +1231,9 @@ class AccessControlledAppState extends AppState {
     for (final id in const ['story', 'discovery']) {
       final signature =
           preferences.getString('$current.narration.$id.signature') ??
-          preferences.getString('$legacy.narration.$id.signature') ??
-          (contentId == id ? contentSignature : null);
-      final offset =
-          preferences.getInt('$current.narration.$id.offset') ??
+              preferences.getString('$legacy.narration.$id.signature') ??
+              (contentId == id ? contentSignature : null);
+      final offset = preferences.getInt('$current.narration.$id.offset') ??
           preferences.getInt('$legacy.narration.$id.offset') ??
           (contentId == id ? narrationOffset : 0);
       if (signature != null && offset > 0) {
@@ -1263,11 +1268,10 @@ class AccessControlledAppState extends AppState {
           '',
       guideFeedbackReply: guideReply,
       guideFeedbackOffline: readBool('guideFeedbackOffline') ?? false,
-      guideFeedbackInputIdentity:
-          readString('guideFeedbackInputIdentity') ??
-              (guideReply.isNotEmpty && wonder.trim().isNotEmpty
-                  ? journeyFeedbackInputIdentity(wonder)
-                  : ''),
+      guideFeedbackInputIdentity: readString('guideFeedbackInputIdentity') ??
+          (guideReply.isNotEmpty && wonder.trim().isNotEmpty
+              ? journeyFeedbackInputIdentity(wonder)
+              : ''),
       writingFeedbackCorrected: writingCorrected,
       writingFeedbackExplanation: writingExplanation,
       writingFeedbackNatural: writingNatural,
@@ -1394,8 +1398,7 @@ class _PhoenixCriticalSnapshot {
       explorerSeed: json['explorerSeed'] as String? ?? '',
       explorerSeedVersion: json['explorerSeedVersion'] as int? ?? -1,
       activeJourneyId: json['activeJourneyId'] as String? ?? '',
-      activeJourneyNamespace:
-          json['activeJourneyNamespace'] as String? ?? '',
+      activeJourneyNamespace: json['activeJourneyNamespace'] as String? ?? '',
       activeIdentityVersion: json['activeIdentityVersion'] as int? ?? -1,
       journeys: <String, _JourneyCriticalState>{
         for (final entry in rawJourneys.entries)
@@ -1441,8 +1444,7 @@ class _PhoenixCriticalSnapshot {
         'activeJourneyNamespace': activeJourneyNamespace,
         'activeIdentityVersion': activeIdentityVersion,
         'journeys': <String, dynamic>{
-          for (final entry in journeys.entries)
-            entry.key: entry.value.toJson(),
+          for (final entry in journeys.entries) entry.key: entry.value.toJson(),
         },
         'earnedJourneyStampIds': earnedJourneyStampIds,
         'memories': memories,
@@ -1487,8 +1489,7 @@ class _PhoenixCriticalSnapshot {
       earnedJourneyStampIds:
           earnedJourneyStampIds ?? this.earnedJourneyStampIds,
       memories: memories ?? this.memories,
-      awardedChallengeIds:
-          awardedChallengeIds ?? this.awardedChallengeIds,
+      awardedChallengeIds: awardedChallengeIds ?? this.awardedChallengeIds,
       goldCoins: goldCoins ?? this.goldCoins,
       silverCoins: silverCoins ?? this.silverCoins,
       bronzeCoins: bronzeCoins ?? this.bronzeCoins,
@@ -1652,8 +1653,7 @@ class _JourneyCriticalState {
     final wonder = json['wonderDraft'] as String? ?? '';
     final express = json['expressDraft'] as String? ?? '';
     final guideReply = json['guideFeedbackReply'] as String? ?? '';
-    final writingCorrected =
-        json['writingFeedbackCorrected'] as String? ?? '';
+    final writingCorrected = json['writingFeedbackCorrected'] as String? ?? '';
     final writingExplanation =
         json['writingFeedbackExplanation'] as String? ?? '';
     final writingNatural = json['writingFeedbackNatural'] as String? ?? '';
@@ -1684,8 +1684,7 @@ class _JourneyCriticalState {
               hasWritingFeedback: hasWriting,
             )
           : parseJourneyCompositeSubstage(rawSubstage),
-      challengeAttemptSequence:
-          json['challengeAttemptSequence'] as int? ?? 0,
+      challengeAttemptSequence: json['challengeAttemptSequence'] as int? ?? 0,
       challengeAttemptId: json['challengeAttemptId'] as String? ?? '',
       wonderDraft: wonder,
       expressDraft: express,
@@ -1708,8 +1707,7 @@ class _JourneyCriticalState {
                   ? journeyFeedbackInputIdentity(express)
                   : ''),
       narrationContentId: json['narrationContentId'] as String?,
-      narrationContentSignature:
-          json['narrationContentSignature'] as String?,
+      narrationContentSignature: json['narrationContentSignature'] as String?,
       narrationOffset: json['narrationOffset'] as int? ?? 0,
       narrationSignatures: _stringMap(
         json['narrationSignatures'],
@@ -1859,8 +1857,7 @@ class _JourneyCriticalState {
       expressDraft: expressDraft ?? this.expressDraft,
       memoryDraft: memoryDraft ?? this.memoryDraft,
       guideFeedbackReply: guideFeedbackReply ?? this.guideFeedbackReply,
-      guideFeedbackOffline:
-          guideFeedbackOffline ?? this.guideFeedbackOffline,
+      guideFeedbackOffline: guideFeedbackOffline ?? this.guideFeedbackOffline,
       guideFeedbackInputIdentity:
           guideFeedbackInputIdentity ?? this.guideFeedbackInputIdentity,
       writingFeedbackCorrected:
@@ -1882,8 +1879,7 @@ class _JourneyCriticalState {
           ? narrationContentSignature
           : narrationContentSignature ?? this.narrationContentSignature,
       narrationOffset: narrationOffset ?? this.narrationOffset,
-      narrationSignatures:
-          narrationSignatures ?? this.narrationSignatures,
+      narrationSignatures: narrationSignatures ?? this.narrationSignatures,
       narrationOffsets: narrationOffsets ?? this.narrationOffsets,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -1986,9 +1982,12 @@ class _JourneyCriticalState {
         'Journey narration offset is invalid for $journeyId.',
       );
     }
-    if (narrationOffsets.keys.toSet().difference(
+    if (narrationOffsets.keys
+        .toSet()
+        .difference(
           narrationSignatures.keys.toSet(),
-        ).isNotEmpty) {
+        )
+        .isNotEmpty) {
       throw CriticalPersistenceException(
         'Journey narration signature binding is incomplete for $journeyId.',
       );

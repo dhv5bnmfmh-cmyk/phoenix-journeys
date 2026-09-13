@@ -63,13 +63,16 @@ Discovery depth is governed by the active Journey contract. A resolver, cache, a
 
 ## P6 Challenge Cognition
 
-Challenge uses all three canonical modes:
+Challenge uses the six canonical capability families, with exactly two authored questions per family at every level:
 
-1. `paragraphRebuild`
-2. `grammarRepair`
-3. `missingSentence`
+1. Semantic Sentence Rebuild
+2. Grammar Repair
+3. Context Completion
+4. Story Evidence / Understanding
+5. Knowledge / Spatial Reasoning
+6. Scenario / Route Decision
 
-The modes must test distinct abilities, use taught active content, provide one defensible best answer, plausible and diagnosable distractors, level-appropriate reasoning, and CURRENT-level provenance. Mechanical corruption, trivia traps, legacy content, cross-Journey contamination, and three modes that test the same memorized sentence are blocking defects.
+The families must test distinct abilities, use taught active content, provide one defensible best answer, plausible and diagnosable distractors, level-appropriate reasoning, and CURRENT-level provenance. Mechanical corruption, trivia traps, legacy content, cross-Journey contamination, character-atomized Rebuild, and families that test the same memorized sentence are blocking defects.
 
 ## P7 Memory Closure
 

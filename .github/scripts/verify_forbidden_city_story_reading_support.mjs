@@ -161,7 +161,7 @@ async function currentSessionLevel(page) {
 
 async function openForbiddenCity(page) {
   if ((await visibleText(page)).includes('北京 · 紫禁城')) {
-    await waitForText(page, '1/6');
+    await waitForText(page, '1/5');
     return;
   }
   await waitForText(page, 'PHOENIX JOURNEYS', 30000);
@@ -174,7 +174,7 @@ async function openForbiddenCity(page) {
   const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
     const text = await visibleText(page);
-    if (text.includes('北京 · 紫禁城') && text.includes('1/6')) return;
+    if (text.includes('北京 · 紫禁城') && text.includes('1/5')) return;
     if (text.includes('PHOENIX JOURNEYS')) {
       for (const action of ['开始', '继续', '再次探索']) {
         const locator = page.getByRole('button', { name: action, exact: false });
@@ -268,7 +268,7 @@ try {
     await setConfiguredLevel(page, level);
     await returnToExplore(page);
     await openForbiddenCity(page);
-    await waitForText(page, '1/6');
+    await waitForText(page, '1/5');
     if ((await currentSessionLevel(page)) !== level) {
       throw new Error(`Lv${level} Story level drift before Reading Support`);
     }

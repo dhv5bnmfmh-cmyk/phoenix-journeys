@@ -123,6 +123,7 @@ class DiscoveryEntry {
     required this.vietnamese,
     required this.english,
     this.pinyin = '',
+    this.sourceRefs = const <String>[],
   });
 
   final String text;
@@ -130,6 +131,7 @@ class DiscoveryEntry {
   final String vietnamese;
   final String english;
   final String pinyin;
+  final List<String> sourceRefs;
 
   String supportText(String language) {
     return switch (language) {

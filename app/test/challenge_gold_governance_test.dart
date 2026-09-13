@@ -10,13 +10,14 @@ String _repoText(String path) {
 }
 
 void main() {
-  test('Six-Stage Standard owns the full Challenge Gold contract', () {
+  test('authoritative entry point owns the full Challenge Gold contract', () {
     final standard = _repoText('docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md');
+    final authority = _repoText('docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md');
     for (final required in <String>[
       'TAUGHT CONTENT → CLEAR LEARNING INTENT',
       'TEACH BEFORE TEST',
       'One primary learning intent',
-      'Mode differentiation',
+      'Family differentiation',
       'One defensible best answer',
       'Gold distractors',
       'Diagnosable misunderstanding',
@@ -39,12 +40,16 @@ void main() {
       'NO LEGACY CONTAMINATION',
       'NO CROSS-JOURNEY CONTAMINATION',
       'LANGUAGE LEARNING VALUE',
+      '**Semantic Sentence Rebuild / 语义块复原** × 2',
+      '**Grammar Repair / 语病修复** × 2',
+      '**Context Completion / 情境补全** × 2',
+      '**Story Evidence / Story Understanding / 故事证据与理解** × 2',
+      '**Beijing / Forbidden City Knowledge & Spatial Reasoning / 北京·紫禁城知识与空间推理** × 2',
+      '**Scenario / Route Decision / 情境与路线决策** × 2',
     ]) {
-      expect(standard, contains(required), reason: required);
+      expect(authority, contains(required), reason: required);
     }
-    expect(standard, contains('paragraphRebuild'));
-    expect(standard, contains('grammarRepair'));
-    expect(standard, contains('missingSentence'));
+    expect(standard, contains('This document MUST NOT duplicate or redefine it'));
   });
 
   test('Acceptance, design, quality and AI layers bind to the same authority', () {
@@ -55,7 +60,7 @@ void main() {
     final creation = _repoText('docs/PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md');
     for (final gate in <String>[
       'Challenge Learning Intent',
-      'Mode Differentiation',
+      'Family Differentiation',
       'One Defensible Answer',
       'Distractor Misconception Logic',
       'Teach Before Test',
@@ -66,7 +71,7 @@ void main() {
     }
     expect(design, contains('Primary Learning Intent'));
     expect(design, contains('Distractor Misconception'));
-    expect(quality, contains('Six-Stage Journey Standard §3'));
+    expect(quality, contains('AUTHORITATIVE STORY DEVELOPMENT CONTRACT'));
     expect(behavior, contains('Challenge MUST NOT be generated as end-of-pipeline filler'));
     expect(creation, contains('CHALLENGE DESIGN → CHALLENGE GOLD AUDIT'));
     expect(creation, contains('Challenge Gold global convergence precondition'));

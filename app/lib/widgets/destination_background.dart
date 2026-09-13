@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../data/journey_background_catalog.dart';
+import '../data/beijing_city_standard.dart';
 import '../models/journey_background.dart';
 import '../services/journey_background_policy.dart';
 import '../services/journey_location_binding.dart';
@@ -153,11 +154,44 @@ const _remainingDynamicBackgrounds = <String, _CinematicBackgroundStyle>{
     cameraTravel: Offset(11, 8),
     waterLight: true,
   ),
-  _pingyaoJourneyId: _CinematicBackgroundStyle(keyName:'pingyao-ancient-city',duration:Duration(seconds:31),skyColor:Color(0xFFFFD39A),atmosphereColor:Color(0xFF76615A),foregroundColor:Color(0xFF211D1B),cameraTravel:Offset(10,8)),
-  _qufuJourneyId: _CinematicBackgroundStyle(keyName:'qufu-confucius-sites',duration:Duration(seconds:30),skyColor:Color(0xFFFFE0AE),atmosphereColor:Color(0xFF7B8B6E),foregroundColor:Color(0xFF202B22),cameraTravel:Offset(8,10)),
-  _leshanJourneyId: _CinematicBackgroundStyle(keyName:'leshan-giant-buddha',duration:Duration(seconds:32),skyColor:Color(0xFFFFD49B),atmosphereColor:Color(0xFF738C7A),foregroundColor:Color(0xFF172B28),cameraTravel:Offset(9,9),waterLight:true),
-  _wuyishanJourneyId: _CinematicBackgroundStyle(keyName:'wuyishan-nine-bend-stream',duration:Duration(seconds:33),skyColor:Color(0xFFE5EEF0),atmosphereColor:Color(0xFF6B9B8A),foregroundColor:Color(0xFF12362D),cameraTravel:Offset(10,7),waterLight:true),
-  _hongheJourneyId: _CinematicBackgroundStyle(keyName:'honghe-hani-rice-terraces',duration:Duration(seconds:32),skyColor:Color(0xFFFFB99F),atmosphereColor:Color(0xFF7296A8),foregroundColor:Color(0xFF173C2C),cameraTravel:Offset(11,8),waterLight:true),
+  _pingyaoJourneyId: _CinematicBackgroundStyle(
+      keyName: 'pingyao-ancient-city',
+      duration: Duration(seconds: 31),
+      skyColor: Color(0xFFFFD39A),
+      atmosphereColor: Color(0xFF76615A),
+      foregroundColor: Color(0xFF211D1B),
+      cameraTravel: Offset(10, 8)),
+  _qufuJourneyId: _CinematicBackgroundStyle(
+      keyName: 'qufu-confucius-sites',
+      duration: Duration(seconds: 30),
+      skyColor: Color(0xFFFFE0AE),
+      atmosphereColor: Color(0xFF7B8B6E),
+      foregroundColor: Color(0xFF202B22),
+      cameraTravel: Offset(8, 10)),
+  _leshanJourneyId: _CinematicBackgroundStyle(
+      keyName: 'leshan-giant-buddha',
+      duration: Duration(seconds: 32),
+      skyColor: Color(0xFFFFD49B),
+      atmosphereColor: Color(0xFF738C7A),
+      foregroundColor: Color(0xFF172B28),
+      cameraTravel: Offset(9, 9),
+      waterLight: true),
+  _wuyishanJourneyId: _CinematicBackgroundStyle(
+      keyName: 'wuyishan-nine-bend-stream',
+      duration: Duration(seconds: 33),
+      skyColor: Color(0xFFE5EEF0),
+      atmosphereColor: Color(0xFF6B9B8A),
+      foregroundColor: Color(0xFF12362D),
+      cameraTravel: Offset(10, 7),
+      waterLight: true),
+  _hongheJourneyId: _CinematicBackgroundStyle(
+      keyName: 'honghe-hani-rice-terraces',
+      duration: Duration(seconds: 32),
+      skyColor: Color(0xFFFFB99F),
+      atmosphereColor: Color(0xFF7296A8),
+      foregroundColor: Color(0xFF173C2C),
+      cameraTravel: Offset(11, 8),
+      waterLight: true),
 };
 
 bool _destinationReduceMotion(BuildContext context) {
@@ -173,6 +207,7 @@ class DestinationBackground extends StatelessWidget {
     required this.child,
     this.localDate,
     this.scrimStrength = .24,
+    this.sceneId,
     super.key,
   });
 
@@ -181,6 +216,7 @@ class DestinationBackground extends StatelessWidget {
   final Widget child;
   final DateTime? localDate;
   final double scrimStrength;
+  final String? sceneId;
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +247,29 @@ class DestinationBackground extends StatelessWidget {
       );
     }
     if (journeyId == _forbiddenCityJourneyId) {
+      final scene = sceneId == null ? null : forbiddenCitySceneById(sceneId!);
+      final portrait =
+          MediaQuery.sizeOf(context).height > MediaQuery.sizeOf(context).width;
+      final sceneIndex = scene == null
+          ? -1
+          : forbiddenCityJourney01Scenes.indexWhere(
+              (candidate) => candidate.sceneId == scene.sceneId,
+            );
+      final nextScene = sceneIndex >= 0 &&
+              sceneIndex + 1 < forbiddenCityJourney01Scenes.length
+          ? forbiddenCityJourney01Scenes[sceneIndex + 1]
+          : null;
       return _ForbiddenCityDynamicBackground(
-        assetPath: asset?.assetPath,
+        assetPath: scene == null
+            ? asset?.assetPath
+            : portrait
+                ? scene.portraitAsset
+                : scene.landscapeAsset,
+        nextAssetPath: nextScene == null
+            ? null
+            : portrait
+                ? nextScene.portraitAsset
+                : nextScene.landscapeAsset,
         scrimStrength: visibleScrimStrength,
         child: child,
       );
@@ -259,11 +316,13 @@ class DestinationBackground extends StatelessWidget {
 class _ForbiddenCityDynamicBackground extends StatefulWidget {
   const _ForbiddenCityDynamicBackground({
     required this.assetPath,
+    required this.nextAssetPath,
     required this.scrimStrength,
     required this.child,
   });
 
   final String? assetPath;
+  final String? nextAssetPath;
   final double scrimStrength;
   final Widget child;
 
@@ -276,7 +335,7 @@ class _ForbiddenCityDynamicBackgroundState
     extends State<_ForbiddenCityDynamicBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _motion;
-  String? _preloadedAssetPath;
+  final Set<String> _preloadedAssetPaths = <String>{};
 
   @override
   void initState() {
@@ -298,9 +357,9 @@ class _ForbiddenCityDynamicBackgroundState
   void didUpdateWidget(covariant _ForbiddenCityDynamicBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.assetPath != widget.assetPath) {
-      _preloadedAssetPath = null;
       _preloadAsset();
     }
+    if (oldWidget.nextAssetPath != widget.nextAssetPath) _preloadAsset();
   }
 
   void _syncMotionPreference() {
@@ -314,10 +373,10 @@ class _ForbiddenCityDynamicBackgroundState
   }
 
   void _preloadAsset() {
-    final path = widget.assetPath;
-    if (path == null || path == _preloadedAssetPath) return;
-    _preloadedAssetPath = path;
-    precacheImage(AssetImage(path), context);
+    for (final path in <String?>[widget.assetPath, widget.nextAssetPath]) {
+      if (path == null || !_preloadedAssetPaths.add(path)) continue;
+      precacheImage(AssetImage(path), context);
+    }
   }
 
   @override
@@ -350,9 +409,15 @@ class _ForbiddenCityDynamicBackgroundState
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      _ForbiddenCityCameraLayer(
-                        assetPath: widget.assetPath,
-                        progress: cameraProgress,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 450),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: _ForbiddenCityCameraLayer(
+                          key: ValueKey(widget.assetPath),
+                          assetPath: widget.assetPath,
+                          progress: cameraProgress,
+                        ),
                       ),
                       _ForbiddenCityDawnLight(progress: lightProgress),
                       _ForbiddenCityCloudShadow(progress: shadowProgress),
@@ -373,6 +438,7 @@ class _ForbiddenCityDynamicBackgroundState
 
 class _ForbiddenCityCameraLayer extends StatelessWidget {
   const _ForbiddenCityCameraLayer({
+    super.key,
     required this.assetPath,
     required this.progress,
   });

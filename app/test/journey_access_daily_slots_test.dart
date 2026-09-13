@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
+import 'package:phoenix_journeys/data/journey_publication_catalog.dart';
 import 'package:phoenix_journeys/services/journey_access_policy.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +28,8 @@ void main() {
     );
   }
 
-  test('production query parameters cannot unlock Development Experience', () async {
+  test('production query parameters cannot unlock Development Experience',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final state = productionState(
       clock: () => DateTime(2026, 8, 3, 10),
@@ -47,7 +49,8 @@ void main() {
     expect(state.canOpenJourney('literary-roaming'), isFalse);
   });
 
-  test('trusted PR Preview host receives isolated Development Experience', () async {
+  test('trusted PR Preview host receives isolated Development Experience',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final state = AccessControlledAppState(
       clock: () => DateTime(2026, 8, 3, 10),
@@ -62,10 +65,8 @@ void main() {
     await state.load();
 
     expect(state.isDevelopmentExperience, isTrue);
-    expect(
-      state.policyAccessibleRegularJourneyIds,
-      dailyJourneyExperiences.map((journey) => journey.id).toSet(),
-    );
+    expect(state.policyAccessibleRegularJourneyIds,
+        publishedJourneyRuntimeIds.toSet());
     expect(state.canOpenJourney('literary-roaming'), isTrue);
     expect(state.canOpenJourney('tide-letter'), isTrue);
   });
@@ -227,7 +228,7 @@ void main() {
     expect(state.explorerSeedFailureReason, contains('persistence failed'));
   });
 
-  test('morning and afternoon assignments are stable and distinct', () async {
+  test('single Reference Journey is stable across both daily slots', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 8);
     final state = productionState(clock: () => now);
@@ -238,7 +239,8 @@ void main() {
 
     expect(refreshed.morningJourneyId, first.morningJourneyId);
     expect(refreshed.afternoonJourneyId, first.afternoonJourneyId);
-    expect(first.morningJourneyId, isNot(first.afternoonJourneyId));
+    expect(first.morningJourneyId, referenceJourneyRuntimeId);
+    expect(first.afternoonJourneyId, referenceJourneyRuntimeId);
     expect(state.releasedDailyJourneyIds, {first.morningJourneyId});
     expect(state.todayJourney.id, first.morningJourneyId);
 
@@ -247,7 +249,7 @@ void main() {
       first.morningJourneyId,
       first.afternoonJourneyId,
     });
-    expect(state.releasedDailyJourneyIds, hasLength(2));
+    expect(state.releasedDailyJourneyIds, hasLength(1));
     expect(state.todayJourney.id, first.afternoonJourneyId);
   });
 
@@ -380,7 +382,8 @@ void main() {
     expect(dayTwo.afternoonJourneyId, expectedDayTwo.afternoonJourneyId);
   });
 
-  test('unreleased regular Journey activation fails without mutation', () async {
+  test('unreleased regular Journey activation fails without mutation',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final state = productionState(
       clock: () => DateTime(2026, 8, 3, 10),
@@ -390,13 +393,12 @@ void main() {
     final originalId = state.activeJourneyId;
     final originalStorage = state.activeJourneyStoragePath;
     final originalCommitted = await state.readCommittedCriticalPayload();
-    final lockedId = dailyJourneyExperiences
-        .map((journey) => journey.id)
-        .firstWhere(
-          (id) =>
-              id != originalId &&
-              !state.policyAccessibleRegularJourneyIds.contains(id),
-        );
+    final lockedId =
+        dailyJourneyExperiences.map((journey) => journey.id).firstWhere(
+              (id) =>
+                  id != originalId &&
+                  !state.policyAccessibleRegularJourneyIds.contains(id),
+            );
 
     await expectLater(
       state.activateJourney(lockedId),
@@ -433,66 +435,41 @@ void main() {
     expect(state.activeJourneyId, originalId);
   });
 
-  test('previous-day active Journey resumes without opening its catalog entry', () async {
+  test('legacy hidden active identity migrates to Beijing without deletion',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      AppState.activeJourneyIdStorageKey: 'shanghai-bund',
+      AppState.activeJourneyNamespaceStorageKey: 'journey.shanghai/bund',
+      AppState.activeJourneyVersionStorageKey:
+          AppState.activeJourneyIdentityVersion,
+    });
+    final state = productionState(clock: () => DateTime(2026, 8, 3, 10));
+
+    await state.load();
+
+    expect(state.activeJourneyId, referenceJourneyRuntimeId);
+    expect(state.canOpenJourney('shanghai-bund'), isFalse);
+    expect(requireDailyJourneyExperience('shanghai-bund').id, 'shanghai-bund');
+    final committed = await state.readCommittedCriticalPayload();
+    expect(committed['activeJourneyId'], referenceJourneyRuntimeId);
+  });
+
+  test('date rollover keeps the only published Beijing Journey', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 10);
     final state = productionState(clock: () => now);
     await state.load();
-    final previousDayId = state.activeJourneyId;
 
-    await state.saveJourneyProgress(
-      step: 2,
-      wonder: '继续昨天的旅程',
-      express: '',
-      memory: '',
-    );
-
-    do {
-      now = DateTime(now.year, now.month, now.day + 1, 13);
-    } while (state.policyAccessibleRegularJourneyIds.contains(previousDayId));
+    now = DateTime(2026, 8, 4, 13);
     await state.load();
 
-    expect(state.activeJourneyId, previousDayId);
-    expect(state.canOpenJourney(previousDayId), isFalse);
-    expect(state.canResumeActiveJourney(previousDayId), isTrue);
-    expect(state.journeyStep, 2);
-
-    await state.activateJourney(previousDayId);
-    expect(state.activeJourneyId, previousDayId);
-
-    final todayId = state.dailyAssignment.afternoonJourneyId;
-    await state.activateJourney(todayId);
-    expect(state.activeJourneyId, todayId);
-    expect(state.canResumeActiveJourney(previousDayId), isFalse);
+    expect(state.activeJourneyId, referenceJourneyRuntimeId);
+    expect(
+        state.policyAccessibleRegularJourneyIds, {referenceJourneyRuntimeId});
   });
 
-  test('unstarted previous-day identity does not become a third Journey', () async {
-    SharedPreferences.setMockInitialValues({});
-    var now = DateTime(2026, 8, 3, 10);
-    final state = productionState(clock: () => now);
-    await state.load();
-    final previousDayId = state.activeJourneyId;
-
-    do {
-      now = DateTime(now.year, now.month, now.day + 1, 13);
-    } while (state.policyAccessibleRegularJourneyIds.contains(previousDayId));
-    await state.load();
-
-    expect(state.activeJourneyId, previousDayId);
-    expect(state.policyAccessibleRegularJourneyIds, hasLength(2));
-    expect(state.canOpenJourney(previousDayId), isFalse);
-    expect(state.canResumeActiveJourney(previousDayId), isFalse);
-    await expectLater(
-      state.activateJourney(previousDayId),
-      throwsA(isA<JourneyAccessDeniedException>()),
-    );
-
-    final todayId = state.dailyAssignment.afternoonJourneyId;
-    await state.activateJourney(todayId);
-    expect(state.activeJourneyId, todayId);
-  });
-
-  test('held Special Journeys stay unpublished even when locally listed', () async {
+  test('held Special Journeys stay unpublished even when locally listed',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final state = productionState(
       clock: () => DateTime(2026, 8, 3, 13),
@@ -529,7 +506,8 @@ void main() {
     expect(state.activeJourneyId, 'literary-roaming');
   });
 
-  test('production never enters Paid Explorer without explicit entitlement', () async {
+  test('production never enters Paid Explorer without explicit entitlement',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final state = productionState(
       clock: () => DateTime(2026, 8, 3, 13),

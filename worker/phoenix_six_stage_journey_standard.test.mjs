@@ -9,11 +9,20 @@ function read(path) {
 
 const standard = read('docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md');
 const matrix = read('docs/templates/PHOENIX_SIX_STAGE_JOURNEY_ACCEPTANCE_MATRIX.md');
+const authority = read('docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md');
 const state = read('app/lib/state/app_state.dart');
-const challenge = read('app/lib/widgets/journey_challenge_panel.dart');
+const model = read('app/lib/models/journey_challenge.dart');
+const challenge = read('app/lib/widgets/hsk_story_challenge.dart');
 
 const requiredStageLabels = ['故事', '单词', '发现', '挑战', '回忆', '完成'];
-const requiredModes = ['paragraphRebuild', 'grammarRepair', 'missingSentence'];
+const requiredFamilies = [
+  ['Semantic Sentence Rebuild', 'sentenceRebuild'],
+  ['Grammar Repair', 'grammarRepair'],
+  ['Context Completion', 'storyCompletion'],
+  ['Story Evidence', 'storyEvidence'],
+  ['Knowledge', 'knowledgeReasoning'],
+  ['Scenario', 'scenarioDecision'],
+];
 
 test('binding Journey standard defines exactly six user-visible stages', () => {
   assert.ok(standard.includes('**Status:** BINDING'));
@@ -32,11 +41,19 @@ test('acceptance matrix records the six stages and rejects standalone Reflection
   assert.ok(matrix.includes('Standalone Writing present: `NO`'));
 });
 
-test('all three Challenge modes are binding and implemented', () => {
-  for (const mode of requiredModes) {
-    assert.ok(standard.includes(`\`${mode}\``), `standard must require ${mode}`);
-    assert.ok(matrix.includes(`\`${mode}\``), `matrix must verify ${mode}`);
-    assert.ok(challenge.includes(mode), `runtime Challenge must implement ${mode}`);
+test('the single active Challenge contract requires and implements 2 x 6', () => {
+  assert.ok(standard.includes('exactly 12 questions'));
+  assert.ok(authority.includes('Active Challenge contract: 2 × 6'));
+  for (const [family, mode] of requiredFamilies) {
+    assert.ok(authority.includes(family), `authority must require ${family}`);
+    assert.ok(matrix.includes(family), `matrix must verify ${family}`);
+    assert.ok(model.includes(mode), `runtime model must implement ${mode}`);
+    assert.ok(challenge.includes(mode), `Challenge shell must render ${mode}`);
+  }
+  assert.ok(standard.includes('This document MUST NOT duplicate or redefine it'));
+  for (const legacy of ['paragraphRebuild', 'missingSentence']) {
+    assert.ok(!standard.includes(`${legacy}\``), `old authority must not require ${legacy}`);
+    assert.ok(!matrix.includes(`${legacy}\``), `matrix must not require ${legacy}`);
   }
 });
 

@@ -79,6 +79,7 @@ List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
   final sortedEntries = List<WordEntry>.of(entries)
     ..sort((a, b) => b.word.length.compareTo(a.word.length));
   final segments = <StoryTextSegment>[];
+  final annotatedWords = <String>{};
   final plainText = StringBuffer();
   var plainStart = 0;
   var cursor = 0;
@@ -109,6 +110,13 @@ List<StoryTextSegment> segmentStoryText(String text, List<WordEntry> entries) {
       if (plainText.isEmpty) plainStart = cursor;
       plainText.write(text[cursor]);
       cursor += 1;
+      continue;
+    }
+
+    if (!annotatedWords.add(match.word)) {
+      if (plainText.isEmpty) plainStart = cursor;
+      plainText.write(match.word);
+      cursor += match.word.length;
       continue;
     }
 
@@ -507,13 +515,13 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
               final highlightStart = hasExplicitHighlight
                   ? widget.highlightStart!
                   : isCurrentNarrationItem
-                  ? snapshot!.start
-                  : -1;
+                      ? snapshot!.start
+                      : -1;
               final highlightEnd = hasExplicitHighlight
                   ? widget.highlightEnd!
                   : isCurrentNarrationItem
-                  ? snapshot!.end
-                  : -1;
+                      ? snapshot!.end
+                      : -1;
 
               return AnimatedContainer(
                 key: ValueKey(
@@ -522,26 +530,6 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isCurrentNarrationItem
-                      ? const Color(0x16FFD879)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isCurrentNarrationItem
-                        ? const Color(0x38FFD879)
-                        : Colors.transparent,
-                  ),
-                  boxShadow: isCurrentNarrationItem
-                      ? const [
-                          BoxShadow(
-                            color: Color(0x16FFD879),
-                            blurRadius: 10,
-                            spreadRadius: 1,
-                          ),
-                        ]
-                      : const [],
-                ),
                 child: Text.rich(
                   key: ValueKey(
                     'interactive-highlight-${widget.narrationItemId ?? widget.text}',
@@ -620,10 +608,7 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
         : baseStyle?.copyWith(
             color: const Color(0xFFFFD879),
             fontWeight: FontWeight.w800,
-            decoration: TextDecoration.underline,
-            decorationColor: Colors.white,
-            decorationStyle: TextDecorationStyle.dotted,
-            decorationThickness: 1.6,
+            decoration: TextDecoration.none,
             shadows: const [
               Shadow(
                 color: Color(0xF0000000),
@@ -781,7 +766,10 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       semanticsLabel: entry == null
           ? null
           : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
-      style: style.copyWith(color: cinematicColor.withValues(alpha: opacity)),
+      style: style.copyWith(
+        color: cinematicColor.withValues(alpha: opacity),
+        decoration: highlighted ? TextDecoration.none : style.decoration,
+      ),
     );
   }
 
@@ -803,8 +791,8 @@ class _InteractiveStoryTextState extends State<InteractiveStoryText>
       semanticsLabel: hidden
           ? ''
           : entry == null
-          ? null
-          : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
+              ? null
+              : '${state.displayText(entry.word)}，${entry.pinyin}，点按查看词语解释',
       style: style,
     );
   }
@@ -863,6 +851,7 @@ class _InlineReadingMarker extends StatelessWidget {
             color: const Color(0xFFFFE7AA),
             height: lineHeight,
             fontWeight: FontWeight.w900,
+            decoration: TextDecoration.none,
           ),
         ),
       ),

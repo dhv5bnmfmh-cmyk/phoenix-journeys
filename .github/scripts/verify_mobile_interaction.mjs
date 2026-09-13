@@ -59,6 +59,51 @@ async function semanticNode(page, label, { prefix = false, timeout = 15000, role
   throw new Error(`semantic state not found: ${label}`);
 }
 
+async function semanticNodeContainingAll(
+  page,
+  labels,
+  { timeout = 15000, role = null } = {},
+) {
+  const wanted = labels.map(normalize);
+  const deadline = Date.now() + timeout;
+  const nodes = page.locator('flt-semantics');
+  while (Date.now() < deadline) {
+    const index = await nodes.evaluateAll((elements, args) => {
+      const clean = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+      const candidates = [];
+      for (let i = 0; i < elements.length; i += 1) {
+        const element = elements[i];
+        if (args.role && element.getAttribute('role') !== args.role) continue;
+        const combined = [
+          element.getAttribute('aria-label'),
+          element.getAttribute('aria-valuetext'),
+          element.getAttribute('aria-description'),
+          element.textContent,
+        ].filter(Boolean).map(clean).join(' ');
+        if (!args.wanted.every((needle) => combined.includes(needle))) continue;
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') continue;
+        candidates.push({ i, area: rect.width * rect.height });
+      }
+      candidates.sort((a, b) => a.area - b.area);
+      return candidates[0]?.i ?? -1;
+    }, { wanted, role });
+    if (index >= 0) return nodes.nth(index);
+    await sleep(100);
+  }
+  throw new Error(`semantic state not found containing all: ${labels.join(' + ')}`);
+}
+
+async function semanticContainsAllExists(page, labels, options = {}) {
+  try {
+    await semanticNodeContainingAll(page, labels, { ...options, timeout: options.timeout ?? 800 });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function semanticExists(page, label, options = {}) {
   try {
     await semanticNode(page, label, { ...options, timeout: options.timeout ?? 800 });
@@ -114,15 +159,15 @@ async function findJourneyProgress(page, timeout = 30000) {
         if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden') continue;
         const values = [element.getAttribute('aria-label'), element.getAttribute('aria-valuetext'), element.textContent].map(clean).filter(Boolean);
         const combined = values.join(' ');
-        if (!/[1-6]\/6/.test(combined)) continue;
-        candidates.push({ i, label: values.find((value) => /[1-6]\/6/.test(value)) ?? combined, progressbar: element.getAttribute('role') === 'progressbar' });
+        if (!/[1-5]\/5/.test(combined)) continue;
+        candidates.push({ i, label: values.find((value) => /[1-5]\/5/.test(value)) ?? combined, progressbar: element.getAttribute('role') === 'progressbar' });
       }
       return candidates.find((entry) => entry.progressbar) ?? candidates[0] ?? null;
     });
     if (match) return { node: nodes.nth(match.i), label: match.label };
     await sleep(100);
   }
-  throw new Error('Journey: no semantic progress state (1/6..6/6) appeared');
+  throw new Error('Journey: no semantic progress state (1/5..5/5) appeared');
 }
 
 async function enableFlutterSemantics(page, browserName) {
@@ -178,21 +223,24 @@ async function exercisePassport(page, browserName) {
   await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT CHINA STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT CHINA', startedAt);
+
   startedAt = Date.now();
-  await tapFirstSemanticAction(page, ['浙江省', '浙江'], `${browserName}:passport-province`);
-  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
-  console.log(`${browserName} PASSPORT PROVINCE STATE CHANGE = PASS`);
-  reportDuration(browserName, 'PASSPORT PROVINCE', startedAt);
-  startedAt = Date.now();
-  await tapFirstSemanticAction(page, ['杭州'], `${browserName}:passport-city`);
-  await semanticNode(page, '浙江', { prefix: true, timeout: 15000 });
-  console.log(`${browserName} PASSPORT CITY STATE CHANGE = PASS`);
-  reportDuration(browserName, 'PASSPORT CITY', startedAt);
+  await tapFirstSemanticAction(page, ['北京市', '北京'], `${browserName}:passport-published-province`);
+  await semanticNodeContainingAll(page, ['北京市', '故宫博物院'], { role: 'button', timeout: 15000 });
+  for (const hidden of ['浙江', '杭州', '上海', '西安']) {
+    if (await semanticContainsAllExists(page, [hidden], { timeout: 300 })) {
+      throw new Error(`${browserName}: hidden city leaked into published Passport UI: ${hidden}`);
+    }
+  }
+  console.log(`${browserName} PASSPORT PUBLISHED BEIJING STATE CHANGE = PASS`);
+  reportDuration(browserName, 'PASSPORT PUBLISHED BEIJING', startedAt);
+
   startedAt = Date.now();
   await tapSemanticAction(page, '返回上一级', `${browserName}:passport-back`, { prefix: true });
-  await semanticNode(page, '请从左侧选择城市', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '请从左侧选择省份', { prefix: true, timeout: 15000 });
   console.log(`${browserName} PASSPORT BACK STATE CHANGE = PASS`);
   reportDuration(browserName, 'PASSPORT BACK', startedAt);
+
   startedAt = Date.now();
   await tapSemanticAction(page, '欧洲', `${browserName}:passport-europe`, { prefix: true, role: null });
   await semanticNode(page, '目的地即将开放', { prefix: true, timeout: 15000 });
@@ -222,16 +270,16 @@ async function openJourney(page, browserName, cycle) {
 }
 
 async function reachDiscovery(page, browserName) {
-  await semanticNode(page, '1/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '1/6 故事', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '1/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '1/5 Story', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:story-next`, { prefix: true });
   await sleep(500);
   await page.touchscreen.tap(22, 58);
-  await semanticNode(page, '2/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '2/6 单词', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '2/5 Vocabulary', { prefix: true, timeout: 15000 });
   await tapSemanticAction(page, '继续', `${browserName}:words-next`, { prefix: true });
-  await semanticNode(page, '3/6', { prefix: true, timeout: 15000 });
-  await semanticNode(page, '3/6 发现', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/5', { prefix: true, timeout: 15000 });
+  await semanticNode(page, '3/5 Discovery', { prefix: true, timeout: 15000 });
   console.log(`${browserName} DISCOVERY STATE TRANSITION = PASS`);
 }
 

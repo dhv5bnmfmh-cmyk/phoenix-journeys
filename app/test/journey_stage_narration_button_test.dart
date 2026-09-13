@@ -30,10 +30,7 @@ void main() {
     );
     expect(size.width, greaterThanOrEqualTo(44));
     expect(size.height, greaterThanOrEqualTo(44));
-
-    await tester.tap(
-      find.byKey(const ValueKey('memory-narration-touch-target')),
-    );
+    await tester.tap(find.byKey(const ValueKey('memory-narration-touch-target')));
     expect(taps, 1);
   });
 
@@ -51,7 +48,6 @@ void main() {
         ),
       ),
     );
-
     expect(find.bySemanticsLabel('停止朗读'), findsOneWidget);
     expect(find.byIcon(Icons.stop_circle_outlined), findsOneWidget);
   });
@@ -76,31 +72,49 @@ void main() {
         ),
       ),
     );
-
     expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('memory-narration-touch-target')), findsOneWidget);
+  });
+
+  test('narration item builder is empty-safe and preserves ordinary memory script', () {
+    final traditional = buildJourneyStageNarrationItems(
+      stage: 'memory',
+      displayedLines: const ['  記憶中的城牆。  ', '', '回家。'],
+    );
+    expect(traditional.map((item) => item.text).toList(), ['記憶中的城牆。', '回家。']);
     expect(
-      find.byKey(const ValueKey('memory-narration-touch-target')),
-      findsOneWidget,
+      buildJourneyStageNarrationItems(
+        stage: 'completion',
+        displayedLines: const ['', '  '],
+      ),
+      isEmpty,
     );
   });
 
-  test(
-    'narration item builder is empty-safe and preserves displayed script',
-    () {
-      final traditional = buildJourneyStageNarrationItems(
-        stage: 'memory',
-        displayedLines: const ['  記憶中的城牆。  ', '', '回家。'],
-      );
-      expect(traditional.map((item) => item.text).toList(), ['記憶中的城牆。', '回家。']);
-      expect(
-        buildJourneyStageNarrationItems(
-          stage: 'completion',
-          displayedLines: const ['', '  '],
-        ),
-        isEmpty,
-      );
-    },
-  );
+  test('Final Memory three-block narration reads learning summary in required order only', () {
+    final items = buildJourneyStageNarrationItems(
+      stage: 'memory',
+      displayedLines: const [
+        '文化正文',
+        '学习正文',
+        '记忆锚点正文',
+      ],
+    );
+    final spoken = items.map((item) => item.text).toList(growable: false);
+    expect(spoken, <String>[
+      '文化发现',
+      '文化正文',
+      '学习结果',
+      '学习正文',
+      'Memory Anchor',
+      '记忆锚点正文',
+      '这段旅程，你最想留下什么？',
+    ]);
+    final joined = spoken.join('\n');
+    expect(joined, isNot(contains('添加照片')));
+    expect(joined, isNot(contains('完成旅程')));
+    expect(joined, isNot(contains('照片仅保存在此设备')));
+  });
 
   test('narration locale follows the displayed Chinese script', () {
     expect(journeyStageNarrationLanguageCode(false), 'zh-CN');

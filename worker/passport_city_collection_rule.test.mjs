@@ -14,8 +14,9 @@ test('Home uses the city-grouped Passport screen', () => {
   assert.doesNotMatch(shell, /import 'passport_screen\.dart';/);
 });
 
-test('Passport keeps every city journey reachable on the transparent atlas', () => {
-  assert.match(passport, /for \(final city in journeyCityCatalog\)/);
+test('Passport exposes only published cities on the transparent atlas', () => {
+  assert.match(passport, /for \(final city in publishedJourneyCityCatalog\)/);
+  assert.doesNotMatch(passport, /SpecialJourneyPassport/);
   assert.match(passport, /_CityMapMarker\(/);
   assert.match(passport, /city\.destinations/);
   assert.match(passport, /passport-city-\$\{city\.id\}/);

@@ -118,11 +118,11 @@ test('story and discovery keep independent narration checkpoints', () => {
   assert.match(state, /_key\('narration\.\$contentId\.\$suffix'\)/);
   assert.match(
     state,
-    /prefs\.setString\(_narrationKey\(contentId, 'signature'\)/,
+    /prefs\.setString\(\s*_narrationKey\(contentId, 'signature'\)/,
   );
   assert.match(
     state,
-    /prefs\.setInt\(_narrationKey\(contentId, 'offset'\)/,
+    /prefs\.setInt\(\s*_narrationKey\(contentId, 'offset'\)/,
   );
 });
 

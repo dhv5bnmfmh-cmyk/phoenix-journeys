@@ -25,13 +25,18 @@ class JourneyProvinceCatalogEntry {
 }
 
 final List<JourneyProvinceCatalogEntry> chinaProvinceCatalog =
-    _buildChinaProvinceCatalog();
+    buildChinaProvinceCatalog(journeyCityCatalog);
 
-List<JourneyProvinceCatalogEntry> _buildChinaProvinceCatalog() {
+final List<JourneyProvinceCatalogEntry> publishedChinaProvinceCatalog =
+    buildChinaProvinceCatalog(publishedJourneyCityCatalog);
+
+List<JourneyProvinceCatalogEntry> buildChinaProvinceCatalog(
+  List<JourneyCityCatalogEntry> cityCatalog,
+) {
   final provinceOrder = <String>[];
   final groups = <String, _MutableProvinceGroup>{};
 
-  for (final city in journeyCityCatalog) {
+  for (final city in cityCatalog) {
     final primaryBinding = requireJourneyLocation(city.primaryDestination.id);
     final country = primaryBinding.countryNode;
     final provinceLevel = primaryBinding.provinceLevelNode;
@@ -115,6 +120,17 @@ JourneyProvinceCatalogEntry requireJourneyProvince(String provinceId) {
     (province) => province.id == provinceId,
     orElse: () => throw StateError(
       'Journey province-level region is not registered: $provinceId.',
+    ),
+  );
+}
+
+JourneyProvinceCatalogEntry requirePublishedJourneyProvince(
+  String provinceId,
+) {
+  return publishedChinaProvinceCatalog.firstWhere(
+    (province) => province.id == provinceId,
+    orElse: () => throw StateError(
+      'Published Journey province-level region is not registered: $provinceId.',
     ),
   );
 }

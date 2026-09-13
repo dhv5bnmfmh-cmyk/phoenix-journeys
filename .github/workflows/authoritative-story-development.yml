@@ -1,0 +1,60 @@
+name: Authoritative Story Development Contract
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - product/city-standard-v1-beijing-forbidden-city
+      - fix/pr208-golden-single-story-baseline
+      - fix/golden-challenge-2x6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: authoritative-story-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  authoritative-story-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Enforce single Story development line
+        run: .github/scripts/enforce_authoritative_story_contract.sh
+      - name: Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Dependencies
+        working-directory: app
+        run: flutter pub get
+      - name: Layer 1 — Authoritative Golden Challenge rendered acceptance
+        working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/authoritative_story_challenge_contract_test.dart
+      - name: Upload rendered Challenge evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: authoritative-golden-challenge-evidence
+          path: |
+            app/build/authoritative-story/challenge-rendered-matrix.json
+            app/build/authoritative-story/challenge-semantic-uniqueness-report.json
+          if-no-files-found: warn
+      - name: Golden Story targeted product contracts
+        working-directory: app
+        run: >-
+          flutter test --reporter expanded
+          test/forbidden_city_product_reference_test.dart
+          test/forbidden_city_full_lifecycle_level_consistency_test.dart
+          test/forbidden_city_story_standard_test.dart
+          test/founder_device_story_continue_regression_test.dart
+          test/journey_runtime_performance_gate_test.dart
+      - name: Analyze Golden product
+        working-directory: app
+        run: flutter analyze

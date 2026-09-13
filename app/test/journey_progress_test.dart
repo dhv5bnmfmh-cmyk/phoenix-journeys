@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/services/critical_persistence_store.dart';
 import 'package:phoenix_journeys/services/journey_access_policy.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
@@ -177,9 +176,7 @@ void main() {
     await state.load();
     final originalId = state.activeJourneyId;
     final originalPath = state.activeJourneyStoragePath;
-    final targetId = dailyJourneyExperiences
-        .map((journey) => journey.id)
-        .firstWhere((id) => id != originalId);
+    const targetId = 'literary-roaming';
 
     backend.failNextWrite = true;
     await expectLater(
@@ -256,9 +253,7 @@ void main() {
     final state = _criticalState(backend);
     await state.load();
     final firstId = state.activeJourneyId;
-    final secondId = dailyJourneyExperiences
-        .map((journey) => journey.id)
-        .firstWhere((id) => id != firstId);
+    const secondId = 'literary-roaming';
 
     await state.saveJourneyProgress(
       step: 2,

@@ -38,6 +38,15 @@ journey_session_init_anchor = (
     else "    _initialized = true;\n    unawaited(_loadLanguageProfile());\n"
 )
 
+snapshot_decode_anchor = (
+    "      var snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)\n"
+    "        ..validate();\n"
+    if "      var snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)\n"
+    in state
+    else "      final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)\n"
+    "        ..validate();\n"
+)
+
 candidate_arch = 'dailyJourneyIdForDate(DateTime date)' in daily_catalog
 print('STARTUP ARCHITECTURE =', 'REMEDIATED' if candidate_arch else 'BASELINE')
 
@@ -127,7 +136,14 @@ state = replace_one(state, "      final preferences = await _preferencesLoader()
 state = replace_one(state, "      var committed = await _criticalStore!.readCommitted();\n      if (committed == null) {\n", "      startupPerformanceMark('phoenix-critical-read-start');\n      var committed = await _criticalStore!.readCommitted();\n      startupPerformanceMark('phoenix-critical-read-end');\n      if (committed == null) {\n        startupPerformanceMark('phoenix-legacy-path-start');\n", 'critical read')
 state = replace_one(state, "        final legacy = await _buildLegacySnapshot(preferences);\n        legacy.snapshot.validate();\n", "        startupPerformanceMark('phoenix-legacy-build-start');\n        final legacy = await _buildLegacySnapshot(preferences);\n        startupPerformanceMark('phoenix-legacy-build-end');\n        legacy.snapshot.validate();\n", 'legacy build')
 state = replace_one(state, "        committed = await _criticalStore!.commitInitial(\n          legacy.snapshot.toJson(),\n        );\n", "        committed = await _criticalStore!.commitInitial(\n          legacy.snapshot.toJson(),\n        );\n        startupPerformanceMark('phoenix-legacy-path-end');\n", 'legacy commit')
-state = replace_one(state, "      final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)\n        ..validate();\n", "      startupPerformanceMark('phoenix-snapshot-decode-validate-start');\n      final snapshot = _PhoenixCriticalSnapshot.fromJson(committed.payload)\n        ..validate();\n      startupPerformanceMark('phoenix-snapshot-decode-validate-end');\n", 'snapshot decode')
+state = replace_one(
+    state,
+    snapshot_decode_anchor,
+    "      startupPerformanceMark('phoenix-snapshot-decode-validate-start');\n"
+    + snapshot_decode_anchor
+    + "      startupPerformanceMark('phoenix-snapshot-decode-validate-end');\n",
+    'snapshot decode',
+)
 state = replace_one(state, "      _applyCommitted(\n        snapshot,\n        revision: committed.revision,\n        schemaVersion: committed.schemaVersion,\n      );\n", "      startupPerformanceMark('phoenix-apply-committed-start');\n      _applyCommitted(\n        snapshot,\n        revision: committed.revision,\n        schemaVersion: committed.schemaVersion,\n      );\n      startupPerformanceMark('phoenix-apply-committed-end');\n", 'apply committed')
 state = replace_one(state, "      if (!_canRestoreActiveJourney(activeJourneyId)) {\n        throw StateError(\n          'Persisted active Journey is not eligible for safe restore.',\n        );\n      }\n", "      startupPerformanceMark('phoenix-restore-eligibility-start');\n      if (!_canRestoreActiveJourney(activeJourneyId)) {\n        throw StateError(\n          'Persisted active Journey is not eligible for safe restore.',\n        );\n      }\n      startupPerformanceMark('phoenix-restore-eligibility-end');\n", 'restore eligibility')
 state = replace_one(state, "      _activeIdentityReady = true;\n      loadStatus = AppLoadStatus.ready;\n    } catch (error, stackTrace) {\n", "      _activeIdentityReady = true;\n      loadStatus = AppLoadStatus.ready;\n      startupPerformanceMark('phoenix-state-ready');\n    } catch (error, stackTrace) {\n", 'state ready')

@@ -287,7 +287,7 @@ Future multi-Story semantics are `UNSEEN FIRST`, `DIFFERENT PER NEW RUN`, and `S
 
 ## Challenge Gold development behavior
 
-For Journey work, AI MUST treat [Phoenix Six-Stage Journey Standard §3](../docs/PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md#3-required-challenge-modes) as the single detailed authority for Challenge Gold quality.
+For Journey work, AI MUST treat [AUTHORITATIVE STORY DEVELOPMENT CONTRACT — Active Challenge contract: 2 × 6](../docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md#active-challenge-contract-2--6) as the single detailed authority for Challenge Gold quality.
 
 AI MUST read the active Story, Discovery, level, vocabulary provenance, and intended learning objective before designing Challenge. Challenge MUST NOT be generated as end-of-pipeline filler. Before proposing `PASS`, AI MUST actively look for ambiguous answers, weak or duplicate distractors, untaught knowledge, legacy/cross-Journey contamination, mode duplication, level mismatch, trivia dependency, keyword matching, and fabricated historical distractors. A real failure requires rewriting the item or its content mapping, not weakening a gate or test.
 

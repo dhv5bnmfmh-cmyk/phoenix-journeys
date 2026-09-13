@@ -58,7 +58,7 @@ async function tapJourneyEntryForIdentity(page, identity) {
   while (Date.now() < deadline) {
     const rs = (await semanticRecords(page)).filter((r) => r.visible);
     lastSnapshot = rs.map(recText).join(' | ');
-    if (lastSnapshot.includes('1/6') && lastSnapshot.includes(identity)) return;
+    if (lastSnapshot.includes('1/5') && lastSnapshot.includes(identity)) return;
     const identities = rs.filter((r) => recText(r).includes(identity));
     const actions = rs.filter((r) => r.role === 'button' && !r.disabled && /^(开始|继续|再次探索)/.test(recText(r)) && !recText(r).includes('朗读'));
     const pairs = [];
@@ -80,7 +80,7 @@ async function tapJourneyEntryForIdentity(page, identity) {
       const successDeadline = Date.now() + 3000;
       while (Date.now() < successDeadline) {
         const text = await visibleText(page);
-        if (text.includes('1/6') && text.includes(identity)) return;
+        if (text.includes('1/5') && text.includes(identity)) return;
         await sleep(100);
       }
     }
@@ -99,12 +99,12 @@ async function openForbiddenCity(page) {
   const postSelectionDeadline = Date.now() + 3000;
   while (Date.now() < postSelectionDeadline) {
     const text = await visibleText(page);
-    if (text.includes('1/6') && text.includes('紫禁城')) return Date.now() - startedAt;
+    if (text.includes('1/5') && text.includes('紫禁城')) return Date.now() - startedAt;
     if (text.includes('PHOENIX JOURNEYS')) break;
     await sleep(100);
   }
   await tapJourneyEntryForIdentity(page, '紫禁城');
-  await waitText(page, '1/6');
+  await waitText(page, '1/5');
   await waitText(page, '紫禁城');
   return Date.now() - startedAt;
 }
@@ -115,9 +115,9 @@ async function advance(page, expectedStage) {
   await button.tap({ timeout: 15000 });
   if (expectedStage === 2) {
     await sleep(400);
-    if (!(await visibleText(page)).includes('2/6')) await page.touchscreen.tap(22, 58);
+    if (!(await visibleText(page)).includes('2/5')) await page.touchscreen.tap(22, 58);
   }
-  await waitText(page, String(expectedStage) + '/6');
+  await waitText(page, String(expectedStage) + '/5');
 }
 
 const browser = await webkit.launch({ headless: true });

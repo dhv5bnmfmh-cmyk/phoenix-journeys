@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/daily_journey_catalog.dart';
 import '../data/journey_data.dart';
+import '../services/journey_vocabulary_context.dart';
 import '../services/narration_controller.dart';
 import '../services/phoenix_vocabulary_service.dart';
 import '../state/app_state.dart';
@@ -18,6 +19,7 @@ const _cream = Color(0xFFFFF4D8);
 const _blue = Color(0xFFEAF3FF);
 const _green = Color(0xFFEAF6E8);
 const _goldLine = Color(0xFFE1B85D);
+const _wordSpeechFallbackTimeout = Duration(seconds: 4);
 
 Future<void> showWordDetail(
   BuildContext context,
@@ -27,15 +29,15 @@ Future<void> showWordDetail(
   List<WordEntry>? entries,
   int? initialIndex,
   Future<bool> Function(WordEntry entry)? onSpeakEntry,
+  JourneyVocabularyContext Function(WordEntry entry)? activeContextResolver,
 }) {
   final studyEntries = entries == null || entries.isEmpty
       ? <WordEntry>[entry]
       : List<WordEntry>.unmodifiable(entries);
   final found = studyEntries.indexWhere((item) => item.word == entry.word);
   final requestedIndex = initialIndex ?? found;
-  final safeIndex = requestedIndex < 0
-      ? 0
-      : requestedIndex.clamp(0, studyEntries.length - 1);
+  final safeIndex =
+      requestedIndex < 0 ? 0 : requestedIndex.clamp(0, studyEntries.length - 1);
   final controller = narrationController ?? NarrationController();
   final appState = context.read<AppState>();
 
@@ -71,9 +73,9 @@ Future<void> showWordDetail(
                 onSpeak: narrationController == null
                     ? () => speakLocally(entry)
                     : onSpeak,
-                onSpeakEntry: narrationController == null
-                    ? speakLocally
-                    : onSpeakEntry,
+                onSpeakEntry:
+                    narrationController == null ? speakLocally : onSpeakEntry,
+                activeContextResolver: activeContextResolver,
               ),
             ),
           ),
@@ -92,6 +94,7 @@ class _WordDetailSheet extends StatefulWidget {
     required this.initialIndex,
     required this.onSpeak,
     required this.onSpeakEntry,
+    this.activeContextResolver,
   });
 
   final NarrationController narrationController;
@@ -99,6 +102,8 @@ class _WordDetailSheet extends StatefulWidget {
   final int initialIndex;
   final Future<bool> Function() onSpeak;
   final Future<bool> Function(WordEntry entry)? onSpeakEntry;
+  final JourneyVocabularyContext Function(WordEntry entry)?
+      activeContextResolver;
 
   @override
   State<_WordDetailSheet> createState() => _WordDetailSheetState();
@@ -145,7 +150,27 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       );
     }
 
-    final contextData = _findVocabularyContext(state, entry);
+    final activeContext = widget.activeContextResolver?.call(entry);
+    if (activeContext != null && !activeContext.isEmpty) {
+      return PhoenixVocabularyExample(
+        chinese: activeContext.chinese,
+        pinyin: activeContext.pinyin,
+        native: activeContext.nativeText(state.translationLanguage),
+        english: activeContext.english,
+        usageNote: '来自当前 Journey 已下载的真实语境。',
+        isOfflineFallback: true,
+        provider: 'phoenix-journey-context',
+        model: 'bundled',
+        qualityReviewed: true,
+        qualityScore: 100,
+      );
+    }
+
+    final contextData = findJourneyVocabularyContext(
+      activeJourney: state.activeJourney,
+      fallbackJourneys: dailyJourneyExperiences,
+      entry: entry,
+    );
     if (contextData.chinese.isNotEmpty) {
       return PhoenixVocabularyExample(
         chinese: contextData.chinese,
@@ -182,9 +207,16 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       _speechUnavailable = false;
     });
     final callback = widget.onSpeakEntry;
-    final success = callback == null
-        ? await widget.onSpeak()
-        : await callback(_entry);
+    var success = false;
+    try {
+      final speech = callback == null ? widget.onSpeak() : callback(_entry);
+      success = await speech.timeout(
+        _wordSpeechFallbackTimeout,
+        onTimeout: () => false,
+      );
+    } catch (_) {
+      success = false;
+    }
     if (!mounted) return;
     setState(() {
       _isSpeaking = false;
@@ -588,9 +620,7 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
                     size: 16,
                   ),
                   label: _buttonLabel(
-                    state.displayText(
-                      _isLast ? '完成并收起' : '下一个单词',
-                    ),
+                    state.displayText(_isLast ? '完成并收起' : '下一个单词'),
                   ),
                 ),
               ),
@@ -600,68 +630,4 @@ class _WordDetailSheetState extends State<_WordDetailSheet> {
       ),
     );
   }
-}
-
-class _VocabularyContext {
-  const _VocabularyContext({
-    required this.chinese,
-    required this.pinyin,
-    required this.vietnamese,
-    required this.english,
-  });
-
-  final String chinese;
-  final String pinyin;
-  final String vietnamese;
-  final String english;
-
-  String nativeText(String language) {
-    return switch (language) {
-      '英语' => english,
-      '中文解释' => chinese,
-      _ => vietnamese,
-    };
-  }
-}
-
-_VocabularyContext _findVocabularyContext(AppState state, WordEntry entry) {
-  final journeys = [
-    state.activeJourney,
-    ...dailyJourneyExperiences.where(
-      (journey) => journey.id != state.activeJourney.id,
-    ),
-  ];
-
-  for (final journey in journeys) {
-    if (!journey.words.any((word) => word.word == entry.word)) continue;
-    for (var index = 0; index < journey.content.sections.length; index += 1) {
-      final section = journey.content.sections[index];
-      if (!section.text.contains(entry.word)) continue;
-      final annotation = index < journey.storyAnnotations.length
-          ? journey.storyAnnotations[index]
-          : null;
-      return _VocabularyContext(
-        chinese: section.text,
-        pinyin: annotation?.pinyin ?? '',
-        vietnamese: annotation?.vietnamese ?? '',
-        english: annotation?.english ?? '',
-      );
-    }
-    for (final discovery in journey.discoveries) {
-      if (!discovery.text.contains(entry.word)) continue;
-      return _VocabularyContext(
-        chinese: discovery.text,
-        pinyin: discovery.pinyin,
-        vietnamese: discovery.vietnamese,
-        english: discovery.english,
-      );
-    }
-  }
-
-  return const _VocabularyContext(
-    chinese: '',
-    pinyin: '',
-    vietnamese: '',
-    english: '',
-  );
 }

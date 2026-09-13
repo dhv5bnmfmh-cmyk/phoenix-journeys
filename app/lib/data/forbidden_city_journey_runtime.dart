@@ -1,5 +1,6 @@
 import 'package:pinyin/pinyin.dart';
 
+import 'beijing_city_standard.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
 
@@ -84,10 +85,10 @@ class ForbiddenCityCompletionMoment {
 
 final forbiddenCityStoryParagraphsByLevel = <List<String>>[
   <String>[
-    '十七岁的古建学徒沈砚跟周师傅走进紫禁城。他从午门沿中轴走向乾清门，把这条常用的学习路线画在纸上，认定这就是唯一正确的路线。阿宁却从东侧来到乾清门前。她要把一份记录送到东边，目标和沈砚不同。沈砚说她走错了。阿宁没有争，她请沈砚一起看两条路怎样到达同一个地方。沈砚看清后没有擦掉阿宁的线，而是把两条路线都留下。临走时，他请阿宁把自己的路线再画清楚；阿宁也愿意听他说明中轴。',
+    '十七岁的古建学徒沈砚跟周师傅走进紫禁城。沈砚从午门出发，沿中轴向北走。他要画一张路线图，给新学徒看。他走到乾清门前，觉得这条路线最正确。阿宁从东侧来到乾清门前。她要把记录送回东边，目标和沈砚不同。沈砚说：“你走错了。”阿宁说：“我们一起看。”两人重新看图。两条路线都到乾清门前。沈砚留下两条路线。周师傅问：“为什么？”沈砚说：“同一个地方，可以有不同路线。”',
   ],
   <String>[
-    '十七岁的古建学徒沈砚跟周师傅进入紫禁城。他从午门沿中轴向北做空间记录，一直走到乾清门前。他把这条常用路线画得很直，觉得同一个地方只该有一种正确走法。阿宁从东侧来到这里，她的任务是把记录送回东边，所以没有沿沈砚的路线移动。沈砚马上说：“你的线和我的不一样。”阿宁回答：“先别删。跟我看一次，再决定。”她主动带沈砚比较两条路线的方向和终点。两条线都能到乾清门前，却服务不同任务。沈砚把阿宁的线保留下来，并在旁边写出两人的目标。阿宁原以为他只相信纸上的主线，看到这个改变后，也请他帮自己标出中轴的位置。',
+    '十七岁的古建学徒沈砚跟周师傅进入紫禁城。沈砚从午门沿中轴向北走。他要记录宫门，也要画一张给新人看的路线图。他觉得这条常用路线就是正确路线。阿宁从东侧到乾清门前。她的任务是把记录送回东边，所以她走了另一条路线。沈砚说：“你的线和我的不一样。”阿宁说：“先看路，再决定。”两人重新看图。两条路线都能到乾清门前，但服务不同任务。沈砚写下两人的目标，也留下两条线。周师傅没有选一条，只让他们说清为什么这样走。',
   ],
   <String>[
     '十七岁的古建学徒沈砚随周师傅从午门进入紫禁城。他沿中轴记录宫门和院落，把自己的学习路线一路画到乾清门前。因为这条路线清楚、常用，他认定它应该成为图上的唯一答案。阿宁却从东侧来到同一个地方。她今天的任务是送回一份东边的记录，路线先贴着东侧空间移动，再在乾清门前与沈砚汇合。沈砚看到两条线不同，立刻判断阿宁走错了。',
@@ -136,14 +137,14 @@ String _pinyin(String text) => PinyinHelper.getPinyinE(
 const _support = <List<(String, String)>>[
   <(String, String)>[
     (
-      'Thẩm Nghiên đi từ Ngọ Môn theo trục giữa đến Càn Thanh Môn và cho rằng đó là tuyến đúng duy nhất. A Ninh đến từ phía đông vì có mục tiêu khác. Cô chủ động đề nghị so sánh hai tuyến; cuối cùng cả hai giữ lại hai đường và bắt đầu tôn trọng cách quan sát của nhau.',
-      'Shen Yan walks from the Meridian Gate along the central axis to the Gate of Heavenly Purity and assumes it is the only correct route. A Ning arrives from the east for a different goal. She actively asks him to compare the two routes; they keep both lines and begin respecting each other’s observations.',
+      'Thẩm Nghiên vào Tử Cấm Thành từ Ngọ Môn, đi theo trục giữa và vẽ một tuyến cho học viên mới. A Ninh đến Càn Thanh Môn từ phía đông vì mục tiêu khác. Khi cùng xem lại bản đồ, họ thấy hai tuyến đều đến cùng một nơi và giữ lại cả hai.',
+      'Shen Yan enters the Forbidden City through the Meridian Gate, follows the central axis, and draws a route for new apprentices. A Ning reaches the Gate of Heavenly Purity from the east for a different goal. Looking at the map together, they see that both routes reach the same place and keep both lines.',
     ),
   ],
   <(String, String)>[
     (
-      'Thẩm Nghiên xem tuyến quen thuộc dọc trục giữa là cách đi đúng duy nhất. A Ninh có nhiệm vụ ở phía đông, nên cô mời anh đi kiểm tra thay vì tranh cãi. Hai tuyến cùng đến Càn Thanh Môn và phục vụ hai nhiệm vụ khác nhau; cả hai cũng thay đổi cách nhìn về nhau.',
-      'Shen Yan treats the familiar central-axis route as the only correct way. A Ning has an east-side task, so she invites him to check rather than argue. Both routes reach the Gate of Heavenly Purity for different tasks, and both characters revise how they see each other.',
+      'Thẩm Nghiên ghi lại tuyến quen thuộc dọc trục giữa. A Ninh phải đưa ghi chép trở lại phía đông nên đi một tuyến khác. Hai người kiểm tra trước khi kết luận, rồi ghi rõ mục tiêu khác nhau bên cạnh hai tuyến cùng đến Càn Thanh Môn.',
+      'Shen Yan records the familiar central-axis route. A Ning must return a record to the east, so she uses another route. They check before judging, then label their different goals beside two routes that both reach the Gate of Heavenly Purity.',
     ),
   ],
   <(String, String)>[
@@ -790,17 +791,64 @@ final forbiddenCityDiscoveryFocusByLevel = <DiscoveryEntry>[
   ),
 ];
 
+const _forbiddenCityGroundingSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef],
+  <String>[forbiddenCityJingyunGateSourceRef],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[],
+];
+
+const _forbiddenCityFocusSourceRefs = <List<String>>[
+  <String>[forbiddenCityMeridianGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityQianqingGateSourceRef, forbiddenCityAxisPlanSourceRef],
+  <String>[forbiddenCityJingyunGateSourceRef],
+  <String>[],
+  <String>[],
+  <String>[],
+  <String>[forbiddenCityAxisPlanSourceRef],
+  <String>[],
+];
+
+DiscoveryEntry _discoveryWithSources(
+  DiscoveryEntry entry,
+  List<String> sourceRefs,
+) {
+  final seen = <String>{};
+  return DiscoveryEntry(
+    text: entry.text,
+    simpleChinese: entry.simpleChinese,
+    vietnamese: entry.vietnamese,
+    english: entry.english,
+    pinyin: entry.pinyin,
+    sourceRefs: List<String>.unmodifiable(
+      sourceRefs.where((ref) => ref.trim().isNotEmpty && seen.add(ref)),
+    ),
+  );
+}
+
 List<DiscoveryEntry> _discoveriesForLevel(int level) {
   final safeLevel = level.clamp(1, 10).toInt();
-  final focus = forbiddenCityDiscoveryFocusByLevel[safeLevel - 1];
-  final grounding = switch (safeLevel) {
-    1 || 2 => forbiddenCityDiscoveries[0],
-    3 || 4 => forbiddenCityDiscoveries[1],
-    5 || 6 => forbiddenCityDiscoveries[2],
-    7 || 8 => forbiddenCityDiscoveries[3],
-    _ => forbiddenCityDiscoveries[4],
+  final focusIndex = safeLevel - 1;
+  final groundingIndex = switch (safeLevel) {
+    1 || 2 => 0,
+    3 || 4 => 1,
+    5 || 6 => 2,
+    7 || 8 => 3,
+    _ => 4,
   };
-  return <DiscoveryEntry>[focus, grounding];
+  return <DiscoveryEntry>[
+    _discoveryWithSources(
+      forbiddenCityDiscoveryFocusByLevel[focusIndex],
+      _forbiddenCityFocusSourceRefs[focusIndex],
+    ),
+    _discoveryWithSources(
+      forbiddenCityDiscoveries[groundingIndex],
+      _forbiddenCityGroundingSourceRefs[groundingIndex],
+    ),
+  ];
 }
 
 const forbiddenCityMemoryMoments = <ForbiddenCityMemoryMoment>[

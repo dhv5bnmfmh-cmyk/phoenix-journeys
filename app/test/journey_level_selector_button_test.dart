@@ -99,7 +99,7 @@ void main() {
     expect(find.text('380–500 字'), findsOneWidget);
     expect(find.text('2 段短文'), findsOneWidget);
     expect(find.text('约 3 分钟'), findsOneWidget);
-    expect(find.textContaining('下一次进入旅程时应用'), findsOneWidget);
+    expect(find.textContaining('从新等级的 Story 重新开始旅程'), findsOneWidget);
   });
 
   testWidgets('boundary buttons disable at one and ten', (tester) async {

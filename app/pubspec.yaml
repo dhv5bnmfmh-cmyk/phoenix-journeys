@@ -16,6 +16,7 @@ dependencies:
   intl: ^0.19.0
   http: ^1.2.2
   web: ^1.1.1
+  image: ^4.3.0
   pinyin: ^3.3.0
   share_plus: ^12.0.2
   # Local speech recognition for shadowing practice.
@@ -58,3 +59,4 @@ flutter:
     - assets/images/backgrounds/generated/leshan/giant-buddha/
     - assets/images/backgrounds/generated/wuyishan/nine-bend-stream/
     - assets/images/backgrounds/generated/honghe/hani-rice-terraces/
+    - assets/journeys/china/beijing/forbidden_city/journey_01/runtime/

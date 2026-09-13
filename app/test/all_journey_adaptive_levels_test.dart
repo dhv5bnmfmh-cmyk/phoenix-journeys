@@ -37,6 +37,13 @@ void main() {
           reason: '${journey.id} ${profile.displayLabel}',
         );
         expect(
+          level.storyParagraphs.every(
+            (paragraph) => paragraph.trim().isNotEmpty,
+          ),
+          isTrue,
+          reason: '${journey.id} should not produce an empty story paragraph',
+        );
+        expect(
           level.storyAnnotations,
           hasLength(storyTarget.paragraphCount),
           reason: '${journey.id} annotations',
@@ -72,6 +79,25 @@ void main() {
         );
       }
     }
+  });
+
+  test('Phoenix exposes exactly ten fused levels', () {
+    expect(agent.allProfiles, hasLength(10));
+    expect(
+      agent.allProfiles.map((item) => item.phoenixLevel),
+      orderedEquals(List<int>.generate(10, (index) => index + 1)),
+    );
+    expect(
+      agent.allProfiles.map((item) => item.storageValue).toSet(),
+      hasLength(10),
+    );
+  });
+
+  test('legacy HSK and TOCFL profiles remain available for migration', () {
+    expect(agent.profilesFor(ChineseExamTrack.hsk), isNotEmpty);
+    expect(agent.profilesFor(ChineseExamTrack.tocfl), isNotEmpty);
+    expect(agent.phoenixLevelFromStorage('hsk:6'), 8);
+    expect(agent.phoenixLevelFromStorage('tocfl:4'), 7);
   });
 
   test('Summer Palace Lv.1 through Lv.10 preserve Pilot N1 invariants', () {

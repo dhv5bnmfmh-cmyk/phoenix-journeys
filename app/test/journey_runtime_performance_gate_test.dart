@@ -157,8 +157,13 @@ void main() {
     expect(resolver, contains('final profile = _languageProfile;'));
     expect(resolver, contains('identical(_cachedLevelProfile, profile)'));
     expect(journey, contains('snapshotJourneySessionProfile('));
-    expect(journey, contains('late final ChineseProficiencyProfile _sessionLanguageProfile;'));
-    expect(journey, isNot(contains('_phoenixLevelController.addListener')));
+    expect(journey, contains('late ChineseProficiencyProfile _sessionLanguageProfile;'));
+    expect(journey, contains('addListener(_handlePhoenixLevelChange)'));
+    expect(journey, contains('_resetJourneyForSelectedLevel'));
+    expect(
+      journey,
+      contains('_phoenixLevelController.addListener(_handlePhoenixLevelChange)'),
+    );
     expect(
       journey,
       contains('_experience = requireDailyJourneyExperience(journeyId);'),
@@ -266,8 +271,8 @@ void main() {
     expect(build, contains('0 => _storyPage()'));
     expect(build, contains('1 => _wordsPage()'));
     expect(build, contains('2 => _discoveryPage()'));
-    expect(build, contains('3 => stepThreePage'));
-    expect(build, contains('4 => stepFourPage'));
+    expect(build, matches(RegExp(r'3\s*=>\s*stepThreePage\s*==')));
+    expect(build, matches(RegExp(r'4\s*=>\s*stepFourPage\s*==')));
     expect(build, contains('_ => _completePage()'));
     expect(build, contains('child: page'));
     expect(build, isNot(contains('final pages = <Widget>[')));
