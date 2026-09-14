@@ -221,11 +221,23 @@ StoryChallengeSet buildTempleOfHeavenChallenge({
   if (specs.length != 12) {
     throw StateError('Temple Lv$safeLevel must contain exactly 12 questions.');
   }
-  final storyText = storyParagraphs.join('\n');
+  final activeStory = templeStoryParagraphsByLevel[safeLevel - 1];
+  if (storyParagraphs.length != activeStory.length ||
+      storyParagraphs.asMap().entries.any(
+            (entry) => entry.value != activeStory[entry.key],
+          )) {
+    throw StateError(
+      'Temple Lv$safeLevel Challenge received a different Story context.',
+    );
+  }
+  final taughtStoryText = templeStoryParagraphsByLevel
+      .take(safeLevel)
+      .expand((paragraphs) => paragraphs)
+      .join('\n');
   final questions = <StoryChallengeQuestion>[];
   for (var index = 0; index < specs.length; index += 1) {
     final spec = specs[index];
-    _validateSpec(safeLevel, index, spec, storyText);
+    _validateSpec(safeLevel, index, spec, taughtStoryText);
     final options = List<String>.unmodifiable(spec.options);
     questions.add(StoryChallengeQuestion(
       id: 'toh-lv$safeLevel-q${index + 1}-${spec.mode.name}',
