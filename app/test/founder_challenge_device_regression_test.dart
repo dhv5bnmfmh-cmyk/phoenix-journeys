@@ -168,7 +168,7 @@ void main() {
       expect(find.text('回答错误'), findsOneWidget);
       expect(find.text('你的选择：错误选项一'), findsOneWidget);
       expect(find.text('正确答案：正确答案一'), findsOneWidget);
-      expect(find.textContaining('为什么这个答案才对：'), findsOneWidget);
+      expect(find.textContaining('为什么你的选择不成立：'), findsOneWidget);
       expect(find.textContaining('不满足“'), findsNothing);
       expect(find.textContaining('证据不一致'), findsNothing);
 
@@ -177,7 +177,7 @@ void main() {
       expect(automatic, contains('回答错误'));
       expect(automatic, contains('你的选择：错误选项一'));
       expect(automatic, contains('正确答案：正确答案一'));
-      expect(automatic, contains('为什么这个答案才对：'));
+      expect(automatic, contains('为什么你的选择不成立：'));
       expect(automatic, contains('正确答案一保留了完整路线条件'));
       expect(automatic, isNot(contains('不满足“')));
       expect(automatic, isNot(contains('证据不一致')));

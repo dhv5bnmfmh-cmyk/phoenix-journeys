@@ -57,6 +57,23 @@ String _feedbackExplanation(StoryChallengeQuestion question) {
   return '请根据 Story、空间关系和题目条件核对答案。';
 }
 
+String _selectedOptionExplanation(
+  StoryChallengeQuestion question,
+  int selectedOption,
+) {
+  final selected = question.options[selectedOption];
+  if (selected == question.answer) return _feedbackExplanation(question);
+  final explanations = question.mode == StoryChallengeMode.grammarRepair &&
+          question.grammarOptionExplanations.length == question.options.length
+      ? question.grammarOptionExplanations
+      : question.distractorRationales;
+  if (explanations.length == question.options.length &&
+      explanations[selectedOption].trim().isNotEmpty) {
+    return explanations[selectedOption].trim();
+  }
+  return _feedbackExplanation(question);
+}
+
 ChallengeFeedbackPresentation grammarLocationFeedbackPresentation(
   StoryChallengeQuestion question,
   int selectedError,
@@ -113,8 +130,8 @@ ChallengeFeedbackPresentation grammarRepairFeedbackPresentation(
       ),
       ChallengeFeedbackField(
         kind: ChallengeFeedbackFieldKind.explanation,
-        label: '为什么这样改才对',
-        value: _feedbackExplanation(question),
+        label: correct ? '为什么这样改才对' : '为什么你的修改不成立',
+        value: _selectedOptionExplanation(question, selectedOption),
       ),
     ],
   );
@@ -125,11 +142,11 @@ ChallengeFeedbackPresentation singleStepFeedbackPresentation(
   required String selectedAnswer,
 }) {
   final correct = selectedAnswer == question.answer;
-  final evidence = question.storyEvidence.trim();
-  final why = _feedbackExplanation(question);
-  final explanation = !correct && evidence.isNotEmpty && !why.contains(evidence)
-      ? '题目里的依据是“$evidence”。$why'
-      : why;
+  final selectedIndex = question.options.indexOf(selectedAnswer);
+  final why = selectedIndex < 0
+      ? _feedbackExplanation(question)
+      : _selectedOptionExplanation(question, selectedIndex);
+  final explanation = why;
   return ChallengeFeedbackPresentation(
     correct: correct,
     fields: <ChallengeFeedbackField>[
@@ -146,7 +163,7 @@ ChallengeFeedbackPresentation singleStepFeedbackPresentation(
       ),
       ChallengeFeedbackField(
         kind: ChallengeFeedbackFieldKind.explanation,
-        label: correct ? '为什么这个答案对' : '为什么这个答案才对',
+        label: correct ? '为什么这个答案对' : '为什么你的选择不成立',
         value: explanation,
       ),
     ],

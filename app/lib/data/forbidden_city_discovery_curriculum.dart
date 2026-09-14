@@ -98,18 +98,18 @@ final List<List<DiscoveryEntry>> _forbiddenCityDiscoveryCurriculum =
       'The Forbidden City is commonly understood as Outer and Inner Courts with different functions: the Outer Court centers on the three great halls, while the Inner Court centers on the three rear palaces.',
     ),
     _fact(
-      '乾清门既是内廷正宫门，又是连接内廷与外朝的重要通道。它同时具有“建筑入口”和“功能转换节点”两层意义，所以判断空间关系时不能只看方向。',
-      '乾清门既是门，也是外朝与内廷之间的重要转换节点。',
-      'Càn Thanh Môn vừa là cổng chính của Nội đình, vừa là nút chuyển quan trọng giữa Ngoại triều và Nội đình.',
-      'The Gate of Heavenly Purity is both an architectural entrance and a major transition point between the Outer and Inner Courts, so direction alone does not describe its spatial role.',
+      '乾清门在清代不只承担通行功能，也曾用于御门听政和斋戒等政务、典礼活动。同一建筑会因活动制度获得不同用途，所以“门的位置”不能单独解释人在这里做什么。',
+      '乾清门在清代还承担政务和典礼活动；位置相同，建筑用途可以有不同层次。',
+      'Dưới thời Thanh, Càn Thanh Môn còn là nơi diễn ra hoạt động chính vụ và nghi lễ; cùng một vị trí kiến trúc có thể mang nhiều tầng công năng.',
+      'In the Qing period, the Gate of Heavenly Purity also hosted government audiences and ritual activities. A fixed location can therefore carry several functional layers.',
     ),
   ],
   <DiscoveryEntry>[
     _fact(
-      '景运门位于乾清门前广场东侧，东向；隆宗门位于广场西侧，西向，两门相对而立且形制相同。这是一组可以直接核对的东西向空间证据。',
-      '景运门在东、隆宗门在西，两门相对，是明确的东西向空间证据。',
-      'Cảnh Vận Môn ở phía đông, Long Tông Môn ở phía tây và hai cổng đối nhau; đây là bằng chứng không gian đông-tây có thể kiểm chứng trực tiếp.',
-      'Jingyun Gate is on the east and Longzong Gate on the west of the forecourt; they face opposite directions and form a directly checkable east-west spatial relation.',
+      '景运门东向、隆宗门西向，两门相对且形制相同。比起只背“东、西”，观察门的朝向与成对形制，可以用现场建筑特征复核自己是否把两侧位置标反。',
+      '两门的朝向和相同形制可以帮助现场复核东西位置，而不只是背方位。',
+      'Hướng quay và hình thức đối xứng của hai cổng giúp kiểm tra tại chỗ xem vị trí đông-tây có bị ghi ngược hay không.',
+      'The gates face opposite directions and share the same form. Those visible features provide an on-site way to check whether east and west have been reversed, beyond memorizing labels.',
     ),
     _fact(
       '乾清门东侧还有内左门，西侧有内右门；而门前广场东西两端又分别是景运门与隆宗门。一个重要节点可以同时拥有中轴、侧向门户和内部连接。',
@@ -118,10 +118,10 @@ final List<List<DiscoveryEntry>> _forbiddenCityDiscoveryCurriculum =
       'Around the Gate of Heavenly Purity, the central-axis relation coexists with Inner Left and Inner Right Gates and with Jingyun and Longzong Gates at the east and west ends of the forecourt.',
     ),
     _fact(
-      '故宫博物院资料把景运门、隆宗门都列为进入乾清门前广场的重要门户。判断一条路线是否有真实空间依据时，可以先核对“门是否存在、位置是否相接、能否进入共同节点”这类可验证事实。',
-      '先核对真实门的位置和连接，再谈路线判断。',
-      'Khi kiểm tra một tuyến, trước hết cần xác nhận cổng có thật, vị trí có nối nhau và có thể đi vào nút chung hay không.',
-      'The Palace Museum identifies both Jingyun and Longzong Gates as important entrances to the forecourt. Route reasoning can therefore begin with verifiable facts about gates, positions, and shared nodes.',
+      '乾清门东侧另有内左门，西侧有内右门。它们与广场两端的景运门、隆宗门不是同一组门；核对路线时必须区分“靠近乾清门的内部连接”和“广场两端的侧向门户”。',
+      '内左门、内右门与景运门、隆宗门不是同一组连接，画路线时不能混为一谈。',
+      'Nội Tả Môn và Nội Hữu Môn không phải cùng một nhóm cổng với Cảnh Vận Môn và Long Tông Môn; khi vẽ tuyến cần phân biệt kết nối bên trong với cổng ở hai đầu quảng trường.',
+      'Inner Left and Inner Right Gates are not the same pair as Jingyun and Longzong Gates. Route records must distinguish near-gate internal connections from the lateral gateways at the ends of the forecourt.',
     ),
   ],
   <DiscoveryEntry>[
@@ -146,10 +146,10 @@ final List<List<DiscoveryEntry>> _forbiddenCityDiscoveryCurriculum =
   ],
   <DiscoveryEntry>[
     _fact(
-      '午门五个门洞在明清时期有明确的身份与礼制用途。中门主要供皇帝使用，官员与宗室王公通常使用不同侧门；同一座门的“可通过位置”因此可以用制度资料核对，而不是凭个人感觉判断。',
-      '午门不同门洞有制度化用途，这类事实可以作为路线判断的证据。',
-      'Các lối qua Ngọ Môn có công năng theo thân phận và lễ chế; đây là loại bằng chứng có thể kiểm tra bằng tư liệu lịch sử.',
-      'The Meridian Gate’s openings had institutional uses tied to status and ritual. Such access rules are historical evidence, not a matter of personal preference.',
+      '午门中门通常服务皇帝，但制度也规定了特定典礼中的例外，例如殿试后新科状元、榜眼、探花可由中门出宫。礼制路线因此不能只贴一个永久身份标签，还要核对人物、方向与具体场合。',
+      '午门中门有特定典礼例外；判断通行规则还要看场合和行动方向。',
+      'Trung môn của Ngọ Môn có ngoại lệ trong nghi lễ, chẳng hạn ba người đỗ đầu kỳ điện thí được đi ra qua trung môn; vì vậy phải kiểm tra cả thân phận, dịp lễ và hướng di chuyển.',
+      'The central opening also had ceremonial exceptions: the top three palace-examination graduates could leave through it. Access reasoning must therefore check occasion and direction as well as identity.',
     ),
     _fact(
       '景运门不仅位于乾清门前广场东侧，故宫博物院还记载它与隆宗门都被称作“禁门”，对进入者有严格限制。建筑位置说明“哪里相连”，制度记录则补充“谁在什么条件下能进入”。',

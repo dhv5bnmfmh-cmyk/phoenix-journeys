@@ -88,7 +88,7 @@ final forbiddenCityStoryParagraphsByLevel = <List<String>>[
     '十七岁的古建学徒沈砚跟周师傅走进紫禁城。沈砚从午门出发，沿中轴向北走。他要画一张路线图，给新学徒看。他走到乾清门前，觉得这条路线最正确。阿宁从东侧来到乾清门前。她要把记录送回东边，目标和沈砚不同。沈砚说：“你走错了。”阿宁说：“我们一起看。”两人重新看图。两条路线都到乾清门前。沈砚留下两条路线。周师傅问：“为什么？”沈砚说：“同一个地方，可以有不同路线。”',
   ],
   <String>[
-    '十七岁的古建学徒沈砚跟周师傅进入紫禁城。沈砚从午门沿中轴向北走。他要记录宫门，也要画一张给新人看的路线图。他觉得这条常用路线就是正确路线。阿宁从东侧到乾清门前。她的任务是把记录送回东边，所以她走了另一条路线。沈砚说：“你的线和我的不一样。”阿宁说：“先看路，再决定。”两人重新看图。两条路线都能到乾清门前，但服务不同任务。沈砚写下两人的目标，也留下两条线。周师傅没有选一条，只让他们说清为什么这样走。',
+    '第二天，新学徒照着沈砚留下的图从午门沿中轴向北走，却把一份午前必须送回东边的记录带到了乾清门前。阿宁赶来时没有责怪他，只问图上为什么没有写任务。她的任务是把记录送回东边，所以她走了另一条路线。沈砚原以为昨天保留两条线已经够了，这时才发现：没有用途和时限，后来的人仍会把常用线当成指令。阿宁说：“先看记录要去哪里，再决定走哪条线。”三人核对交接签记与两个终点，确认两条路线都能到乾清门前，但服务不同任务。沈砚把“午前送回东边”写在阿宁的线旁，也在自己的线上标出“观察宫门”。新学徒按新标记及时完成交接。沈砚把笔递给阿宁，请她以后先检查自己写的任务说明；两人的关系从互相证明路线，变成共同为后来的人负责。周师傅没有选一条，只让他们说清为什么这样走。',
   ],
   <String>[
     '十七岁的古建学徒沈砚随周师傅从午门进入紫禁城。他沿中轴记录宫门和院落，把自己的学习路线一路画到乾清门前。因为这条路线清楚、常用，他认定它应该成为图上的唯一答案。阿宁却从东侧来到同一个地方。她今天的任务是送回一份东边的记录，路线先贴着东侧空间移动，再在乾清门前与沈砚汇合。沈砚看到两条线不同，立刻判断阿宁走错了。',
@@ -143,8 +143,8 @@ const _support = <List<(String, String)>>[
   ],
   <(String, String)>[
     (
-      'Thẩm Nghiên ghi lại tuyến quen thuộc dọc trục giữa. A Ninh phải đưa ghi chép trở lại phía đông nên đi một tuyến khác. Hai người kiểm tra trước khi kết luận, rồi ghi rõ mục tiêu khác nhau bên cạnh hai tuyến cùng đến Càn Thanh Môn.',
-      'Shen Yan records the familiar central-axis route. A Ning must return a record to the east, so she uses another route. They check before judging, then label their different goals beside two routes that both reach the Gate of Heavenly Purity.',
+      'Ngày hôm sau, một học viên mới dùng bản đồ cũ nhưng mang nhầm bản ghi cần giao về phía đông đến Càn Thanh Môn. A Ninh và Thẩm Nghiên kiểm tra đích đến cùng thời hạn, rồi ghi rõ nhiệm vụ trên từng tuyến. Nhờ bản đồ mới, học viên hoàn thành bàn giao đúng giờ; hai người chuyển từ bảo vệ tuyến riêng sang cùng chịu trách nhiệm cho người dùng sau.',
+      'The next day, a new apprentice follows the old map but carries an east-bound record to the Gate of Heavenly Purity. A Ning and Shen Yan check its destination and deadline, then label each route with its task. The revised map lets the apprentice complete the handoff on time, and the pair shift from defending their own routes to sharing responsibility for the next user.',
     ),
   ],
   <(String, String)>[

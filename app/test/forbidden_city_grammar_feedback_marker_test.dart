@@ -102,7 +102,8 @@ void main() {
       expect(find.text('回答错误'), findsOneWidget);
       expect(find.textContaining('你的修改：'), findsOneWidget);
       expect(find.text('正确答案：$correct'), findsOneWidget);
-      expect(find.textContaining('为什么这样改才对：'), findsOneWidget);
+      expect(find.textContaining('为什么你的修改不成立：'), findsOneWidget);
+      expect(find.textContaining('错。这里不是转折关系。'), findsOneWidget);
       expect(find.textContaining('修正规则：'), findsNothing);
       expect(find.textContaining('你的修改（正确）'), findsNothing);
       expect(find.textContaining('为什么错：'), findsNothing);
