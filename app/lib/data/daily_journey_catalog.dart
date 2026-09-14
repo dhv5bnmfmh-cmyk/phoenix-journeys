@@ -81,7 +81,7 @@ const shanghaiStoryAnnotations = <ReadingAnnotation>[
     vietnamese:
         'Sáng sớm, bạn đứng bên sông Hoàng Phố. Gió sông lướt qua Bến Thượng Hải, đường nét của những tòa nhà cổ dần hiện rõ trong ánh sáng dịu.',
     english:
-        'At dawn, the sky over Beijing is just beginning to brighten. You stand before a massive red palace gate as a light breeze drifts across the moat.',
+        'At dawn, you stand beside the Huangpu River. The river breeze crosses the Bund as the outlines of historic buildings slowly sharpen in the soft light.',
   ),
   ReadingAnnotation(
     pinyin:
