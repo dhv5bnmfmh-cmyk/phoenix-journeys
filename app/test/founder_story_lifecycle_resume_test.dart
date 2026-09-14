@@ -59,23 +59,23 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       expect(spokenTexts, hasLength(1));
 
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.inactive,
       );
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.paused,
       );
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.hidden,
       );
       await tester.pump(const Duration(milliseconds: 500));
       final savedOffset = state.journeyNarrationOffsetFor('story');
       expect(savedOffset, greaterThan(0));
 
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.resumed,
       );
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.resumed,
       );
       await tester.pump(const Duration(milliseconds: 800));
