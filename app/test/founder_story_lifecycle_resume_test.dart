@@ -57,7 +57,10 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('narration-main-control')));
       await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(seconds: 3));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 1500)),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
       expect(spokenTexts, hasLength(1));
 
       tester.binding.handleAppLifecycleStateChanged(
