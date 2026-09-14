@@ -42,13 +42,13 @@ test('generates and publishes the quality agent report from the single Flutter t
   assert.match(workflow, /actions\/upload-artifact@v4/);
 });
 
-test('Flutter-backed runner requires thirty-six journeys and 360 inspections', () => {
+test('Flutter-backed runner requires thirty-seven journeys and 370 inspections', () => {
   assert.match(reportRunner, /generate_journey_quality_report\.dart/);
   assert.match(reportRunner, /PHOENIX_QUALITY_MARKDOWN/);
   assert.match(reportRunner, /PHOENIX_QUALITY_JSON/);
-  assert.match(reportRunner, /report\['journeyCount'\], 36/);
+  assert.match(reportRunner, /report\['journeyCount'\], 37/);
   assert.match(reportRunner, /report\['specialJourneyCount'\], 9/);
-  assert.match(reportRunner, /report\['inspectionCount'\], 360/);
+  assert.match(reportRunner, /report\['inspectionCount'\], 370/);
   assert.match(reportRunner, /report\['canPublish'\], isTrue/);
   assert.match(reportRunner, /report\['blockedCount'\], 0/);
 });
