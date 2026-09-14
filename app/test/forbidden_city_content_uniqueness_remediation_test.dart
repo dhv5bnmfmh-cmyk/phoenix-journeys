@@ -78,7 +78,7 @@ void main() {
     final lv2 = forbiddenCityLockedStories[1];
     expect(lv1, isNot(lv2));
     expect(lv2, contains('第二天'));
-    expect(lv2, contains('午前必须送回东侧'));
+    expect(lv2, contains('午前要送回东侧'));
     expect(lv2, contains('交接签记'));
     expect(lv2, contains('及时完成交接'));
     expect(lv2, contains('共同为后来的人负责'));
