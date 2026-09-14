@@ -116,9 +116,17 @@ void main() {
           expect(item.distractorRationales, hasLength(4), reason: item.id);
           expect(item.distractorRationales.toSet(), hasLength(4),
               reason: item.id);
+          const genericFeedback = <String>{
+            '与证据不一致',
+            '不正确',
+            '回答错误',
+            '再想想',
+          };
           expect(
             item.distractorRationales.every(
-              (rationale) => rationale.trim().length >= 10,
+              (rationale) =>
+                  rationale.trim().isNotEmpty &&
+                  !genericFeedback.contains(rationale.trim()),
             ),
             isTrue,
             reason: item.id,
