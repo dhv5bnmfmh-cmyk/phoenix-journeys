@@ -126,7 +126,7 @@ void main() {
     expect(templeOfHeavenMemoryAnchor, contains('冬至祭天'));
     expect(
       templeStoryParagraphsByLevel.last.join(),
-      contains('最好看的镜头'),
+      contains('最漂亮的镜头'),
     );
     expect(
       forbiddenCityLockedStories.join(),
