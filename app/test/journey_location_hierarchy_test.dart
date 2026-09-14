@@ -107,13 +107,13 @@ void main() {
       coverage.journeyCountForProvinceLevelRegion(
         beijing.provinceLevelNode!.id,
       ),
-      2,
+      3,
     );
     expect(
       coverage.journeyCountForCityEquivalentRegion(
         beijing.cityEquivalentNode!.id,
       ),
-      2,
+      3,
     );
     expect(
       coverage.journeyCountForProvinceLevelRegion(

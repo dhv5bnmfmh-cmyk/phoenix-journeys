@@ -47,11 +47,11 @@ void main() {
     );
 
     expect(report['agent'], 'PhoenixJourneyContentQualityAgent');
-    expect(report['journeyCount'], 36);
-    expect(report['regularJourneyCount'], 27);
+    expect(report['journeyCount'], 37);
+    expect(report['regularJourneyCount'], 28);
     expect(report['specialJourneyCount'], 9);
     expect(report['profileCount'], 10);
-    expect(report['inspectionCount'], 360);
+    expect(report['inspectionCount'], 370);
     expect(report['automatedGateStatus'], 'pass');
     expect(report['canEnterHumanReview'], isTrue);
     expect(report['agentSemanticSufficiencyStatus'], 'pending-human-review');
@@ -62,7 +62,7 @@ void main() {
     expect(report['automatedScoreUsedAsLiteraryApproval'], isFalse);
     expect(report['canPublish'], isTrue);
     expect(report['canPublishScope'], 'automated-content-contract-only');
-    expect(report['approvedCount'], 360);
+    expect(report['approvedCount'], 370);
     expect(report['needsRevisionCount'], 0);
     expect(report['blockedCount'], 0);
   }, timeout: const Timeout(Duration(minutes: 3)));

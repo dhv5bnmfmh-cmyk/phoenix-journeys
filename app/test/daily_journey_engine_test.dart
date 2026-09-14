@@ -135,7 +135,10 @@ void main() {
       } else {
         expect(
           journey.discoveries.length,
-          journey.id == 'beijing-summer-palace' ? 2 : 4,
+          journey.id == 'beijing-summer-palace' ||
+                  journey.id == 'beijing-temple-of-heaven'
+              ? 2
+              : 4,
           reason: journey.id,
         );
       }

@@ -12,9 +12,9 @@ import 'package:phoenix_journeys/data/luoyang_longmen_one_pass.dart';
 void main() {
   test('reviewed destinations rotate without repeating during one cycle',
       () {
-    expect(dailyJourneyExperiences, hasLength(27));
+    expect(dailyJourneyExperiences, hasLength(28));
     expect(
-        dailyJourneyExperiences.map((item) => item.id).toSet(), hasLength(27));
+        dailyJourneyExperiences.map((item) => item.id).toSet(), hasLength(28));
 
     final cycle = List.generate(
       dailyJourneyExperiences.length,

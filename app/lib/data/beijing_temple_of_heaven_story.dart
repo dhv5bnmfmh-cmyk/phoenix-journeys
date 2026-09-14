@@ -102,7 +102,7 @@ const templeNarrativeReviews = <TempleNarrativeReview>[
   TempleNarrativeReview(level: 10, newStoryBeat: '试看片观众不再把两个礼仪说成同一场，影片提交，何予成为共同编剧。', characterReason: '林桥把事实判断视为创作责任，而不是外部审查。', consequence: '作品少了最好镜头，却多了真正属于天坛的叙事骨架。', memorableImage: '片尾“编剧：林桥、何予”出现时，圜丘镜头没有回来。', progression: 'result + transformation + closure'),
 ];
 
-const templeStoryParagraphsByLevel = <List<String>>[
+const templeStoryChapters = <List<String>>[
   <String>[
     '下午三点，林桥把手机架在祈年殿前。蓝色屋顶压进取景框，她退了两步，示意何予打板。“片头就从这里开始。”她说，“皇帝来天坛祈求丰收，观众一眼就懂。”何予按下场记板。学校的短片系统傍晚关闭，他们只有这一个下午。第一条拍完，林桥没有重来。风掠过栏杆，祈年殿在屏幕里稳稳停住，她觉得全片已经有了中心。',
   ],
@@ -132,6 +132,34 @@ const templeStoryParagraphsByLevel = <List<String>>[
   ],
   <String>[
     '五点二十七分，新版上传完成。林桥又把链接发给小满。这一次，小满看完只说：“原来祈年殿的祈谷和圜丘的冬至祭天不是前后接着的一场。”林桥没有解释，也没有把那条金色圜丘镜头加回来。她打开片尾，把“编剧：林桥”改成“编剧：林桥、何予”。何予看见后笑了一下，把最后一处字幕停留时间调长半秒。屏幕黑下去之前，片中没有出现全天下午最漂亮的镜头；但两个礼仪终于没有被剪成同一件事。',
+  ],
+];
+
+final templeStoryParagraphsByLevel = <List<String>>[
+  templeStoryChapters[0],
+  templeStoryChapters[1],
+  <String>[templeStoryChapters[1].single, templeStoryChapters[2].single],
+  <String>[templeStoryChapters[2].single, templeStoryChapters[3].single],
+  <String>[templeStoryChapters[3].single, templeStoryChapters[4].single],
+  <String>[
+    '${templeStoryChapters[3].single}${templeStoryChapters[4].single}',
+    templeStoryChapters[5].single,
+  ],
+  <String>[
+    '${templeStoryChapters[4].single}${templeStoryChapters[5].single}',
+    templeStoryChapters[6].single,
+  ],
+  <String>[
+    '${templeStoryChapters[5].single}${templeStoryChapters[6].single}',
+    templeStoryChapters[7].single,
+  ],
+  <String>[
+    '${templeStoryChapters[5].single}${templeStoryChapters[6].single}',
+    '${templeStoryChapters[7].single}${templeStoryChapters[8].single}',
+  ],
+  <String>[
+    '${templeStoryChapters[6].single}${templeStoryChapters[7].single}',
+    '${templeStoryChapters[8].single}${templeStoryChapters[9].single}',
   ],
 ];
 
@@ -311,10 +339,7 @@ JourneyLevelContent templeOfHeavenLevelContent(int requestedLevel) {
 }
 
 final templeOfHeavenCanonicalStoryParagraphs = <String>[
-  templeStoryParagraphsByLevel[0].single,
-  templeStoryParagraphsByLevel[2].single,
-  templeStoryParagraphsByLevel[5].single,
-  templeStoryParagraphsByLevel[9].single,
+  for (final chapter in templeStoryChapters) chapter.single,
 ];
 
 final templeOfHeavenBaseAnnotations = List<ReadingAnnotation>.unmodifiable(<ReadingAnnotation>[
