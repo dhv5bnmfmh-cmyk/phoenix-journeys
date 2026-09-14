@@ -91,6 +91,32 @@ bool shouldCheckpointNarration({
 }
 
 @visibleForTesting
+bool shouldResumeNarrationAfterLifecycle({
+  required bool interruptedWhilePlaying,
+  required String? interruptedJourneyId,
+  required String currentJourneyId,
+  required int? interruptedLevel,
+  required int? currentLevel,
+  required int interruptedStep,
+  required int currentStep,
+  required String? interruptedContentId,
+  required String? currentContentId,
+  required String? interruptedContentSignature,
+  required String currentContentSignature,
+  required int offset,
+  required int totalCharacters,
+}) {
+  return interruptedWhilePlaying &&
+      interruptedJourneyId == currentJourneyId &&
+      interruptedLevel == currentLevel &&
+      interruptedStep == currentStep &&
+      interruptedContentId == currentContentId &&
+      interruptedContentSignature == currentContentSignature &&
+      offset > 0 &&
+      offset < totalCharacters;
+}
+
+@visibleForTesting
 String narrationContentSignature(List<NarrationItem> items) {
   var hash = 0x811c9dc5;
   for (final item in items) {
@@ -221,6 +247,16 @@ class _JourneyScreenState extends State<JourneyScreen>
   late JourneyPreparedBundle _preparedBundle;
   late StoryChallengeSet _preparedChallenge;
   int _levelResetEpoch = 0;
+  bool _lifecycleNarrationInterrupted = false;
+  bool _lifecycleNarrationWasPlaying = false;
+  String? _lifecycleNarrationJourneyId;
+  int? _lifecycleNarrationLevel;
+  int _lifecycleNarrationStep = -1;
+  String? _lifecycleNarrationContentId;
+  String? _lifecycleNarrationSignature;
+  int _lifecycleNarrationOffset = 0;
+  int? _lifecycleNarrationCancellationToken;
+  Future<void>? _lifecycleNarrationSuspension;
 
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
@@ -306,12 +342,98 @@ class _JourneyScreenState extends State<JourneyScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) return;
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_resumeNarrationAfterLifecycle());
+      return;
+    }
+    if (!_initialized) return;
+    if (_lifecycleNarrationInterrupted) return;
     _narrationCheckpointTimer?.cancel();
     _narrationCheckpointTimer = null;
-    unawaited(_persistNarrationPosition());
-    unawaited(_stopJourneyNarration());
+    _lifecycleNarrationInterrupted = true;
+    _lifecycleNarrationWasPlaying =
+        _narration.status == NarrationStatus.playing;
+    _lifecycleNarrationJourneyId = _experience.id;
+    _lifecycleNarrationLevel = _sessionLanguageProfile.phoenixLevel;
+    _lifecycleNarrationStep = step;
+    _lifecycleNarrationContentId = _narration.contentId;
+    _lifecycleNarrationOffset = _narration.currentOffset;
+    final items = _lifecycleNarrationContentId == 'story'
+        ? _storyPlaybackItems
+        : _lifecycleNarrationContentId == 'discovery'
+            ? _discoveryNarrationItems
+            : const <NarrationItem>[];
+    _lifecycleNarrationSignature = items.isEmpty
+        ? null
+        : narrationContentSignature(items);
+    _lifecycleNarrationCancellationToken =
+        _narration.cancelPlaybackImmediately(resetPosition: false);
+    _lifecycleNarrationSuspension = _suspendNarrationForLifecycle(
+      _lifecycleNarrationCancellationToken!,
+    );
+    unawaited(_lifecycleNarrationSuspension!);
     if (_initialized) unawaited(_persistProgress());
+  }
+
+  Future<void> _suspendNarrationForLifecycle(int cancellationToken) async {
+    final contentId = _lifecycleNarrationContentId;
+    final signature = _lifecycleNarrationSignature;
+    final offset = _lifecycleNarrationOffset;
+    if (_lifecycleNarrationWasPlaying &&
+        (contentId == 'story' || contentId == 'discovery') &&
+        signature != null &&
+        offset > 0 &&
+        offset < _narration.totalCharacters) {
+      _lastSavedNarrationOffset = offset;
+      await _appState.saveJourneyNarrationPosition(
+        contentId: contentId!,
+        contentSignature: signature,
+        offset: offset,
+      );
+    }
+    // WebKit can discard a suspended SpeechSynthesisUtterance. Stop that
+    // engine instance, but preserve Phoenix's SSOT offset for foreground.
+    await _narration.flushCancelledPlayback(cancellationToken);
+  }
+
+  Future<void> _resumeNarrationAfterLifecycle() async {
+    if (!_lifecycleNarrationInterrupted) return;
+    _lifecycleNarrationInterrupted = false;
+    final suspension = _lifecycleNarrationSuspension;
+    _lifecycleNarrationSuspension = null;
+    if (suspension != null) await suspension;
+    if (!mounted) return;
+
+    final contentId = _lifecycleNarrationContentId;
+    final items = contentId == 'story'
+        ? _storyPlaybackItems
+        : contentId == 'discovery'
+            ? _discoveryNarrationItems
+            : const <NarrationItem>[];
+    final currentSignature =
+        items.isEmpty ? '' : narrationContentSignature(items);
+    final shouldResume = shouldResumeNarrationAfterLifecycle(
+      interruptedWhilePlaying: _lifecycleNarrationWasPlaying,
+      interruptedJourneyId: _lifecycleNarrationJourneyId,
+      currentJourneyId: _experience.id,
+      interruptedLevel: _lifecycleNarrationLevel,
+      currentLevel: _sessionLanguageProfile.phoenixLevel,
+      interruptedStep: _lifecycleNarrationStep,
+      currentStep: step,
+      interruptedContentId: contentId,
+      currentContentId: _narration.contentId,
+      interruptedContentSignature: _lifecycleNarrationSignature,
+      currentContentSignature: currentSignature,
+      offset: _lifecycleNarrationOffset,
+      totalCharacters: _narration.totalCharacters,
+    );
+    final cancellationToken = _lifecycleNarrationCancellationToken;
+    if (!shouldResume ||
+        cancellationToken == null ||
+        !_narration.ownsPlaybackIntent(cancellationToken)) {
+      return;
+    }
+    await _narration.resumeFromOffset(_lifecycleNarrationOffset);
   }
 
   @override

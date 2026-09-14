@@ -134,4 +134,38 @@ void main() {
       isNot(narrationContentSignature(updated)),
     );
   });
+
+  test('lifecycle resume requires the same narration identity and position', () {
+    bool resumes({
+      String journey = 'beijing-forbidden-city',
+      int level = 5,
+      int step = 0,
+      String content = 'story',
+      String signature = 'story-v1',
+      int offset = 42,
+    }) {
+      return shouldResumeNarrationAfterLifecycle(
+        interruptedWhilePlaying: true,
+        interruptedJourneyId: 'beijing-forbidden-city',
+        currentJourneyId: journey,
+        interruptedLevel: 5,
+        currentLevel: level,
+        interruptedStep: 0,
+        currentStep: step,
+        interruptedContentId: 'story',
+        currentContentId: content,
+        interruptedContentSignature: 'story-v1',
+        currentContentSignature: signature,
+        offset: offset,
+        totalCharacters: 100,
+      );
+    }
+
+    expect(resumes(), isTrue);
+    expect(resumes(level: 6), isFalse);
+    expect(resumes(step: 1), isFalse);
+    expect(resumes(content: 'discovery'), isFalse);
+    expect(resumes(signature: 'story-v2'), isFalse);
+    expect(resumes(offset: 0), isFalse);
+  });
 }

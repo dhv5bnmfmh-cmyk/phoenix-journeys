@@ -258,6 +258,7 @@ class NarrationController extends ChangeNotifier {
   }
 
   int get speechSessionToken => _speechSessionToken;
+  bool ownsPlaybackIntent(int token) => token == _playbackIntentToken;
   int get lastNativeOffset => _lastNativeOffset;
   bool get hasFreshNativeProgress {
     final last = _lastNativeProgressAt;
