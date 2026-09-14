@@ -41,6 +41,17 @@ const worldGeoCatalog = <GeoNode>[
     aliases: ['紫禁城', 'Forbidden City', '故宫'],
   ),
   GeoNode(
+    id: 'cn-beijing-dongcheng-temple-of-heaven',
+    name: '天坛',
+    kind: GeoNodeKind.place,
+    localType: '世界文化遗产',
+    parentId: 'cn-beijing-dongcheng',
+    countryCode: 'CN',
+    latitude: 39.8822,
+    longitude: 116.4066,
+    aliases: ['Temple of Heaven', '天坛公园'],
+  ),
+  GeoNode(
     id: 'cn-beijing-haidian',
     name: '海淀区',
     kind: GeoNodeKind.district,

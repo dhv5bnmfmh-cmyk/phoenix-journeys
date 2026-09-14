@@ -43,7 +43,7 @@ const beijingStorySources = <StorySourceRecord>[
     url: 'https://whc.unesco.org/en/list/881/',
     kind: StorySourceKind.unesco,
     languageCode: 'en',
-    geoNodeIds: ['cn-beijing-dongcheng'],
+    geoNodeIds: ['cn-beijing-dongcheng-temple-of-heaven'],
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-08-06',
   ),
@@ -54,7 +54,7 @@ const beijingStorySources = <StorySourceRecord>[
     url: 'https://english.beijing.gov.cn/specials/parktours/guidevisitors/templeofheaven/',
     kind: StorySourceKind.government,
     languageCode: 'en',
-    geoNodeIds: ['cn-beijing-dongcheng'],
+    geoNodeIds: ['cn-beijing-dongcheng-temple-of-heaven'],
     verificationStatus: StoryVerificationStatus.verified,
     accessedOn: '2026-08-06',
   ),
@@ -114,7 +114,7 @@ final beijingForbiddenCityJourney = _record(
 final beijingTempleOfHeavenJourney = _record(
   id: templeOfHeavenJourneyId,
   title: '北京 · 天坛：$templeOfHeavenCanonicalTitle',
-  geoNodeId: 'cn-beijing-dongcheng',
+  geoNodeId: 'cn-beijing-dongcheng-temple-of-heaven',
   tags: const <String>[
     '北京',
     '天坛',

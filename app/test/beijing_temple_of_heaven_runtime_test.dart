@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/data/beijing_temple_of_heaven_story.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/forbidden_city_journey_runtime.dart';
+import 'package:phoenix_journeys/data/world_geo_catalog.dart';
 import 'package:phoenix_journeys/models/journey_challenge.dart';
 import 'package:phoenix_journeys/models/language_proficiency.dart';
 import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
@@ -34,6 +35,18 @@ void main() {
     expect(journey.place, '天坛');
     expect(journey.content.id, templeOfHeavenJourneyId);
     expect(journey.content.sections, isNotEmpty);
+  });
+
+  test('Temple registry binds to a place GeoNode with coordinates', () {
+    final journey = requireDailyJourneyExperience(templeOfHeavenJourneyId);
+    final node = worldGeoCatalog.singleWhere(
+      (item) => item.id == 'cn-beijing-dongcheng-temple-of-heaven',
+    );
+
+    expect(journey.geoNodeId, node.id);
+    expect(node.isPlace, isTrue);
+    expect(node.latitude, isNotNull);
+    expect(node.longitude, isNotNull);
   });
 
   test('Temple Lv1-Lv10 keep one context and authored 2x6 dispatch', () {

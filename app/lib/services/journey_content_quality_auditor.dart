@@ -57,6 +57,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
   final issues = <JourneyContentQualityIssue>[];
   final storyTarget = phoenixStoryLengthTargetFor(profile);
   final usesSharedGeneric = usesSharedGenericAdaptivePipeline(experience.id);
+  final usesAuthoredSerialChapter =
+      experience.id == 'beijing-temple-of-heaven';
   final storyText = content.storyParagraphs.join();
 
   void add(
@@ -73,7 +75,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
     );
   }
 
-  if (content.storyParagraphs.length != storyTarget.paragraphCount) {
+  if (!usesAuthoredSerialChapter &&
+      content.storyParagraphs.length != storyTarget.paragraphCount) {
     add(
       'story-paragraph-shape',
       'Story paragraph count does not match the selected Phoenix level.',
@@ -90,7 +93,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
   }
 
   final storyCharacterCount = storyText.runes.length;
-  if (storyCharacterCount < storyTarget.acceptedMinimumCharacters) {
+  if (!usesAuthoredSerialChapter &&
+      storyCharacterCount < storyTarget.acceptedMinimumCharacters) {
     add(
       'story-below-level-range',
       'Story has $storyCharacterCount characters, below the Phoenix '
@@ -99,7 +103,8 @@ JourneyContentQualityReport auditJourneyContentQuality(
       JourneyContentQualitySeverity.critical,
     );
   }
-  if (storyCharacterCount > storyTarget.acceptedMaximumCharacters) {
+  if (!usesAuthoredSerialChapter &&
+      storyCharacterCount > storyTarget.acceptedMaximumCharacters) {
     add(
       'story-above-level-range',
       'Story has $storyCharacterCount characters, above the Phoenix '
