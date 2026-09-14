@@ -1,19 +1,6 @@
 name: Cloudflare PR Preview
 
 on:
-  push:
-    branches:
-      - product/city-standard-v1-beijing-forbidden-city
-    paths:
-      - 'app/**'
-      - 'worker/**'
-      - 'wrangler.toml'
-      - '.github/workflows/preview-cloudflare.yml'
-      - '.github/workflows/mobile-interaction-audit.yml'
-      - '.github/workflows/startup-performance-audit.yml'
-      - '.github/scripts/enforce_authoritative_story_contract.sh'
-      - '.github/scripts/measure_journey_open_visible.mjs'
-      - 'docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md'
   pull_request:
     branches:
       - main

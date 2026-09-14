@@ -1,3 +1,6 @@
+> **NON-AUTHORITATIVE REFERENCE**  
+> The only active binding development standard is [docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md](../AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md). This retained document is historical, explanatory, or a template and cannot independently define MUST/BLOCK/FAIL/REQUIRED/AUTHORITATIVE rules.
+
 # Phoenix Story / Discovery Design Matrix
 
 Use this matrix with [Phoenix Narrative and Discovery Standard](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md).

@@ -1,3 +1,6 @@
+> **NON-AUTHORITATIVE REFERENCE**  
+> The only active binding development standard is [docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md](AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md). This retained document is historical, explanatory, or a template and cannot independently define MUST/BLOCK/FAIL/REQUIRED/AUTHORITATIVE rules.
+
 # Phoenix Journeys Fast Development Governance V2
 
 ## Purpose

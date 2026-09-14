@@ -8,24 +8,11 @@ contracts.
 
 ## Binding authority
 
-Story work MUST load and obey all of the following existing authorities:
+This file is the **one and only active, binding Phoenix Story/Journey/Challenge/content-quality/release-development standard**. All other standards, appendices, matrices, roadmaps, quality-gate explanations, and templates are non-authoritative references or historical evidence. They may explain or operationalize this contract but MUST NOT create a peer authority, conflicting rule, alternate development route, or independent release gate.
 
-1. [Phoenix Narrative and Discovery Standard](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md)
-2. [Story Depth + Historical Story Universe Appendix](PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD_APPENDIX_STORY_DEPTH_HISTORY.md)
-3. [Phoenix New Journey Creation Standard](PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md)
-4. [Phoenix Six-Stage Journey Standard](PHOENIX_SIX_STAGE_JOURNEY_STANDARD.md)
-5. [Phoenix Journey System Standard](PHOENIX_JOURNEY_SYSTEM_STANDARD.md)
-6. [Phoenix Product Quality Standard](PHOENIX_PRODUCT_QUALITY_STANDARD.md)
-7. [Phoenix Full Application Audit Standard](PHOENIX_FULL_APPLICATION_AUDIT_STANDARD.md)
-8. [Phoenix Journey Content Quality Gate](journey-content-quality-gate.md)
-9. [Phoenix Story / Discovery Design Matrix](templates/PHOENIX_STORY_DISCOVERY_DESIGN_MATRIX.md)
-10. [Phoenix New Journey Acceptance Matrix](templates/PHOENIX_NEW_JOURNEY_ACCEPTANCE_MATRIX.md)
-11. [Fast Development Governance V2](FAST_DEVELOPMENT_GOVERNANCE_V2.md)
+Where a retained reference contains a useful rule not repeated verbatim here, that material is informative until incorporated here; it cannot override this contract. Binding changes are made only in this file. V2/V3, candidate, temporary, destination-specific, Founder-specific, or parallel standards are prohibited.
 
-Where wording overlaps, this authoritative entry point and its binding parent
-documents are one contract surface. Destination-specific, candidate,
-temporary, historical, or Story-specific workflow text MUST NOT redefine or
-bypass them. Active Challenge architecture count MUST remain exactly one.
+**Active authoritative standard count: 1. Active authoritative entry point count: 1. Parallel active standard count: 0.**
 
 ## Golden product reference
 
@@ -424,3 +411,82 @@ product without this entry point.
 `story.forbidden_city.modern_evidence_handoff.v1` are Founder-rejected and MUST
 remain absent from product source, runtime registries, fallbacks, fixtures,
 generators, tests, Preview harnesses, and release paths.
+
+
+## Founder-approved Golden Product lock and future route
+
+**Founder-approved Golden Product Baseline:** `151dcf332bdaea9e75b1797ea45bc2af488d482b`  
+**Founder device acceptance:** PASS  
+**Future development start truth:** `main`  
+**Retired development route:** `product/city-standard-v1-beijing-forbidden-city` and every other non-`main` development branch are non-authoritative. Their physical deletion may remain pending when ref-deletion tooling is unavailable.
+
+The immutable tag `phoenix-golden-founder-2026-09-14` MUST, when tag-write tooling is available, be created exactly at the baseline SHA above and never moved. Until then its status is `PENDING / TOOL BLOCKED`; this SHA record preserves traceability but does not pretend the tag exists.
+
+### Reusable Golden product behavior
+
+Future Stories MUST reuse the single approved Journey engine, Story runtime path, navigation ownership, level switching behavior, and the Story, Vocabulary, Discovery, Challenge, Memory, and completion lifecycles. They MUST preserve progress/resume, mobile behavior, audio and feedback lifecycles, lock/background narration resume, explicit replay semantics, bottom-navigation ownership, the approved 2×6 Challenge architecture, 12 questions per Level, 10 Levels where applicable, six capability families, option-specific wrong feedback, semantic anti-template and rendered acceptance gates, content-quality gates, same-build release governance, and Founder-device acceptance.
+
+A new Story MUST NOT create a parallel engine, navigation route, Challenge shell, audio controller, feedback model, lifecycle manager, position store, or release path.
+
+### Golden authored content is not a template
+
+`两条路，一张图` is a product-behavior reference only. It MUST NOT be copied as an authored-content template. Changing a city, building, character, task, route, nouns, correct-option position, synonyms, or sentence order while retaining the same plot skeleton, conflict, character arc, evidence chain, pedagogical reasoning, answer logic, distractor logic, Discovery progression, Challenge progression, or Memory conclusion is `TRIVIAL VARIATION` or `TEMPLATE DUPLICATE` and FAILS.
+
+**STRUCTURE CAN REPEAT. PEDAGOGY AND AUTHORED STORY LOGIC CANNOT BE RESKINNED.**
+
+### Mandatory Story DNA
+
+Before authoring, every new Story MUST record:
+
+1. central theme;
+2. central question;
+3. narrative premise;
+4. core conflict;
+5. character motivation;
+6. character relationship and change;
+7. unique event chain;
+8. historical/cultural evidence types;
+9. Discovery progression;
+10. language progression;
+11. reasoning progression;
+12. decision progression;
+13. Memory Anchor;
+14. why this Story cannot be replaced by an existing Story.
+
+### Cross-Story originality and progression
+
+The semantic anti-template gate applies within-Level, cross-Level, cross-family, and cross-Story. It MUST detect exact and normalized duplicates, prompt and plot skeleton reuse, slot swaps, reasoning fingerprints, answer and distractor logic, evidence chains, character-resolution arcs, Discovery fact progression, Challenge progression, and single-fact recycling. Different names or places do not excuse an identical reasoning fingerprint.
+
+Levels MUST form a cognitive ladder: Lv1–2 recognition/direct understanding; Lv3–4 relationships/evidence identification; Lv5–6 cause/spatial/structural reasoning; Lv7–8 multiple evidence/conflicting conditions/inference; Lv9–10 integration/uncertainty/conditional decisions/defensible judgment. Each Level adds reasoning demand, evidence complexity, or decision complexity—not merely length.
+
+Adjacent Story Levels MUST add a new event, constraint, evidence, consequence, character decision, relationship shift, or unresolved question. If chapters remain interchangeable after removing Level labels, the progression FAILS.
+
+Discovery may revisit a subject only with a new knowledge dimension such as location → function → historical rule → exception → evidence source → reliability → route consequence → institutional constraint. Paraphrased repetition is semantic recycling and FAILS.
+
+### Feedback contract
+
+Every MCQ distractor MUST have its own option-specific rationale explaining why that option is wrong, the misunderstanding type, and the relevant evidence/language/reasoning. Generic reusable feedback such as “与证据不一致” is prohibited. Identical three-distractor feedback fails. The Golden coverage target is 300/300 and future applicable coverage is 100%.
+
+## Development / Release Failure Prevention
+
+1. **WRITE CAPABILITY FIRST.** Verify actual file/blob/tree, commit, non-force ref update, ref deletion, and tag schemas before extended work; permission metadata alone is insufficient.
+2. **FRESH-READ BEFORE MUTATION.** Read current branch, HEAD, relevant PR/run, and active runtime identity in every execution window.
+3. **EXACT SHA IS RELEASE TRUTH.** Query parameters are not proof; verify the deployed `health.release`.
+4. **NO BLIND RERUN.** Extract the first useful failure and classify it as REAL PRODUCT FAILURE, HARNESS / ACCEPTANCE FAILURE, CONTRACT CONFLICT, or INFRA / CASCADE FAILURE before acting.
+5. **PRODUCT != HARNESS.** Do not change product for a harness defect or weaken acceptance to hide a product defect.
+6. **ONE SUCCESSOR.** One candidate has exactly one authoritative Preview successor; no duplicate manual dispatch.
+7. **BUILD ONCE / SAME BUILD.** Build exactly once, then validate, deploy, and verify that same artifact.
+8. **ACTUAL PREVIEW URL.** Founder handoff uses the actual `cloudflare/preview` commit-status `target_url`, never a guessed URL.
+9. **DEVICE EVIDENCE WINS.** A reproducible Founder-device failure remains a real gate even when headless CI passes.
+10. **WEBKIT LIFECYCLE.** Lock/background/foreground is a temporary interruption, not a new Story session, replay, or reset. Matching Journey, Level, Stage, narration identity, and playback intent preserve and restore narration position.
+11. **LIFECYCLE RACE PROTECTION.** Repeated inactive, paused, hidden, visibilitychange, pagehide, pageshow, and resumed callbacks must not overwrite a valid snapshot, reset offset to zero, double-resume, or duplicate audio.
+12. **LEVEL ISOLATION.** A Level change starts the new Level at Story step 0; old Challenge, feedback, Memory, audio offset, and resume state cannot leak.
+13. **REPLAY IS EXPLICIT.** Only an explicit user replay/restart may reset narration to zero.
+14. **CONTENT QUALITY != LITERAL UNIQUENESS.** Exact/normalized duplicate zero is insufficient; semantic recycling and cross-family, cross-Level, and cross-Story reasoning must pass.
+15. **DO NOT GAME AUDITS.** Synonym, person/place rename, word order, punctuation, and option relocation do not establish originality.
+16. **FOUNDER DEVICE ACCEPTANCE IS A REAL GATE.** Mobile lifecycle, audio, touch, and navigation require real-device acceptance after automation.
+17. **MAIN IS THE ONLY ACTIVE ROUTE.** Every execution fresh-reads `main`; no retired branch or remembered chat SHA may become development truth.
+
+## Mandatory governance path
+
+The active CI/governance path MUST execute authoritative Story contract enforcement, content uniqueness remediation, semantic anti-template, option-specific feedback, narration lifecycle/position restore, Level isolation, replay, Founder regressions, static analysis, Full Flutter, and workflow/governance syntax validation. In particular, `forbidden_city_content_uniqueness_remediation_test.dart` MUST NOT be an isolated optional test.

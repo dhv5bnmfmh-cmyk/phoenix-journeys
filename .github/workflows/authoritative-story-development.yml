@@ -2,12 +2,9 @@ name: Authoritative Story Development Contract
 
 on:
   pull_request:
+    branches: [main]
   push:
-    branches:
-      - main
-      - product/city-standard-v1-beijing-forbidden-city
-      - fix/pr208-golden-single-story-baseline
-      - fix/golden-challenge-2x6
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -22,7 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Enforce single Story development line
+        with:
+          fetch-depth: 0
+      - name: Enforce single authoritative standard and route
         run: .github/scripts/enforce_authoritative_story_contract.sh
       - name: Flutter stable
         uses: subosito/flutter-action@v2
@@ -32,29 +31,23 @@ jobs:
       - name: Dependencies
         working-directory: app
         run: flutter pub get
-      - name: Layer 1 — Authoritative Golden Challenge rendered acceptance
+      - name: Mandatory Story governance regressions
         working-directory: app
         run: >-
           flutter test --reporter expanded
           test/authoritative_story_challenge_contract_test.dart
-      - name: Upload rendered Challenge evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: authoritative-golden-challenge-evidence
-          path: |
-            app/build/authoritative-story/challenge-rendered-matrix.json
-            app/build/authoritative-story/challenge-semantic-uniqueness-report.json
-          if-no-files-found: warn
-      - name: Golden Story targeted product contracts
-        working-directory: app
-        run: >-
-          flutter test --reporter expanded
-          test/forbidden_city_product_reference_test.dart
+          test/forbidden_city_content_uniqueness_remediation_test.dart
+          test/journey_semantic_anti_template_gate_test.dart
+          test/forbidden_city_grammar_feedback_marker_test.dart
+          test/founder_story_lifecycle_resume_test.dart
+          test/narration_resume_offset_test.dart
+          test/founder_level_switch_journey_reset_test.dart
+          test/founder_device_story_continue_regression_test.dart
+          test/founder_challenge_device_regression_test.dart
+          test/founder_device_fix_v1_test.dart
           test/forbidden_city_full_lifecycle_level_consistency_test.dart
           test/forbidden_city_story_standard_test.dart
-          test/founder_device_story_continue_regression_test.dart
-          test/journey_runtime_performance_gate_test.dart
+          test/journey_memory_completion_narration_contract_test.dart
       - name: Analyze Golden product
         working-directory: app
         run: flutter analyze

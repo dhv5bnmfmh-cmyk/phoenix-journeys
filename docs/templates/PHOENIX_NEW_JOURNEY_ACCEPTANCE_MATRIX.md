@@ -1,3 +1,6 @@
+> **NON-AUTHORITATIVE REFERENCE**  
+> The only active binding development standard is [docs/AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md](../AUTHORITATIVE_STORY_DEVELOPMENT_CONTRACT.md). This retained document is historical, explanatory, or a template and cannot independently define MUST/BLOCK/FAIL/REQUIRED/AUTHORITATIVE rules.
+
 # Phoenix New Journey Acceptance Matrix
 
 Use with [Phoenix New Journey Creation Standard](../PHOENIX_NEW_JOURNEY_CREATION_STANDARD.md), [Phoenix Journey System Standard](../PHOENIX_JOURNEY_SYSTEM_STANDARD.md), [Phoenix Narrative and Discovery Standard](../PHOENIX_NARRATIVE_AND_DISCOVERY_STANDARD.md), and [PHOENIX AI BACKGROUND PRODUCTION STANDARD](../PHOENIX_AI_BACKGROUND_PRODUCTION_STANDARD.md).
