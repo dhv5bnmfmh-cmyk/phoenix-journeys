@@ -1,4 +1,5 @@
 import '../models/story_content.dart';
+import 'beijing_temple_of_heaven_story.dart';
 import 'forbidden_city_journey_runtime.dart';
 
 const beijingStorySources = <StorySourceRecord>[
@@ -63,13 +64,6 @@ final _forbiddenCityCanonicalStory = <String>[
   forbiddenCityLockedStories.last,
 ];
 
-const _templeOfHeavenCanonicalStory = <String>[
-  '声学社学生顾遥来到天坛，准备为校展校准一份回音壁实验图。她想证明自己的计算比祖父顾衡留下的旧笔记更可靠，却发现图纸上最关键的一段刻度被雨水洇成空白。',
-  '顾遥从圜丘、皇穹宇走到回音壁，比较石面、圆墙和中心轴线。顾衡提醒她，天坛首先是明清皇帝祭天祈谷的礼制建筑，声学现象不能脱离真实空间与参观条件被夸大成传说。',
-  '闭园前，顾遥只能选择照抄旧数据按时交件，或放弃漂亮结论，重新记录温度、距离和站位。她选择重测，因此错过校展初审，却发现原图把一次偶然清晰的回声写成了固定规律。',
-  '顾遥在补交报告中保留空白刻度，并说明证据不足之处。顾衡把旧笔记交给她继续保管。她不再把修正看成否定前人，而把它看成对历史、建筑和学习者负责的延续。',
-];
-
 JourneyContentRecord _record({
   required String id,
   required String title,
@@ -118,12 +112,21 @@ final beijingForbiddenCityJourney = _record(
 );
 
 final beijingTempleOfHeavenJourney = _record(
-  id: 'beijing-temple-of-heaven',
-  title: '北京 · 天坛：回音壁前的空白刻度',
+  id: templeOfHeavenJourneyId,
+  title: '北京 · 天坛：$templeOfHeavenCanonicalTitle',
   geoNodeId: 'cn-beijing-dongcheng',
-  tags: const ['北京', '天坛', '祭天礼制', '声学', '证据', '世界文化遗产'],
-  paragraphs: _templeOfHeavenCanonicalStory,
-  sourceIds: const [
+  tags: const <String>[
+    '北京',
+    '天坛',
+    '祈年殿',
+    '圜丘',
+    '冬至祭天',
+    '祈谷',
+    '影像叙事',
+    '世界文化遗产',
+  ],
+  paragraphs: templeOfHeavenCanonicalStoryParagraphs,
+  sourceIds: const <String>[
     'unesco-temple-of-heaven-881',
     'beijing-gov-temple-of-heaven',
   ],
