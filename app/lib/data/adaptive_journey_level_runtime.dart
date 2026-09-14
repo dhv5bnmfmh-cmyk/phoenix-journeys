@@ -8,6 +8,7 @@ import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
+import 'beijing_temple_of_heaven_story.dart';
 import 'daily_journey_experience.dart';
 import 'dedicated_adaptive_journey_catalog.dart';
 import 'forbidden_city_content_cache.dart';
@@ -83,6 +84,21 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
     return _resolveForbiddenCityAdaptiveLevel(
       profile,
       knownWords: knownWords,
+    );
+  }
+  if (experience.id == templeOfHeavenJourneyId) {
+    final level = profile.phoenixLevel ?? _levelForBand(profile.band);
+    final content = templeOfHeavenLevelContent(level);
+    final unseenWords = content.words
+        .where((entry) => !knownWords.contains(entry.word))
+        .toList(growable: false);
+    return JourneyLevelContent(
+      storyParagraphs: content.storyParagraphs,
+      storyAnnotations: content.storyAnnotations,
+      words: unseenWords.isEmpty ? content.words : unseenWords,
+      discoveries: content.discoveries,
+      wonderQuestion: content.wonderQuestion,
+      expressQuestion: content.expressQuestion,
     );
   }
   if (isBatchOneGoldJourney(experience.id)) {
