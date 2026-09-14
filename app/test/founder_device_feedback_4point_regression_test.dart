@@ -485,7 +485,7 @@ void main() {
         expect(audio.single, contains('回答错误'));
         expect(audio.single, contains('你的修改：${question.options[wrongRepair]}'));
         expect(audio.single, contains('正确答案：${question.answer}'));
-        expect(audio.single, contains('为什么这样改才对：'));
+        expect(audio.single, contains('为什么你的修改不成立：'));
 
         await pumpQuestion(tester, question, feedbackAudio: audio);
         final correctRepair = question.options.indexOf(question.answer);

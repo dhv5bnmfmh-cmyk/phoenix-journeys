@@ -73,7 +73,12 @@ class _ChallengeHostState extends State<_ChallengeHost> {
         narration: '题目音频一',
         answer: '正确答案一',
         options: const ['错误选项一', '正确答案一', '干扰二', '干扰三'],
-        rationales: const ['错误：不满足“从目标推导行动”或与“路线证据”证据不一致。', '', '', ''],
+        rationales: const [
+          '“错误选项一”忽略了路线必须满足的终点条件。',
+          '正确：正确答案一保留了完整路线条件。',
+          '“干扰二”只考虑方向，没有核对任务终点。',
+          '“干扰三”跳过了 Story 中的路线约束。',
+        ],
         whyCorrect: '正确答案一保留了完整路线条件',
       ),
       _question(
@@ -82,7 +87,12 @@ class _ChallengeHostState extends State<_ChallengeHost> {
         narration: '题目音频二',
         answer: '正确答案二',
         options: const ['干扰一', '正确答案二', '干扰二', '干扰三'],
-        rationales: const ['', '', '', ''],
+        rationales: const [
+          '“干扰一”与第二题的当前情境不符。',
+          '正确：正确答案二符合当前情境。',
+          '“干扰二”遗漏了当前任务条件。',
+          '“干扰三”没有使用题目提供的证据。',
+        ],
         whyCorrect: '正确答案二符合当前情境',
       ),
     ],
@@ -178,7 +188,7 @@ void main() {
       expect(automatic, contains('你的选择：错误选项一'));
       expect(automatic, contains('正确答案：正确答案一'));
       expect(automatic, contains('为什么你的选择不成立：'));
-      expect(automatic, contains('正确答案一保留了完整路线条件'));
+      expect(automatic, contains('错误选项一”忽略了路线必须满足的终点条件'));
       expect(automatic, isNot(contains('不满足“')));
       expect(automatic, isNot(contains('证据不一致')));
       expect(automatic, isNot(contains('题目音频一')));
