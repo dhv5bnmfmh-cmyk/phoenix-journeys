@@ -1,0 +1,84 @@
+{
+  "journeyId": "beijing-forbidden-city-journey-01",
+  "runtimeId": "beijing-forbidden-city",
+  "assetVersion": "2026-09-02-v3",
+  "promptVersion": "fc01-v1",
+  "generatedAt": "2026-09-02T00:00:00Z",
+  "storyBindingPolicy": "Lv1-Lv10 semantic spans resolve every real paragraph character to exactly one canonical scene; no random backgrounds.",
+  "sources": [
+    "https://www.dpm.org.cn/",
+    "https://www.dpm.org.cn/explore/building/236454.html",
+    "https://www.dpm.org.cn/explore/building/236473.html",
+    "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf",
+    "https://whc.unesco.org/en/list/439/"
+  ],
+  "scenes": [
+    {
+      "sceneId": "FC01-A",
+      "storyBinding": "semantic-anchor:entry-through-first-observation",
+      "sourceRefs": [
+        "https://www.dpm.org.cn/explore/building/236454.html",
+        "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf"
+      ],
+      "assetVersion": "2026-09-02-v2",
+      "landscapePath": "masters/fc01_a_entry_landscape.webp",
+      "portraitPath": "masters/fc01_a_entry_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_a_entry_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_a_entry_portrait.webp",
+      "verified": true,
+      "visualNotes": "Entry threshold, strong central-axis first impression, early morning. Portrait v2 is a native 9:16 re-composition from the Founder-selected landscape identity, with a low-detail lower mobile safe zone.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-B",
+      "storyBinding": "semantic-anchor:axis-judgment-before-east-task",
+      "sourceRefs": [
+        "https://www.dpm.org.cn/",
+        "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf"
+      ],
+      "landscapePath": "masters/fc01_b_axis_landscape.webp",
+      "portraitPath": "masters/fc01_b_axis_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_b_axis_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_b_axis_portrait.webp",
+      "verified": true,
+      "visualNotes": "Gate sequence, courtyard depth and spatial hierarchy.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-C",
+      "storyBinding": "semantic-anchor:east-task-through-route-conflict",
+      "sourceRefs": [
+        "https://www.dpm.org.cn/",
+        "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf"
+      ],
+      "landscapePath": "masters/fc01_c_east_route_landscape.webp",
+      "portraitPath": "masters/fc01_c_east_route_portrait.webp",
+      "runtimeLandscapePath": "runtime/fc01_c_east_route_landscape.webp",
+      "runtimePortraitPath": "runtime/fc01_c_east_route_portrait.webp",
+      "verified": true,
+      "visualNotes": "Central ordering plus real side corridor and eastward turn; no route graphics.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    },
+    {
+      "sceneId": "FC01-D",
+      "storyBinding": "semantic-anchor:shared-evidence-through-closure",
+      "sourceRefs": [
+        "https://www.dpm.org.cn/explore/building/236473.html",
+        "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf"
+      ],
+      "assetVersion": "2026-09-02-v2",
+      "promptVersion": "fc01-d-v2",
+      "landscapePath": "masters/fc01_d_shared_node_landscape_v2.webp",
+      "portraitPath": "masters/fc01_d_shared_node_portrait_v2.webp",
+      "runtimeLandscapePath": "runtime/fc01_d_shared_node_landscape_v2.webp",
+      "runtimePortraitPath": "runtime/fc01_d_shared_node_portrait_v2.webp",
+      "verified": true,
+      "visualNotes": "Qianqingmen shared node verified against Palace Museum facts: five-bay single-eave hip-and-gable gate, elevated pale-stone base, balustrades and stair approaches. Central-axis approach and lateral connection remain legible; no readable plaque. Native 9:16 portrait reserves a low-detail lower mobile safe zone.",
+      "mobileCropVerified": true,
+      "desktopCropVerified": true
+    }
+  ]
+}

@@ -1,0 +1,744 @@
+import '../agents/phoenix_language_level_agent.dart';
+import '../models/language_proficiency.dart';
+import '../models/story_content.dart';
+import 'package:pinyin/pinyin.dart';
+import 'daily_journey_experience.dart';
+import 'journey_data.dart';
+import 'journey_level_catalog.dart';
+
+const journeyExpansionSources = <StorySourceRecord>[
+  StorySourceRecord(
+    id: 'unesco-suzhou-classical-gardens',
+    title: 'Classical Gardens of Suzhou',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/813',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: ['cn-jiangsu-suzhou-gusu-humble-administrators-garden'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'suzhou-garden-bureau-humble-administrators-garden',
+    title: '拙政园',
+    publisher: '苏州市园林和绿化管理局',
+    url: 'https://ylj.suzhou.gov.cn/szsylj/sjyc/201905/c1df393edc8745abb20e8a9bd5525782.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-jiangsu-suzhou-gusu-humble-administrators-garden'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'suzhou-garden-bureau-water-design',
+    title: '理水',
+    publisher: '苏州市园林和绿化管理局',
+    url: 'https://ylj.suzhou.gov.cn/szsylj/ylys/201903/df5a3bf3bdbd49b0b787076f355b1074.shtml',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-jiangsu-suzhou-gusu-humble-administrators-garden'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-08-14',
+  ),
+  StorySourceRecord(
+    id: 'unesco-luoyang-longmen-grottoes',
+    title: 'Longmen Grottoes',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/1003',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: ['cn-henan-luoyang-luolong-longmen-grottoes'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'ncha-luoyang-longmen-grottoes',
+    title: '龙门石窟',
+    publisher: '国家文物局',
+    url: 'https://www.ncha.gov.cn/art/2024/8/8/art_2791_190649.html',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-henan-luoyang-luolong-longmen-grottoes'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'unesco-quanzhou-emporium',
+    title: 'Quanzhou: Emporium of the World in Song-Yuan China',
+    publisher: 'UNESCO World Heritage Centre',
+    url: 'https://whc.unesco.org/en/list/1561',
+    kind: StorySourceKind.unesco,
+    languageCode: 'en',
+    geoNodeIds: ['cn-fujian-quanzhou-licheng-kaiyuan-temple'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+  StorySourceRecord(
+    id: 'quanzhou-government-kaiyuan-temple',
+    title: '开元寺：从海洋贸易中崛起的多元文化家园',
+    publisher: '泉州市人民政府',
+    url: 'https://www.quanzhou.gov.cn/lyb/lyxw/202104/t20210421_2547183.htm',
+    kind: StorySourceKind.government,
+    languageCode: 'zh-CN',
+    geoNodeIds: ['cn-fujian-quanzhou-licheng-kaiyuan-temple'],
+    verificationStatus: StoryVerificationStatus.verified,
+    accessedOn: '2026-07-29',
+  ),
+];
+
+JourneyContentRecord _journeyRecord({
+  required String id,
+  required String title,
+  required String geoNodeId,
+  required List<String> tags,
+  required List<String> paragraphs,
+  required List<String> sourceIds,
+}) {
+  return JourneyContentRecord(
+    id: id,
+    title: title,
+    geoNodeId: geoNodeId,
+    languageCode: 'zh-CN',
+    verificationStatus: StoryVerificationStatus.published,
+    tags: tags,
+    sections: List.generate(
+      paragraphs.length,
+      (index) => JourneyStorySection(
+        id: 'story-$index',
+        text: paragraphs[index],
+        sourceIds: sourceIds,
+      ),
+    ),
+  );
+}
+
+const _suzhouParagraphs = <String>[
+  '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都去接他放学；这个星期天，她带他来到拙政园，程朗第一次认真提出：“今天让我走前面吧，我在下一处等你。”陈玉兰看了他一眼，只说：“别走太快。”',
+  '沿着池水转过长廊，亭子、白墙和树影叠得像一幅被墙角切开的山水画。程朗的背影第一次从她眼前消失时，陈玉兰立刻喊了他的名字。程朗从转角退回来，没有争辩，只把脚步放慢了一点。',
+  '再往前走，曲桥和屋角又一次截断视线，廊下的人声盖住了程朗的脚步声。陈玉兰抬起手，他的名字已经到了嘴边，却没有喊；她把手放下来，自己走完那几步看不见他的路。',
+  '下一处水面重新打开时，程朗已经停在前面，正回头找她。他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
+];
+
+const _suzhouAnnotations = <ReadingAnnotation>[
+  ReadingAnnotation(
+    pinyin: 'Xià zhōuyī, shí’èr suì de Chéng Lǎng yào kāishǐ zìjǐ zuò chē qù chūzhōng. Liù nián lái, wàipó Chén Yùlán jīhū měitiān dōu qù jiē tā fàngxué; zhège xīngqītiān, tā dài tā láidào Zhuōzhèng Yuán, Chéng Lǎng dì yī cì rènzhēn tíchū: “Jīntiān ràng wǒ zǒu qiánmiàn ba, wǒ zài xià yí chù děng nǐ.” Chén Yùlán kàn le tā yì yǎn, zhǐ shuō: “Bié zǒu tài kuài.”',
+    vietnamese: 'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên, và lần đầu cậu nghiêm túc nói: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Bà nhìn cậu rồi chỉ nói: “Đừng đi nhanh quá.”',
+    english: 'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday at the Humble Administrator’s Garden, he asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” She looks at him and says only, “Don’t go too fast.”',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Yánzhe chíshuǐ zhuǎnguò chángláng, tíngzi, báiqiáng hé shùyǐng dié de xiàng yì fú bèi qiángjiǎo qiēkāi de shānshuǐhuà. Chéng Lǎng de bèiyǐng dì yī cì cóng tā yǎnqián xiāoshī shí, Chén Yùlán lìkè hǎn le tā de míngzi. Chéng Lǎng cóng zhuǎnjiǎo tuì huílái, méiyǒu zhēngbiàn, zhǐ bǎ jiǎobù fàngmàn le yìdiǎn.',
+    vietnamese: 'Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây xếp lớp như một bức tranh sơn thủy bị góc tường cắt ngang. Lần đầu bóng lưng Trình Lãng biến khỏi tầm mắt, Trần Ngọc Lan lập tức gọi tên cậu. Cậu quay lại từ góc rẽ, không tranh cãi, chỉ đi chậm hơn một chút.',
+    english: 'Along the pond and around a long corridor, pavilions, white walls, and tree shadows overlap like a landscape painting cut by the corner of a wall. The first time Cheng Lang disappears from sight, Chen Yulan immediately calls his name. He comes back around the corner without arguing and simply slows his pace a little.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Zài wǎng qián zǒu, qūqiáo hé wūjiǎo yòu yí cì jiéduàn shìxiàn, lángxià de rénshēng gàizhù le Chéng Lǎng de jiǎobùshēng. Chén Yùlán táiqǐ shǒu, tā de míngzi yǐjīng dào le zuǐbiān, què méiyǒu hǎn; tā bǎ shǒu fàng xiàlái, zìjǐ zǒuwán nà jǐ bù kànbujiàn tā de lù.',
+    vietnamese: 'Đi tiếp, cầu cong và góc mái lại cắt đứt tầm nhìn, tiếng người dưới hành lang át cả tiếng bước chân của Trình Lãng. Trần Ngọc Lan giơ tay, tên cậu đã ở ngay đầu môi nhưng bà không gọi; bà hạ tay xuống và tự đi hết mấy bước không nhìn thấy cậu.',
+    english: 'Farther on, a curved bridge and the corner of a building cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps. Chen Yulan raises her hand, his name already at her lips, but does not call. She lowers her hand and walks those few unseen steps herself.',
+  ),
+  ReadingAnnotation(
+    pinyin: 'Xià yí chù shuǐmiàn chóngxīn dǎkāi shí, Chéng Lǎng yǐjīng tíng zài qiánmiàn, zhèng huítóu zhǎo tā. Tā wèn: “Wàipó, wǒ hái néng zǒu qiánmiàn ma?” Chén Yùlán bǎ jiānshàng de shuǐhúdài wǎng shàng tí le tí, shuō: “Xià yí chù děng wǒ.” Chéng Lǎng zhuǎn guòqù, bèiyǐng hěn kuài yòu bèi fángwū dǎngzhù. Chén Yùlán méiyǒu zhuī shàngqù.',
+    vietnamese: 'Khi mặt nước ở khoảng tiếp theo lại mở ra, Trình Lãng đã dừng phía trước và đang quay đầu tìm bà. Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?” Trần Ngọc Lan kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Trần Ngọc Lan không đuổi theo.',
+    english: 'When the water opens into view again, Cheng Lang has already stopped ahead and is looking back for her. “Grandma, can I still walk in front?” he asks. Chen Yulan adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.” He turns away and soon disappears behind a building again. She does not chase after him.',
+  ),
+];
+
+const _suzhouWords = <WordEntry>[
+  WordEntry(word: '园林', pinyin: 'yuánlín', partOfSpeech: '名词', simpleChinese: '经过设计的庭园和景观。', translation: 'Vườn cảnh được thiết kế.', englishDefinition: 'designed garden landscape', symbol: '🌿'),
+  WordEntry(word: '亭子', pinyin: 'tíngzi', partOfSpeech: '名词', simpleChinese: '供人休息观景的小建筑。', translation: 'Đình nhỏ để nghỉ và ngắm cảnh.', englishDefinition: 'pavilion', symbol: '🏯'),
+  WordEntry(word: '漏窗', pinyin: 'lòuchuāng', partOfSpeech: '名词', simpleChinese: '带有镂空图案的园林窗。', translation: 'Cửa sổ hoa văn rỗng trong vườn.', englishDefinition: 'decorative openwork window', symbol: '🪟'),
+  WordEntry(word: '长廊', pinyin: 'chángláng', partOfSpeech: '名词', simpleChinese: '连接不同空间的长走廊。', translation: 'Hành lang dài nối các không gian.', englishDefinition: 'long covered corridor', symbol: '🚶'),
+  WordEntry(word: '借景', pinyin: 'jièjǐng', partOfSpeech: '名词', simpleChinese: '把远处景色引入园内的设计方法。', translation: 'Kỹ thuật mượn cảnh bên ngoài.', englishDefinition: 'borrowed scenery', symbol: '🖼️'),
+  WordEntry(word: '池水', pinyin: 'chíshuǐ', partOfSpeech: '名词', simpleChinese: '池塘里的水。', translation: 'Nước trong ao.', englishDefinition: 'pond water', symbol: '💧'),
+  WordEntry(word: '曲桥', pinyin: 'qūqiáo', partOfSpeech: '名词', simpleChinese: '弯曲转折的小桥。', translation: 'Cầu nhỏ uốn cong.', englishDefinition: 'curved bridge', symbol: '🌉'),
+  WordEntry(word: '山水画', pinyin: 'shānshuǐhuà', partOfSpeech: '名词', simpleChinese: '表现山川自然的中国画。', translation: 'Tranh sơn thủy Trung Hoa.', englishDefinition: 'Chinese landscape painting', symbol: '🖌️'),
+  WordEntry(word: '层次', pinyin: 'céngcì', partOfSpeech: '名词', simpleChinese: '空间前后形成的不同层面。', translation: 'Các lớp không gian trước sau.', englishDefinition: 'visual layers and depth', symbol: '🌫️'),
+  WordEntry(word: '外婆', pinyin: 'wàipó', partOfSpeech: '名词', simpleChinese: '母亲的母亲。', translation: 'Bà ngoại.', englishDefinition: 'maternal grandmother', symbol: '👵'),
+  WordEntry(word: '自己', pinyin: 'zìjǐ', partOfSpeech: '代词', simpleChinese: '本人，不依靠别人。', translation: 'Tự mình.', englishDefinition: 'oneself; independently', symbol: '🚶'),
+  WordEntry(word: '转弯', pinyin: 'zhuǎnwān', partOfSpeech: '动词', simpleChinese: '改变行走方向。', translation: 'Rẽ.', englishDefinition: 'to turn a corner', symbol: '↪️', examples: [WordExample(chinese: '长廊转弯后，程朗暂时从外婆的视线里消失。', pinyin: 'Chángláng zhuǎnwān hòu, Chéng Lǎng zànshí cóng wàipó de shìxiàn lǐ xiāoshī.', vietnamese: 'Sau khúc quanh hành lang, Trình Lãng tạm khuất khỏi tầm mắt bà ngoại.', english: 'After the corridor turns, Cheng Lang temporarily disappears from his grandmother’s sight.')]),
+  WordEntry(word: '消失', pinyin: 'xiāoshī', partOfSpeech: '动词', simpleChinese: '从视线里看不见了。', translation: 'Biến mất.', englishDefinition: 'to disappear from view', symbol: '👀'),
+  WordEntry(word: '视线', pinyin: 'shìxiàn', partOfSpeech: '名词', simpleChinese: '眼睛看出去的方向和范围。', translation: 'Tầm nhìn.', englishDefinition: 'line of sight', symbol: '👁️'),
+  WordEntry(word: '抬起', pinyin: 'táiqǐ', partOfSpeech: '动词', simpleChinese: '把手或物体向上举。', translation: 'Giơ lên.', englishDefinition: 'to raise', symbol: '✋'),
+  WordEntry(word: '水面', pinyin: 'shuǐmiàn', partOfSpeech: '名词', simpleChinese: '水最上面的表面。', translation: 'Mặt nước.', englishDefinition: 'water surface', symbol: '🌊'),
+  WordEntry(word: '回头', pinyin: 'huítóu', partOfSpeech: '动词', simpleChinese: '转头向后看。', translation: 'Ngoảnh lại.', englishDefinition: 'to look back', symbol: '↩️'),
+  WordEntry(word: '追上', pinyin: 'zhuīshàng', partOfSpeech: '动词', simpleChinese: '加快脚步赶到前面的人身边。', translation: 'Đuổi kịp.', englishDefinition: 'to catch up', symbol: '🏃'),
+  WordEntry(word: '遮挡', pinyin: 'zhēdǎng', partOfSpeech: '动词', simpleChinese: '挡住，使人暂时看不见。', translation: 'Che khuất.', englishDefinition: 'to block from view', symbol: '🧱'),
+  WordEntry(word: '世界遗产', pinyin: 'shìjiè yíchǎn', partOfSpeech: '名词', simpleChinese: '被国际认定具有突出价值的文化或自然遗产。', translation: 'Di sản thế giới.', englishDefinition: 'World Heritage', symbol: '🌏'),
+  WordEntry(word: '保护', pinyin: 'bǎohù', partOfSpeech: '动词', simpleChinese: '防止重要事物受到损害。', translation: 'Bảo vệ.', englishDefinition: 'to protect; conservation', symbol: '🛡️'),
+];
+
+const _suzhouCoreDiscoveries = <DiscoveryEntry>[
+  DiscoveryEntry(text: '拙政园以水面为园林空间的重要中心，建筑、植物和道路沿水展开，让游人边走边看见不同景色。', pinyin: 'Zhuōzhèng Yuán yǐ shuǐmiàn wéi yuánlín kōngjiān de zhòngyào zhōngxīn, jiànzhù, zhíwù hé dàolù yán shuǐ zhǎnkāi, ràng yóurén biān zǒu biān kànjiàn bùtóng jǐngsè.', simpleChinese: '拙政园围绕水面安排建筑、植物和道路。', vietnamese: 'Chuyết Chính Viên tổ chức kiến trúc, cây cối và lối đi quanh mặt nước, để cảnh vật thay đổi theo bước chân.', english: 'The Humble Administrator’s Garden organizes buildings, planting, and paths around water so views change as visitors walk.'),
+  DiscoveryEntry(text: '亭子提供停留和观景的位置，长廊连接不同建筑与院落；它们与池水一起组织游园路线，而不只是在园中摆放装饰。', pinyin: 'Tíngzi tígōng tíngliú hé guānjǐng de wèizhi, chángláng liánjiē bùtóng jiànzhù yǔ yuànluò; tāmen yǔ chíshuǐ yìqǐ zǔzhī yóuyuán lùxiàn, ér bù zhǐshì zài yuán zhōng bǎifàng zhuāngshì.', simpleChinese: '亭子让人停下看景，长廊把建筑和院落连起来。', vietnamese: 'Đình là nơi dừng lại ngắm cảnh, còn hành lang dài nối các công trình và sân; cùng với mặt nước, chúng tổ chức tuyến tham quan.', english: 'Pavilions provide places to pause and look, while corridors connect buildings and courtyards; together with the water, they organize movement through the garden.'),
+  DiscoveryEntry(text: '长廊的转折、建筑的墙面和植物的遮挡会暂时收紧视线，使同一条路被分成看得见与暂时看不见的几段。', pinyin: 'Chángláng de zhuǎnzhé, jiànzhù de qiángmiàn hé zhíwù de zhēdǎng huì zànshí shōujǐn shìxiàn, shǐ tóng yì tiáo lù bèi fēnchéng kàndéjiàn yǔ zànshí kànbujiàn de jǐ duàn.', simpleChinese: '廊、墙和植物会让前面的景物暂时看不见。', vietnamese: 'Các khúc ngoặt của hành lang, tường nhà và cây cối tạm thời thu hẹp tầm nhìn, chia một lối đi thành những đoạn thấy và khuất.', english: 'Turns in corridors, building walls, and planting temporarily narrow sightlines, dividing one path into visible and hidden stretches.'),
+  DiscoveryEntry(text: '从较窄的廊道或建筑边转向开阔池面时，视野会重新打开；水面把天空、建筑和植物的倒影带进画面，扩大空间感。', pinyin: 'Cóng jiào zhǎi de lángdào huò jiànzhù biān zhuǎnxiàng kāikuò chímiàn shí, shìyě huì chóngxīn dǎkāi; shuǐmiàn bǎ tiānkōng, jiànzhù hé zhíwù de dàoyǐng dài jìn huàmiàn, kuòdà kōngjiāngǎn.', simpleChinese: '从窄处走到池边，视野会重新变开阔。', vietnamese: 'Khi rời hành lang hẹp hoặc mép công trình để hướng ra mặt ao rộng, tầm nhìn mở lại; phản chiếu của trời, nhà và cây làm không gian có vẻ rộng hơn.', english: 'Moving from a narrow corridor or building edge toward open water releases the view; reflections of sky, buildings, and planting enlarge the sense of space.'),
+  DiscoveryEntry(text: '回廊、建筑、植物和水面不是各自孤立的景物。它们通过前后遮挡、远近对照和水中倒影形成层次，让有限空间显得更深。', pinyin: 'Huíláng, jiànzhù, zhíwù hé shuǐmiàn bú shì gèzì gūlì de jǐngwù. Tāmen tōngguò qiánhòu zhēdǎng, yuǎnjìn duìzhào hé shuǐzhōng dàoyǐng xíngchéng céngcì, ràng yǒuxiàn kōngjiān xiǎnde gèng shēn.', simpleChinese: '廊、房屋、植物和水面一起形成前后层次。', vietnamese: 'Hành lang, kiến trúc, cây cối và mặt nước không tách rời; che khuất trước sau, đối chiếu gần xa và phản chiếu tạo chiều sâu trong không gian hữu hạn.', english: 'Corridors, buildings, planting, and water work together: overlap, near–far contrast, and reflection create depth within limited space.'),
+  DiscoveryEntry(text: '漏窗既让墙保持分隔，也让人透过镂空图案看见另一侧的局部景物。被窗框选中的景色像一幅画，人的位置改变时，画面也会改变。', pinyin: 'Lòuchuāng jì ràng qiáng bǎochí fēngé, yě ràng rén tòuguò lòukōng tú’àn kànjiàn lìng yí cè de júbù jǐngwù. Bèi chuāngkuàng xuǎnzhòng de jǐngsè xiàng yì fú huà, rén de wèizhi gǎibiàn shí, huàmiàn yě huì gǎibiàn.', simpleChinese: '漏窗把另一边的一部分景色框成一幅会变化的画。', vietnamese: 'Cửa sổ hoa vừa giữ sự phân cách của tường vừa cho thấy một phần cảnh phía bên kia; khung cảnh thay đổi khi người xem đổi vị trí.', english: 'Openwork windows preserve a wall’s separation while framing partial views beyond it; the framed scene changes as the viewer moves.'),
+  DiscoveryEntry(text: '借景把园外或较远处的景物纳入眼前构图，使视线越过园墙和近处建筑。它不把远景搬进园内，而是通过观看位置让远近景物发生联系。', pinyin: 'Jièjǐng bǎ yuánwài huò jiào yuǎnchù de jǐngwù nàrù yǎnqián gòutú, shǐ shìxiàn yuèguò yuánqiáng hé jìnchù jiànzhù. Tā bù bǎ yuǎnjǐng bānjìn yuánnèi, ér shì tōngguò guānkàn wèizhi ràng yuǎnjìn jǐngwù fāshēng liánxì.', simpleChinese: '借景利用观看位置，把远处景物放进眼前画面。', vietnamese: 'Mượn cảnh đưa cảnh vật ngoài vườn hoặc ở xa vào bố cục trước mắt; không di chuyển cảnh vật mà dùng vị trí nhìn để nối gần với xa.', english: 'Borrowed scenery brings distant or outside features into the present composition, using viewpoint rather than physically moving the distant scene.'),
+  DiscoveryEntry(text: '苏州古典园林把水、山石、植物和建筑作为一个整体来设计：水组织开合，山石形成起伏，植物随季节变化，建筑提供行走、停留和观看的位置。', pinyin: 'Sūzhōu Gǔdiǎn Yuánlín bǎ shuǐ, shānshí, zhíwù hé jiànzhù zuòwéi yí gè zhěngtǐ lái shèjì: shuǐ zǔzhī kāihé, shānshí xíngchéng qǐfú, zhíwù suí jìjié biànhuà, jiànzhù tígōng xíngzǒu, tíngliú hé guānkàn de wèizhi.', simpleChinese: '水、石、植物和建筑各有作用，又共同组成园林。', vietnamese: 'Vườn cổ Tô Châu thiết kế nước, đá, cây và kiến trúc như một chỉnh thể: nước tạo đóng mở, đá tạo cao thấp, cây đổi theo mùa, công trình định vị việc đi, dừng và nhìn.', english: 'Suzhou gardens design water, rocks, planting, and architecture as one system: water shapes opening and enclosure, rocks create relief, plants mark seasons, and buildings position movement, pause, and viewing.'),
+  DiscoveryEntry(text: '苏州园林在有限城市用地中，通过曲折路线、遮挡与显现、框景和借景连续改变观看关系，使游园过程像逐步展开的山水画，而不是一次看完的全景。', pinyin: 'Sūzhōu Yuánlín zài yǒuxiàn chéngshì yòngdì zhōng, tōngguò qūzhé lùxiàn, zhēdǎng yǔ xiǎnxiàn, kuàngjǐng hé jièjǐng liánxù gǎibiàn guānkàn guānxì, shǐ yóuyuán guòchéng xiàng zhúbù zhǎnkāi de shānshuǐhuà, ér bú shì yí cì kànwán de quánjǐng.', simpleChinese: '园林用转折、遮挡和借景，让景色边走边展开。', vietnamese: 'Trong khu đất đô thị hữu hạn, tuyến đi quanh co, che–hiện, đóng khung và mượn cảnh liên tục thay đổi cách nhìn, khiến khu vườn mở ra từng bước như tranh sơn thủy.', english: 'Within limited urban land, winding routes, concealment and reveal, framed views, and borrowed scenery continually change what can be seen, unfolding the garden like a landscape painting rather than a single panorama.'),
+  DiscoveryEntry(text: '拙政园属于“苏州古典园林”世界遗产。世界遗产价值不仅在单座亭子或一片池水，也在整体空间设计和延续至今的造园传统；保护需要维护水体、山石、植物、建筑及其观看关系。', pinyin: 'Zhuōzhèng Yuán shǔyú “Sūzhōu Gǔdiǎn Yuánlín” Shìjiè Yíchǎn. Shìjiè Yíchǎn jiàzhí bùjǐn zài dān zuò tíngzi huò yí piàn chíshuǐ, yě zài zhěngtǐ kōngjiān shèjì hé yánxù zhìjīn de zàoyuán chuántǒng; bǎohù xūyào wéihù shuǐtǐ, shānshí, zhíwù, jiànzhù jí qí guānkàn guānxì.', simpleChinese: '保护拙政园，要保护水、石、植物、建筑和它们组成的整体空间。', vietnamese: 'Chuyết Chính Viên thuộc Di sản Thế giới “Vườn cổ điển Tô Châu”. Giá trị nằm ở thiết kế tổng thể và truyền thống tạo vườn, nên bảo tồn phải giữ cả nước, đá, cây, kiến trúc và quan hệ nhìn giữa chúng.', english: 'The Humble Administrator’s Garden is part of the Classical Gardens of Suzhou World Heritage property. Its value lies in the complete spatial design and continuing garden tradition, so conservation must sustain water, rocks, planting, buildings, and their viewing relationships.'),
+];
+
+DiscoveryEntry _suzhouSupplementalDiscovery({
+  required String text,
+  required String simpleChinese,
+  required String vietnamese,
+  required String english,
+}) =>
+    DiscoveryEntry(
+      text: text,
+      pinyin: PinyinHelper.getPinyinE(
+        text,
+        separator: ' ',
+        format: PinyinFormat.WITH_TONE_MARK,
+      ),
+      simpleChinese: simpleChinese,
+      vietnamese: vietnamese,
+      english: english,
+    );
+
+final _suzhouDiscoveries = <DiscoveryEntry>[
+  _suzhouCoreDiscoveries[0],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园中部以大片池水为主，池广树茂，临水建筑形体不一、高低错落。',
+    simpleChinese: '中部以大片池水为主，临水建筑高低不同。',
+    vietnamese: 'Khu trung tâm của Chuyết Chính Viên lấy mặt nước rộng làm chủ đạo, cây cối sum suê và các công trình ven nước có hình dáng, cao thấp khác nhau.',
+    english: 'The central garden is organized around broad water, with abundant planting and waterside buildings that vary in form and height.',
+  ),
+  _suzhouCoreDiscoveries[1],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林常沿水池安排景物和观赏点，桥、廊与临水建筑把行走、停留和观看串成连续路线。',
+    simpleChinese: '桥、廊和临水建筑把走路、停留和看景连在一起。',
+    vietnamese: 'Vườn Tô Châu thường bố trí cảnh và điểm ngắm quanh hồ; cầu, hành lang và công trình ven nước nối việc đi, dừng và quan sát thành một tuyến liên tục.',
+    english: 'Suzhou gardens often arrange scenery and viewing points around water; bridges, corridors, and waterside buildings link movement, pause, and viewing into a continuous route.',
+  ),
+  _suzhouCoreDiscoveries[2],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园水面被二山、房屋、曲桥、竹丛和树木分成几部分，但池水仍流通环回，因此空间似分又连。',
+    simpleChinese: '山、房屋、桥和植物把水面分开，但池水仍相通。',
+    vietnamese: 'Ở Chuyết Chính Viên, hai gò núi, nhà, cầu cong, bụi tre và cây chia mặt nước thành nhiều phần, nhưng nước vẫn lưu thông vòng quanh nên không gian vừa tách vừa nối.',
+    english: 'At the Humble Administrator’s Garden, two hills, buildings, curved bridges, bamboo, and trees divide the water into parts, yet the water still circulates and remains connected.',
+  ),
+  _suzhouCoreDiscoveries[3],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林理水讲究“有聚有分”：聚时水面开阔明朗，分时与山石、花木、屋宇掩映而显得幽曲；拙政园同时利用这两种空间感。',
+    simpleChinese: '水面有时集中开阔，有时分开幽曲，形成开合变化。',
+    vietnamese: 'Nghệ thuật xử lý nước của vườn Tô Châu coi trọng cả tụ và phân: khi tụ, mặt nước rộng sáng; khi phân, nước xen với đá, cây và nhà tạo cảm giác uốn khúc kín đáo. Chuyết Chính Viên dùng cả hai.',
+    english: 'Suzhou water design balances gathering and division: gathered water feels open and bright, while divided water intertwines with rocks, planting, and buildings to create winding enclosure; the Humble Administrator’s Garden uses both.',
+  ),
+  _suzhouCoreDiscoveries[4],
+  _suzhouSupplementalDiscovery(
+    text: '同一片水面从不同观赏点看，会因房屋、桥、竹丛和树木的前后关系呈现不同层次；观看位置本身就是园林设计的一部分。',
+    simpleChinese: '换一个观看位置，同一片水面会出现不同层次。',
+    vietnamese: 'Cùng một mặt nước sẽ hiện ra các lớp khác nhau từ những điểm nhìn khác nhau vì quan hệ trước sau giữa nhà, cầu, tre và cây; vị trí người xem là một phần của thiết kế.',
+    english: 'The same water reveals different layers from different viewing points because buildings, bridges, bamboo, and trees overlap differently; the viewer’s position is part of the design.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '拙政园的空间可以暂时挡住视线，却没有切断连续的水面和游线；“看不见”与“走散”在这种园林空间里不是同一件事。',
+    simpleChinese: '暂时看不见前方，不等于路线被切断。',
+    vietnamese: 'Không gian Chuyết Chính Viên có thể tạm che tầm nhìn mà không cắt đứt mặt nước hay tuyến đi liên tục; “không nhìn thấy” không đồng nghĩa với “bị tách rời”.',
+    english: 'The garden can temporarily block a sightline without breaking the continuity of water or route; in this spatial system, losing sight is not the same as becoming disconnected.',
+  ),
+  _suzhouCoreDiscoveries[5],
+  _suzhouSupplementalDiscovery(
+    text: '拙政园一些桥位于开阔池水上，桥身空透，使被划分的水面仍彼此贯通，同时增加层次和倒影。',
+    simpleChinese: '桥把水面分开，也让两边保持贯通。',
+    vietnamese: 'Một số cầu ở Chuyết Chính Viên bắc qua mặt nước rộng với thân cầu thoáng, nên các phần nước bị chia vẫn thông nhau, đồng thời tăng lớp không gian và phản chiếu.',
+    english: 'Some bridges over the broad water are visually open, so divided water spaces remain connected while gaining additional layers and reflections.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '水廊和桥既能分隔空间，也能维持通行与观看的连续，因此园路不需要一直笔直无遮挡，仍能形成完整的空间经验。',
+    simpleChinese: '廊和桥可以一边分隔，一边保持路线连续。',
+    vietnamese: 'Hành lang trên nước và cầu vừa có thể chia không gian vừa duy trì sự liên tục của việc đi và nhìn; tuyến vườn không cần luôn thẳng và không bị che mà vẫn tạo thành trải nghiệm hoàn chỉnh.',
+    english: 'Water corridors and bridges can divide space while preserving continuity of movement and viewing, so a garden route need not remain straight and unobstructed to feel continuous.',
+  ),
+  _suzhouCoreDiscoveries[6],
+  _suzhouSupplementalDiscovery(
+    text: '苏州园林的池面处理讲究“聚分得体”：较大水面建立主次，被分出的水湾和水道制造似断似续的幽曲感。',
+    simpleChinese: '大水面建立主次，小分隔制造曲折变化。',
+    vietnamese: 'Xử lý mặt nước trong vườn Tô Châu chú trọng tụ và phân hợp lý: mặt nước lớn tạo quan hệ chính phụ, còn các vịnh và nhánh nước nhỏ tạo cảm giác lúc đứt lúc nối.',
+    english: 'Suzhou gardens balance gathered and divided water: larger surfaces establish hierarchy, while smaller inlets and channels create a winding sense of seeming interruption and continuation.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '聚与分、开与合、转折与层次共同让游园成为连续变化的过程，而不是站在一个位置一次看完全部景色。',
+    simpleChinese: '园林用聚分、开合和转折让景色一步步变化。',
+    vietnamese: 'Tụ và phân, mở và khép, khúc ngoặt và lớp không gian cùng khiến việc dạo vườn trở thành một quá trình biến đổi liên tục, thay vì nhìn hết từ một điểm.',
+    english: 'Gathering and division, opening and enclosure, turns and layers make the garden a continuously changing experience rather than a panorama seen from one position.',
+  ),
+  _suzhouCoreDiscoveries[7],
+  _suzhouSupplementalDiscovery(
+    text: '苏州古典园林在有限空间中把水、山石、植物和建筑组织成自然世界的缩影，使人工设计与自然意象同时成立。',
+    simpleChinese: '有限空间里的水、石、植物和建筑共同形成自然缩影。',
+    vietnamese: 'Vườn cổ Tô Châu tổ chức nước, đá, cây và kiến trúc trong không gian hữu hạn thành một thế giới tự nhiên thu nhỏ, nơi thiết kế nhân tạo và ý niệm tự nhiên cùng tồn tại.',
+    english: 'Classical Suzhou gardens organize water, rocks, planting, and buildings within limited space as a miniature natural world, joining deliberate design with an image of nature.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '建筑、山石、花木和水体的价值来自彼此配合；观看位置把这些要素连接成完整构图，而不是把它们当作互不相关的单件景物。',
+    simpleChinese: '水、石、植物和建筑要一起看，不能只看一个物件。',
+    vietnamese: 'Giá trị của kiến trúc, đá, cây hoa và nước đến từ sự phối hợp giữa chúng; điểm nhìn nối các yếu tố thành một bố cục hoàn chỉnh thay vì những vật rời rạc.',
+    english: 'Buildings, rocks, planting, and water gain meaning through their relationships; viewpoint connects them into a composition rather than a set of unrelated objects.',
+  ),
+  _suzhouCoreDiscoveries[8],
+  _suzhouSupplementalDiscovery(
+    text: '世界遗产“完整性”要求遗产地的环境与特征覆盖苏州古典园林的必要要素和关键价值，不能只剩少数孤立景物。',
+    simpleChinese: '完整性要求重要要素和整体环境都得到保存。',
+    vietnamese: 'Tính toàn vẹn của Di sản Thế giới yêu cầu bối cảnh và đặc trưng của di sản bao quát các yếu tố thiết yếu và giá trị chính của vườn cổ Tô Châu, chứ không chỉ còn vài cảnh vật rời rạc.',
+    english: 'World Heritage integrity requires the setting and features to contain the essential elements and key values of the classical gardens, not merely a few isolated sights.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '“真实性”不仅看外观；历代诗文、绘画、地图、古树、匾额和砖石雕刻，以及延续的传统造园材料和技术，共同记录园林的历史延续。',
+    simpleChinese: '真实性来自历史记录、实物和延续的传统材料与技术。',
+    vietnamese: 'Tính xác thực không chỉ nằm ở vẻ ngoài; thơ văn, tranh, bản đồ, cây cổ, biển bảng, chạm khắc gạch đá cùng vật liệu và kỹ thuật làm vườn truyền thống nối tiếp nhau ghi lại lịch sử của khu vườn.',
+    english: 'Authenticity is not only about appearance; historical writings, paintings, maps, old trees, plaques, carvings, and continuing traditional materials and techniques record the gardens’ continuity.',
+  ),
+  _suzhouCoreDiscoveries[9],
+  _suzhouSupplementalDiscovery(
+    text: 'UNESCO记录显示，苏州园林历代修缮持续使用传统材料和技术，以延续既有的造园观念和地方做法。',
+    simpleChinese: '修缮要重视传统材料、技术和造园方法的延续。',
+    vietnamese: 'UNESCO ghi nhận rằng việc sửa chữa vườn Tô Châu qua các thời kỳ tiếp tục sử dụng vật liệu và kỹ thuật truyền thống để duy trì quan niệm và thực hành làm vườn địa phương.',
+    english: 'UNESCO records that repairs to the Suzhou gardens have continued to use traditional materials and techniques, sustaining established design concepts and local practice.',
+  ),
+  _suzhouSupplementalDiscovery(
+    text: '保护工作强调最小干预，并控制周边城市化影响；因此保护判断要维护整体格局、必要要素及其关系，而不是只把单个亭子或池塘处理好。',
+    simpleChinese: '保护要少干预，并维护整体格局和要素关系。',
+    vietnamese: 'Công tác bảo tồn nhấn mạnh can thiệp tối thiểu và kiểm soát tác động đô thị hóa xung quanh; vì vậy phải giữ bố cục tổng thể, các yếu tố thiết yếu và quan hệ giữa chúng, không chỉ xử lý tốt một đình hay một ao riêng lẻ.',
+    english: 'Conservation emphasizes minimum intervention and control of surrounding urban impacts; judgment therefore has to protect the overall layout, essential elements, and their relationships, not only a single pavilion or pond.',
+  ),
+];
+
+const _suzhouDiscoveryRanges = <(int, int)>[
+  (0, 2),
+  (2, 4),
+  (4, 6),
+  (6, 8),
+  (8, 11),
+  (11, 14),
+  (14, 17),
+  (17, 20),
+  (20, 23),
+  (23, 26),
+];
+
+DiscoveryEntry _suzhouCanonicalizeDiscoveryPinyin(DiscoveryEntry entry) =>
+    DiscoveryEntry(
+      text: entry.text,
+      pinyin: PinyinHelper.getPinyinE(
+        entry.text,
+        separator: ' ',
+        format: PinyinFormat.WITH_TONE_MARK,
+      ),
+      simpleChinese: entry.simpleChinese,
+      vietnamese: entry.vietnamese,
+      english: entry.english,
+    );
+
+List<DiscoveryEntry> _suzhouDiscoveriesForLevel(int level) {
+  final range = _suzhouDiscoveryRanges[level - 1];
+  return List<DiscoveryEntry>.unmodifiable(
+    _suzhouDiscoveries
+        .sublist(range.$1, range.$2)
+        .map(_suzhouCanonicalizeDiscoveryPinyin),
+  );
+}
+
+/// Founder-locked adaptive package for 《下一处等我》. Every level preserves the
+/// four approved causal beats; higher levels deepen the same Story without
+/// adding a second plot or explanatory epilogue.
+JourneyLevelContent suzhouGardenCanonicalLevelContent(
+  int requestedLevel, {
+  ChineseProficiencyProfile? profile,
+  Set<String> knownWords = const <String>{},
+}) {
+  final level = requestedLevel.clamp(1, 10).toInt();
+  final story = _suzhouAdaptiveStory(level);
+  final discoveries = _suzhouDiscoveriesForLevel(level);
+  final support = _suzhouReadingSupport(level);
+  final annotations = <ReadingAnnotation>[
+    for (var index = 0; index < story.length; index++)
+      ReadingAnnotation(
+        pinyin: PinyinHelper.getPinyinE(
+          story[index],
+          separator: ' ',
+          format: PinyinFormat.WITH_TONE_MARK,
+        ),
+        vietnamese: support[index].$1,
+        english: support[index].$2,
+      ),
+  ];
+  final searchable = '${story.join()}${discoveries.map((entry) => entry.text).join()}';
+  return JourneyLevelContent(
+    storyParagraphs: List<String>.unmodifiable(story),
+    storyAnnotations: List<ReadingAnnotation>.unmodifiable(annotations),
+    words: List<WordEntry>.unmodifiable(
+      const PhoenixLanguageLevelAgent().selectVocabulary(
+        words: _suzhouWords
+            .where((entry) => searchable.contains(entry.word)),
+        levelCatalog: _suzhouVocabularyLevelCatalog,
+        profile: profile ??
+            const PhoenixLanguageLevelAgent().profileForPhoenixLevel(level),
+        knownWords: knownWords,
+      ),
+    ),
+    discoveries: discoveries,
+    wonderQuestion: '陈玉兰第二次看不见程朗时，为什么抬起手却没有喊他的名字？',
+    expressQuestion: '请写出“下一处等我”在故事开头和结尾分别是谁对谁说，以及这句话的意思怎样改变。',
+  );
+}
+
+const _suzhouVocabularyLevelCatalog = <String, VocabularyLevelTag>{
+  '园林': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '亭子': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2, kind: VocabularyKind.cultural),
+  '漏窗': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4, kind: VocabularyKind.cultural),
+  '长廊': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3, kind: VocabularyKind.cultural),
+  '借景': VocabularyLevelTag(hskLevel: 6, tocflLevel: 5, kind: VocabularyKind.cultural),
+  '池水': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '曲桥': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4, kind: VocabularyKind.cultural),
+  '山水画': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3, kind: VocabularyKind.cultural),
+  '层次': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
+  '外婆': VocabularyLevelTag(hskLevel: 2, tocflLevel: 1),
+  '自己': VocabularyLevelTag(hskLevel: 1, tocflLevel: 1),
+  '转弯': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '消失': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '视线': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
+  '抬起': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '水面': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '回头': VocabularyLevelTag(hskLevel: 2, tocflLevel: 2),
+  '追上': VocabularyLevelTag(hskLevel: 3, tocflLevel: 2),
+  '遮挡': VocabularyLevelTag(hskLevel: 5, tocflLevel: 4),
+  '世界遗产': VocabularyLevelTag(hskLevel: 6, tocflLevel: 5, kind: VocabularyKind.cultural),
+  '保护': VocabularyLevelTag(hskLevel: 4, tocflLevel: 3),
+};
+
+const _suzhouLv6FirstEffectVi =
+    'Sau khi Trình Lãng quay lại, khoảng cách vốn đã nới ra giữa hai bà cháu thu ngắn lại. Trong mấy bước tiếp theo, cậu vẫn đi phía trước nhưng bước chân nhỏ hơn trước; Trần Ngọc Lan không cần vội mà vẫn có thể nhìn thấy bóng lưng cậu sớm hơn.';
+const _suzhouLv6FirstEffectEn =
+    'After Cheng Lang comes back, the distance that had opened between them narrows. Over the next few steps he still walks ahead, but his stride is smaller than before; Chen Yulan does not have to hurry to see his back again sooner.';
+const _suzhouLv7PressureVi =
+    'Khi rẽ qua mép tường tiếp theo, ánh mắt Trần Ngọc Lan vẫn bám theo cậu, bàn tay cũng căng lên trước cả bước chân. Bà không gọi cậu lại gần, cũng không đưa tay kéo cậu, chỉ tiếp tục đi theo nhịp đã chậm lại của cậu.';
+const _suzhouLv7PressureEn =
+    'As they pass the next wall edge, Chen Yulan’s gaze still follows him and her hand tightens before her steps do. She does not call him closer or reach out to pull him back; she simply keeps walking at the slower pace he has taken.';
+const _suzhouHigherFirstVietnamese =
+    'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên, và lần đầu cậu nghiêm túc nói: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Bà nhìn cậu rồi chỉ nói: “Đừng đi nhanh quá.” Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây xếp lớp như một bức tranh sơn thủy bị góc tường cắt ngang. Lần đầu bóng lưng Trình Lãng biến khỏi tầm mắt, Trần Ngọc Lan lập tức gọi tên cậu. Cậu quay lại từ góc rẽ, không tranh cãi, chỉ đi chậm hơn một chút.';
+const _suzhouHigherFirstEnglish =
+    'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday at the Humble Administrator’s Garden, he asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” She looks at him and says only, “Don’t go too fast.” Along the pond and around a long corridor, pavilions, white walls, and tree shadows overlap like a landscape painting cut by the corner of a wall. The first time Cheng Lang disappears from sight, Chen Yulan immediately calls his name. He comes back around the corner without arguing and simply slows his pace a little.';
+const _suzhouSecondTriggerVi =
+    'Đi tiếp, cùng kiểu che khuất ấy lại xuất hiện: cầu cong và góc nhà một lần nữa cắt đứt tầm nhìn, còn tiếng người dưới hành lang át tiếng bước chân của Trình Lãng.';
+const _suzhouSecondTriggerEn =
+    'Farther on, the same kind of occlusion returns: a curved bridge and building corner cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps.';
+const _suzhouSecondChoiceVi =
+    'Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà hạ tay xuống và tự đi hết mấy bước không nhìn thấy cậu.';
+const _suzhouSecondChoiceEn =
+    'Chen Yulan raises her hand, his name already at her lips, but does not call. She lowers her hand and walks those few unseen steps herself.';
+const _suzhouWaterReturnVi =
+    'Khi mặt nước ở khoảng tiếp theo lại mở ra, Trình Lãng đã dừng phía trước và đang quay đầu tìm bà.';
+const _suzhouWaterReturnEn =
+    'When the water opens into view again, Cheng Lang has already stopped ahead and is looking back for her.';
+const _suzhouAgency8Vi =
+    'Trình Lãng không tiếp tục kéo giãn khoảng cách, cũng không quay ngược lại theo lối cũ; cậu chỉ đứng nguyên tại chỗ. Trần Ngọc Lan đi hết mấy bước bị che khuất, và hai bà cháu lại lọt vào tầm nhìn của nhau.';
+const _suzhouAgency8En =
+    'Cheng Lang does not keep widening the distance or retrace the path; he simply stays where he is. Chen Yulan clears the hidden steps, and they come back into each other’s sight.';
+const _suzhouAgencyQuestionVi = 'Cậu hỏi: “Bà ơi, cháu vẫn được đi phía trước chứ?”';
+const _suzhouAgencyQuestionEn = '“Grandma, can I still walk in front?” he asks.';
+const _suzhouBalance9Vi =
+    'Trình Lãng không quay lại. Trần Ngọc Lan cũng không gọi cậu lùi về; giữa hai bà cháu vẫn còn mấy bước ấy. Bà đi gần hơn nhưng không biến “đi phía trước” trở lại thành “đi bên cạnh”.';
+const _suzhouBalance9En =
+    'Cheng Lang does not walk back. Chen Yulan does not call him back either; those few steps remain between them. She comes closer without turning “walking ahead” back into “walking beside her.”';
+const _suzhouEndingReplyVi =
+    'Trần Ngọc Lan kéo quai bình nước trên vai lên rồi nói: “Đợi bà ở chỗ tiếp theo.”';
+const _suzhouEndingReplyEn =
+    'Chen Yulan adjusts the water-bottle strap on her shoulder and says, “Wait for me at the next place.”';
+const _suzhouSensory10Vi =
+    'Trước mắt không có bóng lưng cậu, bên tai cũng không có tiếng bước chân nào bà có thể nhận ra; trong hành lang vẫn có người qua lại, và mặt nước vẫn mở rồi khép giữa các công trình như thường.';
+const _suzhouSensory10En =
+    'His back is absent from her view, and no recognizable footsteps reach her ears; people still pass through the corridor, and the water keeps opening and closing between buildings as before.';
+const _suzhouUncertainty10Vi =
+    'Trong mấy bước ấy, bà vẫn không biết ở khoảng tiếp theo mình sẽ thấy mặt nước hay Trình Lãng trước.';
+const _suzhouUncertainty10En =
+    'For those few steps, she still does not know whether the water or Cheng Lang will appear first at the next opening.';
+const _suzhouDistance10Vi = 'Giữa hai bà cháu vẫn còn khoảng cách vừa rồi.';
+const _suzhouDistance10En = 'The same distance remains between them.';
+const _suzhouFinalActionVi =
+    'Trình Lãng quay đi, bóng lưng nhanh chóng lại bị căn nhà che khuất. Trần Ngọc Lan không đuổi theo.';
+const _suzhouFinalActionEn =
+    'He turns away and soon disappears behind a building again. She does not chase after him.';
+
+List<(String, String)> _suzhouReadingSupport(int level) => switch (level) {
+  1 => const [(
+      'Thứ Hai tới, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường. Chủ nhật, bà ngoại Trần Ngọc Lan đưa cậu đến Chuyết Chính Viên. Trình Lãng nói: “Hôm nay để cháu đi trước. Cháu đợi bà ở chỗ kế tiếp.” Sau khúc quanh hành lang, cậu biến khỏi tầm mắt lần đầu và bà lập tức gọi cậu quay lại. Lần thứ hai, cầu cong và góc nhà lại chắn tầm nhìn. Trần Ngọc Lan giơ tay nhưng không gọi, tự đi hết mấy bước ấy. Khi mặt nước mở ra trở lại, Trình Lãng đang đợi phía trước. Bà chỉ nói: “Đợi bà ở chỗ kế tiếp.” Trình Lãng tiếp tục đi, và bà không đuổi theo.',
+      'Next Monday, twelve-year-old Cheng Lang will begin traveling to school by himself. On Sunday, his grandmother Chen Yulan takes him to the Humble Administrator’s Garden. Cheng Lang says, “Let me walk ahead today. I’ll wait for you at the next place.” After the corridor turns, he disappears from view for the first time and she immediately calls him back. The second time, a curved bridge and a building corner block her view again. Chen Yulan raises her hand but does not call; she walks those few steps herself. When the water opens into view again, Cheng Lang is waiting ahead. She only says, “Wait for me at the next place.” Cheng Lang continues forward, and Chen Yulan does not chase after him.'
+    )],
+  2 => const [(
+      'Thứ Hai tới, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường cấp hai. Sáu năm qua, bà ngoại Trần Ngọc Lan hầu như ngày nào cũng đón cậu tan học. Chủ nhật này bà đưa cậu đến Chuyết Chính Viên, và cậu lần đầu nghiêm túc nói: “Hôm nay để cháu đi trước. Cháu đợi bà ở chỗ kế tiếp.” Sau khúc quanh hành lang, bóng lưng cậu biến mất lần đầu; bà lập tức gọi tên. Trình Lãng quay lại, không tranh cãi, chỉ đi chậm hơn. Phía trước, cầu cong và góc nhà lại cắt đứt tầm nhìn. Bà giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà tự đi hết mấy bước. Khi mặt nước mở ra, Trình Lãng đang ngoái lại tìm bà. Bà chỉnh dây bình nước: “Đợi bà ở chỗ kế tiếp.” Cậu quay đi tiếp; bà không đuổi theo.',
+      'Next Monday, twelve-year-old Cheng Lang will begin traveling to middle school alone. For six years, his grandmother Chen Yulan has met him after school almost every day. This Sunday she takes him to the Humble Administrator’s Garden, where for the first time he says seriously, “Let me walk ahead today. I’ll wait for you at the next place.” After the corridor turns, his back disappears for the first time and she immediately calls his name. Cheng Lang comes back without arguing and merely slows down. Farther on, a curved bridge and building corner cut off her view again. Chen Yulan raises her hand, his name already at her lips, but does not call; she walks those few steps herself. When the water opens again, Cheng Lang is looking back for her. She adjusts the water-bottle strap: “Wait for me at the next place.” He turns and continues; she does not chase him.'
+    )],
+  3 => const [
+      (
+        'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học. Chủ nhật, bà đưa cậu đến Chuyết Chính Viên. Trình Lãng nói: “Hôm nay để cháu đi trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Hai bà cháu đi dọc mặt nước vào hành lang dài; tường trắng và bóng cây chia tầm nhìn trước sau thành từng đoạn. Lần đầu rẽ qua góc tường, Trình Lãng biến khỏi tầm mắt, bà lập tức gọi tên cậu. Cậu quay lại, không tranh cãi, chỉ đi chậm hơn.',
+        'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day. On Sunday she brings him to the Humble Administrator’s Garden. Cheng Lang says, “Let me walk ahead today. I’ll wait for you at the next place.” They walk beside the water into a long corridor; white walls and tree shadows divide the view ahead into separate stretches. The first time Cheng Lang turns around a wall corner and disappears from sight, Chen Yulan immediately calls his name. He comes back without arguing and simply slows down.'
+      ),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại che Trình Lãng. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi; bà tự đi hết mấy bước không nhìn thấy cậu. Khi rời mép công trình, mặt nước mở ra trở lại và Trình Lãng đã dừng phía trước, ngoái lại tìm bà. Bà chỉnh dây bình nước rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng tiếp tục đi; bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner hide Cheng Lang again. Chen Yulan raises her hand, his name already at her lips, but does not call; she walks those few unseen steps herself. As she clears the edge of the building, the water opens into view again and Cheng Lang has stopped ahead, looking back for her. She adjusts the water-bottle strap and says, “Wait for me at the next place.” Cheng Lang continues forward; she does not chase him.'
+      ),
+    ],
+  4 => const [
+      (
+        'Thứ Hai tuần sau, Trình Lãng mười hai tuổi sẽ bắt đầu tự đi xe đến trường trung học cơ sở. Suốt sáu năm, bà ngoại Trần Ngọc Lan gần như ngày nào cũng đón cậu tan học; Chủ nhật này, bà đưa cậu đến Chuyết Chính Viên. Trình Lãng lần đầu nghiêm túc nói: “Hôm nay để cháu đi phía trước nhé, cháu sẽ đợi bà ở chỗ tiếp theo.” Đi dọc mặt nước rồi rẽ qua hành lang dài, đình, tường trắng và bóng cây tạo thành nhiều lớp trước sau. Trình Lãng vẫn đi trên cùng một tuyến vườn, nhưng góc tường khiến bóng lưng cậu lần đầu biến khỏi tầm mắt bà. Bà lập tức gọi tên; cậu quay lại từ khúc rẽ, không tranh cãi, chỉ đi chậm hơn một chút.',
+        'Next Monday, twelve-year-old Cheng Lang will begin travelling to middle school on his own. For six years, his grandmother Chen Yulan has picked him up after school almost every day; this Sunday she takes him to the Humble Administrator’s Garden. Cheng Lang asks seriously for the first time, “Let me walk ahead today. I’ll wait for you at the next place.” Along the water and around a long corridor, pavilions, white walls, and tree shadows form layers in front and behind. Cheng Lang is still following the same garden route, but a wall corner makes his back disappear from her sight for the first time. She immediately calls his name; he comes back from the turn without arguing and simply slows down a little.'
+      ),
+      (
+        'Đi tiếp, cầu cong và góc nhà lại cắt đứt tầm nhìn, tiếng người dưới hành lang át tiếng bước chân của Trình Lãng; những bước không nhìn thấy cậu vẫn nằm trên cùng con đường đi về phía trước. Trần Ngọc Lan giơ tay, tên cậu đã ở đầu môi nhưng bà không gọi. Bà hạ tay và tự đi hết đoạn đường bị che khuất ấy. Khi mặt nước ở chỗ tiếp theo mở ra trở lại, Trình Lãng đã dừng phía trước và ngoái lại tìm bà. Bà chỉnh dây bình nước rồi nói: “Đợi bà ở chỗ tiếp theo.” Trình Lãng quay đi, bóng lưng lại bị căn nhà che khuất; bà không đuổi theo.',
+        'Farther on, a curved bridge and building corner cut the sightline again, while voices under the corridor cover Cheng Lang’s footsteps; the unseen steps are still part of the same path forward. Chen Yulan raises her hand, his name already at her lips, but does not call. She lowers her hand and walks the hidden stretch herself. When the water at the next place opens into view again, Cheng Lang has stopped ahead and is looking back for her. She adjusts the water-bottle strap and says, “Wait for me at the next place.” Cheng Lang turns away, his back hidden by a building again; she does not chase him.'
+      ),
+    ],
+  5 => [
+      ('${_suzhouAnnotations[0].vietnamese} ${_suzhouAnnotations[1].vietnamese}', '${_suzhouAnnotations[0].english} ${_suzhouAnnotations[1].english}'),
+      ('${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}', '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}'),
+    ],
+  6 => [
+      ('$_suzhouHigherFirstVietnamese $_suzhouLv6FirstEffectVi', '$_suzhouHigherFirstEnglish $_suzhouLv6FirstEffectEn'),
+      ('${_suzhouAnnotations[2].vietnamese} ${_suzhouAnnotations[3].vietnamese}', '${_suzhouAnnotations[2].english} ${_suzhouAnnotations[3].english}'),
+    ],
+  7 => [
+      ('$_suzhouHigherFirstVietnamese $_suzhouLv6FirstEffectVi $_suzhouLv7PressureVi', '$_suzhouHigherFirstEnglish $_suzhouLv6FirstEffectEn $_suzhouLv7PressureEn'),
+      ('$_suzhouSecondTriggerVi $_suzhouSecondChoiceVi $_suzhouWaterReturnVi $_suzhouAgencyQuestionVi $_suzhouEndingReplyVi $_suzhouFinalActionVi', '$_suzhouSecondTriggerEn $_suzhouSecondChoiceEn $_suzhouWaterReturnEn $_suzhouAgencyQuestionEn $_suzhouEndingReplyEn $_suzhouFinalActionEn'),
+    ],
+  8 => [
+      ('$_suzhouHigherFirstVietnamese $_suzhouLv6FirstEffectVi $_suzhouLv7PressureVi', '$_suzhouHigherFirstEnglish $_suzhouLv6FirstEffectEn $_suzhouLv7PressureEn'),
+      ('$_suzhouSecondTriggerVi $_suzhouSecondChoiceVi $_suzhouWaterReturnVi $_suzhouAgency8Vi $_suzhouAgencyQuestionVi $_suzhouEndingReplyVi $_suzhouFinalActionVi', '$_suzhouSecondTriggerEn $_suzhouSecondChoiceEn $_suzhouWaterReturnEn $_suzhouAgency8En $_suzhouAgencyQuestionEn $_suzhouEndingReplyEn $_suzhouFinalActionEn'),
+    ],
+  9 => [
+      ('$_suzhouHigherFirstVietnamese $_suzhouLv6FirstEffectVi $_suzhouLv7PressureVi', '$_suzhouHigherFirstEnglish $_suzhouLv6FirstEffectEn $_suzhouLv7PressureEn'),
+      ('$_suzhouSecondTriggerVi $_suzhouSecondChoiceVi $_suzhouWaterReturnVi $_suzhouAgency8Vi $_suzhouAgencyQuestionVi $_suzhouBalance9Vi $_suzhouEndingReplyVi $_suzhouFinalActionVi', '$_suzhouSecondTriggerEn $_suzhouSecondChoiceEn $_suzhouWaterReturnEn $_suzhouAgency8En $_suzhouAgencyQuestionEn $_suzhouBalance9En $_suzhouEndingReplyEn $_suzhouFinalActionEn'),
+    ],
+  _ => [
+      ('$_suzhouHigherFirstVietnamese $_suzhouLv6FirstEffectVi $_suzhouLv7PressureVi', '$_suzhouHigherFirstEnglish $_suzhouLv6FirstEffectEn $_suzhouLv7PressureEn'),
+      ('$_suzhouSecondTriggerVi $_suzhouSensory10Vi $_suzhouSecondChoiceVi $_suzhouUncertainty10Vi $_suzhouWaterReturnVi $_suzhouAgency8Vi $_suzhouAgencyQuestionVi $_suzhouBalance9Vi $_suzhouEndingReplyVi $_suzhouDistance10Vi $_suzhouFinalActionVi', '$_suzhouSecondTriggerEn $_suzhouSensory10En $_suzhouSecondChoiceEn $_suzhouUncertainty10En $_suzhouWaterReturnEn $_suzhouAgency8En $_suzhouAgencyQuestionEn $_suzhouBalance9En $_suzhouEndingReplyEn $_suzhouDistance10En $_suzhouFinalActionEn'),
+    ],
+};
+
+const _suzhouLv6FirstEffect =
+    '程朗退回来以后，两人之间原本拉开的距离缩短了。接下来的几步，他仍走在前面，只是步子比刚才小；陈玉兰不用赶，也能更快看见他的背影。';
+const _suzhouLv7Pressure =
+    '转过下一处墙边时，陈玉兰的目光仍追着他，手也比脚步先紧了一下。她没有叫他靠近，也没有伸手去拉他，只照着他放慢后的速度往前走。';
+const _suzhouSecondTrigger =
+    '再往前走，同样的遮挡又来了：曲桥和屋角又一次截断视线，廊下的人声盖住了程朗的脚步声。';
+const _suzhouAgency8 =
+    '程朗没有继续把距离拉远，也没有沿原路退回来，只站在原处。陈玉兰走出被遮住的几步，两个人重新落进彼此的视线里。';
+const _suzhouBalance9 =
+    '程朗没有往回走。陈玉兰也没有叫他退回来；两个人仍隔着那几步。她走近，却没有把“走在前面”重新变成“走在身边”。';
+const _suzhouSensory10 =
+    '眼前没有他的背影，耳边也没有能辨认出的脚步；长廊里仍有人经过，水面也照常在建筑之间一开一合。';
+const _suzhouUncertainty10 = '那几步里，她仍不知道下一处先出现的是水面还是程朗。';
+const _suzhouDistance10 = '两人之间仍留着刚才那段距离。';
+
+List<String> _suzhouAdaptiveStory(int level) => switch (level) {
+  1 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车上学。星期天，外婆陈玉兰带他到拙政园。程朗说：“今天让我走前面吧，我在下一处等你。”长廊转弯后，他第一次消失，外婆立刻把他喊回来。第二次，曲桥和屋角又挡住视线。陈玉兰抬起手，却没有喊，自己走完那几步。水面重新打开时，程朗正在前面等她。她只说：“下一处等我。”程朗继续往前，陈玉兰没有追上去。',
+    ],
+  2 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学。这个星期天，她带他到拙政园，程朗第一次认真说：“今天让我走前面吧，我在下一处等你。”转过长廊，他的背影第一次消失，陈玉兰立刻喊了他的名字。程朗退回来，没有争辩，只把脚步放慢。再往前，曲桥和屋角又截断视线。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她自己走完那几步。水面重新打开时，程朗正在前面回头找她。陈玉兰提了提水壶带：“下一处等我。”程朗转身继续走，她没有追上去。',
+    ],
+  3 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学。星期天，她带他到拙政园。程朗说：“今天让我走前面吧，我在下一处等你。”两人沿池水走进长廊，白墙和树影把前后的视线分成一段一段。第一次转过墙角，程朗从她眼前消失，陈玉兰立刻喊了他的名字。他退回来，没有争辩，只把脚步放慢。',
+      '再往前，曲桥和屋角又把程朗挡住。陈玉兰抬起手，名字已经到了嘴边，却没有喊；她自己走完那几步看不见他的路。转出建筑边，水面重新打开，程朗已经停在前面回头找她。陈玉兰提了提水壶带，说：“下一处等我。”程朗继续往前，她没有追上去。',
+    ],
+  4 => <String>[
+      '下周一，十二岁的程朗要开始自己坐车去初中。六年来，外婆陈玉兰几乎每天都接他放学；这个星期天，她带他到拙政园，程朗第一次认真说：“今天让我走前面吧，我在下一处等你。”沿着池水转过长廊，亭子、白墙和树影叠出前后层次。程朗一直走在同一条园路上，墙角却让他的背影第一次从陈玉兰眼前消失。她立刻喊了他的名字；程朗从转角退回来，没有争辩，只把脚步放慢一点。',
+      '再往前，曲桥和屋角又一次截断视线，廊下人声盖住程朗的脚步声；看不见他的几步，仍在同一条向前的路上。陈玉兰抬起手，名字到了嘴边，却没有喊。她放下手，自己走完那段被遮住的路。下一处水面重新打开时，程朗已经停在前面回头找她。陈玉兰提了提水壶带，说：“下一处等我。”程朗转过去，背影又被房屋挡住；她没有追上去。',
+    ],
+  5 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}',
+      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
+    ],
+  6 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}$_suzhouLv6FirstEffect',
+      '${_suzhouParagraphs[2]}${_suzhouParagraphs[3]}',
+    ],
+  7 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}$_suzhouLv6FirstEffect$_suzhouLv7Pressure',
+      '$_suzhouSecondTrigger${_suzhouParagraphs[2].substring(33)}${_suzhouParagraphs[3]}',
+    ],
+  8 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}$_suzhouLv6FirstEffect$_suzhouLv7Pressure',
+      '$_suzhouSecondTrigger${_suzhouParagraphs[2].substring(33)}下一处水面重新打开时，程朗已经停在前面，正回头找她。$_suzhouAgency8他问：“外婆，我还能走前面吗？”陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
+    ],
+  9 => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}$_suzhouLv6FirstEffect$_suzhouLv7Pressure',
+      '$_suzhouSecondTrigger${_suzhouParagraphs[2].substring(33)}下一处水面重新打开时，程朗已经停在前面，正回头找她。$_suzhouAgency8他问：“外婆，我还能走前面吗？”$_suzhouBalance9陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
+    ],
+  _ => <String>[
+      '${_suzhouParagraphs[0]}${_suzhouParagraphs[1]}$_suzhouLv6FirstEffect$_suzhouLv7Pressure',
+      '$_suzhouSecondTrigger$_suzhouSensory10${_suzhouParagraphs[2].substring(33)}$_suzhouUncertainty10下一处水面重新打开时，程朗已经停在前面，正回头找她。$_suzhouAgency8他问：“外婆，我还能走前面吗？”$_suzhouBalance9陈玉兰把肩上的水壶带往上提了提，说：“下一处等我。”$_suzhouDistance10程朗转过去，背影很快又被房屋挡住。陈玉兰没有追上去。',
+    ],
+};
+
+const suzhouGardenMemoryResult =
+    '陈玉兰第二次没有喊回程朗，自己走完看不见他的几步；程朗在下一处停下回望。';
+const suzhouGardenCulturalPoint =
+    '拙政园以池水为中心，长廊、建筑、植物与转折让视线收紧后重新打开，形成层层展开的空间。';
+const suzhouGardenMemoryAnchor = '抬起又放下的手，与下一处回望的程朗';
+const suzhouGardenCompletionSummary = '下一处等我：两个人都学会在短暂看不见时等对方。';
+
+const _luoyangParagraphs = <String>[
+  '傍晚，你沿伊河走到龙门石窟。两岸山崖像一道石门，密集的洞窟和佛龛分布在灰色岩壁上。',
+  '从北魏到唐代，工匠在这里持续开凿。不同年代的造像留下服饰、面容和雕刻风格的变化。',
+  '走近奉先寺，巨大的主像与两侧造像共同形成庄严空间。石头上的细节，让遥远历史突然有了人的尺度。',
+  '龙门石窟不仅是一组宏伟雕像，也是一部刻在山崖上的艺术史。河水向前流，石刻则保存着时代留下的表情。',
+];
+
+const _luoyangAnnotations = <ReadingAnnotation>[
+  ReadingAnnotation(pinyin: 'Bàngwǎn, nǐ yán Yī Hé zǒudào Lóngmén Shíkū. Liǎng àn shānyá xiàng yí dào shímén, mìjí de dòngkū hé Fókān fēnbù zài huīsè yánbì shàng.', vietnamese: 'Chiều tối, bạn đi dọc sông Y đến hang đá Long Môn. Vách núi hai bờ như một cánh cổng đá, đầy hang và hốc tượng.', english: 'At dusk, you follow the Yi River to Longmen, where cliffs form a stone gate covered with caves and niches.'),
+  ReadingAnnotation(pinyin: 'Cóng Běiwèi dào Tángdài, gōngjiàng zài zhèlǐ chíxù kāizáo. Bùtóng niándài de zàoxiàng liúxià fúshì, miànróng hé diāokè fēnggé de biànhuà.', vietnamese: 'Từ Bắc Ngụy đến thời Đường, nghệ nhân liên tục tạc đá, để lại thay đổi về trang phục, gương mặt và phong cách điêu khắc.', english: 'From the Northern Wei through the Tang, artisans recorded changing dress, faces, and carving styles.'),
+  ReadingAnnotation(pinyin: 'Zǒujìn Fèngxiān Sì, jùdà de zhǔxiàng yǔ liǎngcè zàoxiàng gòngtóng xíngchéng zhuāngyán kōngjiān. Shítou shàng de xìjié, ràng yáoyuǎn lìshǐ tūrán yǒule rén de chǐdù.', vietnamese: 'Đến gần Phụng Tiên Tự, tượng chính lớn cùng các tượng hai bên tạo nên không gian trang nghiêm. Chi tiết trên đá khiến lịch sử xa xôi trở nên gần với con người.', english: 'At Fengxian Temple, monumental figures create a solemn space whose details bring distant history to human scale.'),
+  ReadingAnnotation(pinyin: 'Lóngmén Shíkū bùjǐn shì yì zǔ hóngwěi diāoxiàng, yě shì yí bù kè zài shānyá shàng de yìshùshǐ. Héshuǐ xiàng qián liú, shíkè zé bǎocúnzhe shídài liúxià de biǎoqíng.', vietnamese: 'Long Môn không chỉ là nhóm tượng hùng vĩ mà còn là lịch sử nghệ thuật khắc trên vách núi. Dòng sông trôi đi, còn đá giữ lại nét mặt của thời đại.', english: 'Longmen is art history carved into a cliff: the river moves on while stone preserves the faces of an era.'),
+];
+
+const _luoyangWords = <WordEntry>[
+  WordEntry(word: '石窟', pinyin: 'shíkū', partOfSpeech: '名词', simpleChinese: '在岩石山体中开凿的洞窟。', translation: 'Hang được đục trong vách đá.', englishDefinition: 'rock-cut grotto', symbol: '🪨'),
+  WordEntry(word: '佛龛', pinyin: 'Fókān', partOfSpeech: '名词', simpleChinese: '安放佛像的小空间。', translation: 'Hốc nhỏ đặt tượng Phật.', englishDefinition: 'Buddhist niche', symbol: '🕯️'),
+  WordEntry(word: '开凿', pinyin: 'kāizáo', partOfSpeech: '动词', simpleChinese: '在石头上挖掘和雕刻。', translation: 'Đào và tạc vào đá.', englishDefinition: 'to excavate and carve', symbol: '⛏️'),
+  WordEntry(word: '造像', pinyin: 'zàoxiàng', partOfSpeech: '名词', simpleChinese: '宗教或纪念用途的雕像。', translation: 'Tượng dùng cho tôn giáo hoặc tưởng niệm.', englishDefinition: 'religious sculpted image', symbol: '🗿'),
+  WordEntry(word: '庄严', pinyin: 'zhuāngyán', partOfSpeech: '形容词', simpleChinese: '严肃而令人尊敬。', translation: 'Trang nghiêm và đáng kính.', englishDefinition: 'solemn and dignified', symbol: '✨'),
+  WordEntry(word: '山崖', pinyin: 'shānyá', partOfSpeech: '名词', simpleChinese: '陡峭的山壁。', translation: 'Vách núi dựng đứng.', englishDefinition: 'cliff face', symbol: '⛰️'),
+  WordEntry(word: '岩壁', pinyin: 'yánbì', partOfSpeech: '名词', simpleChinese: '由岩石形成的陡壁。', translation: 'Vách đá.', englishDefinition: 'rock wall', symbol: '🪨'),
+  WordEntry(word: '细节', pinyin: 'xìjié', partOfSpeech: '名词', simpleChinese: '事物中细小而重要的部分。', translation: 'Chi tiết nhỏ nhưng quan trọng.', englishDefinition: 'detail', symbol: '🔍'),
+  WordEntry(word: '雕刻', pinyin: 'diāokè', partOfSpeech: '动词', simpleChinese: '在材料上刻出形象或图案。', translation: 'Điêu khắc hình hoặc hoa văn.', englishDefinition: 'to carve or sculpt', symbol: '🔨'),
+];
+
+const _luoyangDiscoveries = <DiscoveryEntry>[
+  DiscoveryEntry(text: '龙门石窟集中保存北魏晚期至唐代的重要佛教石刻艺术。', pinyin: 'Lóngmén Shíkū jízhōng bǎocún Běiwèi wǎnqī zhì Tángdài de zhòngyào Fójiào shíkè yìshù.', simpleChinese: '这里保存了北魏到唐代的重要石刻。', vietnamese: 'Long Môn bảo tồn nghệ thuật khắc đá Phật giáo quan trọng từ cuối Bắc Ngụy đến thời Đường.', english: 'Longmen preserves major Buddhist stone art from the late Northern Wei through the Tang.'),
+  DiscoveryEntry(text: '洞窟与佛龛沿伊河两岸的石灰岩山崖分布。', pinyin: 'Dòngkū yǔ Fókān yán Yī Hé liǎng àn de shíhuīyán shānyá fēnbù.', simpleChinese: '许多洞窟分布在伊河边的山崖上。', vietnamese: 'Các hang và hốc tượng phân bố trên vách đá vôi dọc hai bờ sông Y.', english: 'Caves and niches line limestone cliffs beside the Yi River.'),
+  DiscoveryEntry(text: '奉先寺的大型造像群以规模、布局和细节形成完整的视觉中心。', pinyin: 'Fèngxiān Sì de dàxíng zàoxiàng qún yǐ guīmó, bùjú hé xìjié xíngchéng wánzhěng de shìjué zhōngxīn.', simpleChinese: '奉先寺的大型造像构成视觉中心。', vietnamese: 'Quần thể tượng lớn ở Phụng Tiên Tự tạo thành một trung tâm thị giác hoàn chỉnh nhờ quy mô, bố cục và chi tiết.', english: 'The monumental figures at Fengxian Temple form a coherent visual focus through scale, arrangement, and detail.'),
+  DiscoveryEntry(text: '龙门造像体现了中国石刻艺术在不同历史阶段的发展。', pinyin: 'Lóngmén zàoxiàng tǐxiàn le Zhōngguó shíkè yìshù zài bùtóng lìshǐ jiēduàn de fāzhǎn.', simpleChinese: '不同造像展示了艺术风格的变化。', vietnamese: 'Các tượng Long Môn cho thấy sự phát triển của nghệ thuật điêu khắc đá Trung Hoa.', english: 'The sculptures show the development of Chinese stone carving across periods.'),
+];
+
+const _quanzhouParagraphs = <String>[
+  '上午，你走进泉州开元寺。东西两座石塔越过树梢，安静地标记着这座古代港口城市的天际线。',
+  '宋元时期，泉州与遥远海域保持贸易往来。商人、旅行者和不同信仰的人在这里相遇，留下多元的城市遗产。',
+  '开元寺的石塔、殿宇和古树属于这张交流网络的一部分。建筑细节既有地方传统，也见证海上交通带来的文化碰撞。',
+  '离开寺院时，你会发现泉州的世界性并不只存在于港口。它藏在石塔、街巷和人们长期共同生活的痕迹里。',
+];
+
+const _quanzhouAnnotations = <ReadingAnnotation>[
+  ReadingAnnotation(pinyin: 'Shàngwǔ, nǐ zǒujìn Quánzhōu Kāiyuán Sì. Dōngxī liǎng zuò shítǎ yuèguò shùshāo, ānjìng de biāojìzhe zhè zuò gǔdài gǎngkǒu chéngshì de tiānjìxiàn.', vietnamese: 'Buổi sáng, bạn bước vào chùa Khai Nguyên ở Tuyền Châu. Hai tháp đá đông tây vượt trên ngọn cây, đánh dấu đường chân trời của thành phố cảng cổ.', english: 'In the morning, you enter Kaiyuan Temple. Its east and west stone pagodas mark the skyline of the ancient port city.'),
+  ReadingAnnotation(pinyin: 'Sòng Yuán shíqī, Quánzhōu yǔ yáoyuǎn hǎiyù bǎochí màoyì wǎnglái. Shāngrén, lǚxíngzhě hé bùtóng xìnyǎng de rén zài zhèlǐ xiāngyù, liúxià duōyuán de chéngshì yíchǎn.', vietnamese: 'Thời Tống Nguyên, Tuyền Châu giao thương với những vùng biển xa. Thương nhân, lữ khách và người thuộc nhiều tín ngưỡng gặp nhau, để lại di sản đô thị đa dạng.', english: 'During the Song and Yuan periods, merchants, travellers, and many faiths met in Quanzhou’s far-reaching trade network.'),
+  ReadingAnnotation(pinyin: 'Kāiyuán Sì de shítǎ, diànyǔ hé gǔshù shǔyú zhè zhāng jiāoliú wǎngluò de yí bùfen. Jiànzhù xìjié jì yǒu dìfāng chuántǒng, yě jiànzhèng hǎishàng jiāotōng dàilái de wénhuà pèngzhuàng.', vietnamese: 'Tháp đá, điện thờ và cây cổ trong chùa là một phần của mạng lưới giao lưu ấy, vừa mang truyền thống địa phương vừa chứng kiến tiếp xúc văn hóa đường biển.', english: 'The temple’s pagodas, halls, and old trees belong to that network, joining local tradition with maritime exchange.'),
+  ReadingAnnotation(pinyin: 'Líkāi sìyuàn shí, nǐ huì fāxiàn Quánzhōu de shìjièxìng bìng bù zhǐ cúnzài yú gǎngkǒu. Tā cáng zài shítǎ, jiēxiàng hé rénmen chángqī gòngtóng shēnghuó de hénjì lǐ.', vietnamese: 'Khi rời chùa, bạn nhận ra tính quốc tế của Tuyền Châu không chỉ ở cảng mà còn trong tháp đá, phố ngõ và dấu vết chung sống lâu dài.', english: 'Quanzhou’s global character survives not only at the port, but in pagodas, lanes, and traces of shared life.'),
+];
+
+const _quanzhouWords = <WordEntry>[
+  WordEntry(word: '石塔', pinyin: 'shítǎ', partOfSpeech: '名词', simpleChinese: '用石材建成的塔。', translation: 'Tháp xây bằng đá.', englishDefinition: 'stone pagoda', symbol: '🗼'),
+  WordEntry(word: '港口', pinyin: 'gǎngkǒu', partOfSpeech: '名词', simpleChinese: '船只停靠和装卸货物的地方。', translation: 'Cảng cho tàu thuyền và hàng hóa.', englishDefinition: 'seaport', symbol: '⚓'),
+  WordEntry(word: '贸易', pinyin: 'màoyì', partOfSpeech: '名词', simpleChinese: '商品与服务的交换活动。', translation: 'Hoạt động trao đổi hàng hóa và dịch vụ.', englishDefinition: 'trade', symbol: '⛵'),
+  WordEntry(word: '信仰', pinyin: 'xìnyǎng', partOfSpeech: '名词', simpleChinese: '人所相信并尊重的宗教或思想。', translation: 'Tín ngưỡng hoặc niềm tin.', englishDefinition: 'faith or belief', symbol: '🕊️'),
+  WordEntry(word: '多元', pinyin: 'duōyuán', partOfSpeech: '形容词', simpleChinese: '由多种不同部分组成。', translation: 'Đa dạng, gồm nhiều thành phần.', englishDefinition: 'diverse and plural', symbol: '🌍'),
+  WordEntry(word: '殿宇', pinyin: 'diànyǔ', partOfSpeech: '名词', simpleChinese: '寺院或宫殿中的建筑。', translation: 'Điện thờ hoặc công trình trong đền chùa.', englishDefinition: 'temple halls', symbol: '🏛️'),
+  WordEntry(word: '古树', pinyin: 'gǔshù', partOfSpeech: '名词', simpleChinese: '生长了很多年的老树。', translation: 'Cây cổ thụ.', englishDefinition: 'ancient tree', symbol: '🌳'),
+  WordEntry(word: '街巷', pinyin: 'jiēxiàng', partOfSpeech: '名词', simpleChinese: '城市里的街道和小巷。', translation: 'Đường phố và ngõ nhỏ.', englishDefinition: 'streets and lanes', symbol: '🏘️'),
+  WordEntry(word: '海上交通', pinyin: 'hǎishàng jiāotōng', partOfSpeech: '名词', simpleChinese: '通过海洋进行的运输与往来。', translation: 'Giao thông và đi lại trên biển.', englishDefinition: 'maritime transport', symbol: '🚢'),
+];
+
+const _quanzhouDiscoveries = <DiscoveryEntry>[
+  DiscoveryEntry(text: '泉州在宋元时期是连接中国内陆与海外市场的重要海洋商贸中心。', pinyin: 'Quánzhōu zài Sòng Yuán shíqī shì liánjiē Zhōngguó nèilù yǔ hǎiwài shìchǎng de zhòngyào hǎiyáng shāngmào zhōngxīn.', simpleChinese: '宋元时期，泉州是重要的国际港口。', vietnamese: 'Thời Tống Nguyên, Tuyền Châu là trung tâm thương mại biển nối nội địa Trung Quốc với thị trường hải ngoại.', english: 'In the Song-Yuan period, Quanzhou linked China’s interior with overseas markets.'),
+  DiscoveryEntry(text: '世界遗产由二十二处代表行政、交通、生产、贸易与多元文化的遗产点组成。', pinyin: 'Shìjiè Yíchǎn yóu èrshíèr chù dàibiǎo xíngzhèng, jiāotōng, shēngchǎn, màoyì yǔ duōyuán wénhuà de yíchǎndiǎn zǔchéng.', simpleChinese: '二十二处遗产点共同讲述港口城市的运作。', vietnamese: 'Di sản gồm 22 địa điểm đại diện cho quản lý, giao thông, sản xuất, thương mại và văn hóa đa dạng.', english: 'Twenty-two component sites explain the port’s administration, transport, production, trade, and diversity.'),
+  DiscoveryEntry(text: '开元寺的殿宇、古树与双塔共同保存了古城街巷中的历史层次。', pinyin: 'Kāiyuán Sì de diànyǔ, gǔshù yǔ shuāngtǎ gòngtóng bǎocún le gǔchéng jiēxiàng zhōng de lìshǐ céngcì.', simpleChinese: '殿宇、古树和双塔保留了古城历史。', vietnamese: 'Điện thờ, cây cổ và tháp đôi của Khai Nguyên Tự cùng lưu giữ những lớp lịch sử trong phố cổ.', english: 'Temple halls, old trees, and twin pagodas preserve layers of history in the old city.'),
+  DiscoveryEntry(text: '开元寺及其东西塔是泉州系列世界遗产的重要组成部分。', pinyin: 'Kāiyuán Sì jí qí Dōngxī Tǎ shì Quánzhōu xìliè Shìjiè Yíchǎn de zhòngyào zǔchéng bùfen.', simpleChinese: '开元寺和双塔属于泉州世界遗产。', vietnamese: 'Chùa Khai Nguyên và hai tháp đông tây là thành phần quan trọng của Di sản Thế giới Tuyền Châu.', english: 'Kaiyuan Temple and its twin pagodas are important components of the serial World Heritage property.'),
+];
+
+final suzhouGardenJourney = _journeyRecord(
+  id: 'suzhou-humble-administrators-garden',
+  title: '苏州 · 拙政园：下一处等我',
+  geoNodeId: 'cn-jiangsu-suzhou-gusu-humble-administrators-garden',
+  tags: const ['苏州', '拙政园', '古典园林', '借景', '世界遗产'],
+  paragraphs: _suzhouParagraphs,
+  sourceIds: const [
+    'unesco-suzhou-classical-gardens',
+    'suzhou-garden-bureau-humble-administrators-garden',
+    'suzhou-garden-bureau-water-design',
+  ],
+);
+
+final luoyangLongmenJourney = _journeyRecord(
+  id: 'luoyang-longmen-grottoes',
+  title: '洛阳 · 龙门石窟：读一部刻在山崖上的艺术史',
+  geoNodeId: 'cn-henan-luoyang-luolong-longmen-grottoes',
+  tags: const ['洛阳', '龙门石窟', '北魏', '唐代', '石刻艺术'],
+  paragraphs: _luoyangParagraphs,
+  sourceIds: const ['unesco-luoyang-longmen-grottoes', 'ncha-luoyang-longmen-grottoes'],
+);
+
+final quanzhouKaiyuanJourney = _journeyRecord(
+  id: 'quanzhou-kaiyuan-temple',
+  title: '泉州 · 开元寺：从双塔读懂海洋商贸之城',
+  geoNodeId: 'cn-fujian-quanzhou-licheng-kaiyuan-temple',
+  tags: const ['泉州', '开元寺', '海上丝绸之路', '宋元', '世界遗产'],
+  paragraphs: _quanzhouParagraphs,
+  sourceIds: const ['unesco-quanzhou-emporium', 'quanzhou-government-kaiyuan-temple'],
+);
+
+final journeyExpansionRecords = <JourneyContentRecord>[
+  suzhouGardenJourney,
+  luoyangLongmenJourney,
+  quanzhouKaiyuanJourney,
+];
+
+final journeyExpansionExperiences = LazyJourneyList(<DailyJourneyExperienceBuilder>[
+  () => DailyJourneyExperience(
+    id: suzhouGardenJourney.id,
+    city: '苏州',
+    cityCode: 'SZV',
+    place: '拙政园',
+    appBarTitle: '苏州 · 拙政园',
+    storyTitle: '下一处等我',
+    headline: '下一处等我',
+    description: '外婆第一次让十二岁的外孙走在前面，在拙政园一次次消失又重现的视线里学着不再把他喊回来。',
+    discoveryTeaser: '长廊、建筑转折与池水开合怎样让园中视线时而隐藏、时而重新出现？',
+    distanceLabel: '1,820 km',
+    stampSymbol: '园',
+    content: suzhouGardenJourney,
+    storyAnnotations: _suzhouAnnotations,
+    words: _suzhouWords,
+    discoveries: _suzhouDiscoveries,
+    wonderQuestion: '如果你是陈玉兰，第二次看不见程朗时，你会喊他回来吗？为什么？',
+    expressQuestion: '请用两到三句话写出陈玉兰抬起手却没有喊名字的那个瞬间。',
+  ),
+  () => DailyJourneyExperience(
+    id: luoyangLongmenJourney.id,
+    city: '洛阳',
+    cityCode: 'LYA',
+    place: '龙门石窟',
+    appBarTitle: '洛阳 · 龙门石窟',
+    storyTitle: '山崖石刻故事',
+    headline: '读一部刻在山崖上的艺术史',
+    description: '沿伊河观察洞窟、造像与跨越多个时代的雕刻风格。',
+    discoveryTeaser: '为什么同一面山崖能看见不同朝代的艺术？',
+    distanceLabel: '1,470 km',
+    stampSymbol: '石',
+    content: luoyangLongmenJourney,
+    storyAnnotations: _luoyangAnnotations,
+    words: _luoyangWords,
+    discoveries: _luoyangDiscoveries,
+    wonderQuestion: '面对龙门石窟，你最想先观察整体规模还是一尊造像的细节？为什么？',
+    expressQuestion: '请用两到三句话描写石窟、山崖与伊河形成的景象。',
+  ),
+  () => DailyJourneyExperience(
+    id: quanzhouKaiyuanJourney.id,
+    city: '泉州',
+    cityCode: 'JJN',
+    place: '开元寺',
+    appBarTitle: '泉州 · 开元寺',
+    storyTitle: '海洋商贸故事',
+    headline: '从双塔读懂海洋商贸之城',
+    description: '从开元寺双塔出发，寻找宋元泉州连接世界的城市痕迹。',
+    discoveryTeaser: '为什么一座寺院能讲述古代国际港口的故事？',
+    distanceLabel: '1,250 km',
+    stampSymbol: '海',
+    content: quanzhouKaiyuanJourney,
+    storyAnnotations: _quanzhouAnnotations,
+    words: _quanzhouWords,
+    discoveries: _quanzhouDiscoveries,
+    wonderQuestion: '如果你是宋元时期来到泉州的旅行者，最想在港口寻找哪一种语言或商品？',
+    expressQuestion: '请用两到三句话介绍开元寺双塔与泉州港口历史的关系。',
+  ),
+]);
