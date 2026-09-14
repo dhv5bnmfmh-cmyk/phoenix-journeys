@@ -1,24 +1,6 @@
 name: Startup Performance Regression Audit
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'app/lib/app.dart'
-      - 'app/lib/startup_performance_probe.dart'
-      - 'app/lib/data/daily_journey_experience.dart'
-      - 'app/lib/data/journey_startup_metadata.dart'
-      - 'app/lib/screens/explore_screen.dart'
-      - 'app/lib/screens/journey_screen.dart'
-      - 'app/web/**'
-      - '.github/scripts/startup_instrument.py'
-      - '.github/scripts/measure_startup.mjs'
-      - '.github/scripts/measure_journey_open_visible.mjs'
-      - '.github/scripts/journey_level_session_harness.mjs'
-      - '.github/scripts/enforce_authoritative_story_contract.sh'
-      - '.github/workflows/startup-performance-audit.yml'
-      - '.github/workflows/preview-cloudflare.yml'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
