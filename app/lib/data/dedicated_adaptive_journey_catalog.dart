@@ -1,6 +1,7 @@
 const dedicatedAdaptiveJourneyIds = <String>{
   'beijing-summer-palace',
   'beijing-forbidden-city',
+  'beijing-temple-of-heaven',
   'shanghai-bund',
   'xian-city-wall',
   'hangzhou-west-lake',
@@ -25,6 +26,7 @@ const dedicatedAdaptiveJourneyIds = <String>{
 const canonicalExpandedDiscoveryJourneyIds = <String>{
   'beijing-summer-palace',
   'beijing-forbidden-city',
+  'beijing-temple-of-heaven',
   'xian-city-wall',
   'suzhou-humble-administrators-garden',
   'luoyang-longmen-grottoes',
