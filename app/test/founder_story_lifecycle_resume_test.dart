@@ -56,6 +56,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
 
       await tester.tap(find.byKey(const ValueKey('narration-main-control')));
+      await tester.pump(const Duration(milliseconds: 300));
       await tester.pump(const Duration(seconds: 3));
       expect(spokenTexts, hasLength(1));
 
