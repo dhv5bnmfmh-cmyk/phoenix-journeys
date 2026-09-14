@@ -39,6 +39,7 @@ void main() {
   test('Temple Lv1-Lv10 keep one context and authored 2x6 dispatch', () {
     final storyFingerprints = <String>{};
     final challengeFingerprints = <String>{};
+    final levels = <StoryChallengeSet>[];
 
     for (var level = 1; level <= 10; level += 1) {
       final prepared = JourneyPreparationCoordinator.instance.prepareNow(
@@ -51,6 +52,7 @@ void main() {
         sessionLevel: level,
         storyParagraphs: prepared.challengeSourceMaterial,
       );
+      levels.add(challenge);
 
       expect(prepared.key.phoenixLevel, level, reason: 'Lv$level key');
       expect(
@@ -84,6 +86,52 @@ void main() {
 
     expect(storyFingerprints, hasLength(10));
     expect(challengeFingerprints, hasLength(10));
+    expect(auditor.auditMatrix(levels).passed, isTrue);
+  });
+
+  test('Temple feedback and cross-Story fingerprints remain unique', () {
+    final templeFingerprints = <String>{};
+    final forbiddenFingerprints = <String>{};
+
+    for (var level = 1; level <= 10; level += 1) {
+      final prepared = JourneyPreparationCoordinator.instance.prepareNow(
+        journeyId: templeOfHeavenJourneyId,
+        profile: profile(level),
+        scriptMode: 'simplified',
+      );
+      final temple = engine.build(
+        journeyId: templeOfHeavenJourneyId,
+        sessionLevel: level,
+        storyParagraphs: prepared.challengeSourceMaterial,
+      );
+      final forbidden = engine.build(
+        journeyId: forbiddenCityJourneyId,
+        sessionLevel: level,
+        storyParagraphs: forbiddenCityStoryParagraphsByLevel[level - 1],
+      );
+
+      for (final item in temple.questions) {
+        templeFingerprints.add(_crossStoryFingerprint(item));
+        if (item.options.isNotEmpty) {
+          expect(item.distractorRationales, hasLength(4), reason: item.id);
+          expect(item.distractorRationales.toSet(), hasLength(4),
+              reason: item.id);
+          expect(
+            item.distractorRationales.every(
+              (rationale) => rationale.trim().length >= 10,
+            ),
+            isTrue,
+            reason: item.id,
+          );
+        }
+      }
+      forbiddenFingerprints.addAll(
+        forbidden.questions.map(_crossStoryFingerprint),
+      );
+    }
+
+    expect(templeFingerprints, hasLength(120));
+    expect(templeFingerprints.intersection(forbiddenFingerprints), isEmpty);
   });
 
   test('Grammar repair preserves Step 1 and Step 2 authoring evidence', () {
@@ -150,3 +198,23 @@ void main() {
     }
   });
 }
+
+String _crossStoryFingerprint(StoryChallengeQuestion item) => <String>[
+      item.mode.name,
+      item.prompt,
+      item.answer,
+      item.options.join('|'),
+      item.reasoningTarget,
+      item.whyCorrect,
+    ]
+        .join('|')
+        .replaceAll(
+          RegExp(r'沈砚|阿宁|周师傅|林桥|何予|小满'),
+          '<PERSON>',
+        )
+        .replaceAll(
+          RegExp(r'紫禁城|午门|乾清门|中轴|外朝|内廷|东侧|天坛|祈年殿|圜丘|皇穹宇'),
+          '<PLACE>',
+        )
+        .replaceAll(RegExp(r'[，。！？：；、“”\s]'), '')
+        .toLowerCase();
