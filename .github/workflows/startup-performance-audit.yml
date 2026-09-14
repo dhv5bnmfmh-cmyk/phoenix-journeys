@@ -3,7 +3,7 @@ name: Startup Performance Regression Audit
 on:
   push:
     branches:
-      - product/city-standard-v1-beijing-forbidden-city
+      - main
     paths:
       - 'app/lib/app.dart'
       - 'app/lib/startup_performance_probe.dart'
