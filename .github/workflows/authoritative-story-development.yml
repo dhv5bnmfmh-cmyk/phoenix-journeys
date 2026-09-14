@@ -35,6 +35,7 @@ jobs:
         working-directory: app
         run: >-
           flutter test --reporter expanded
+          test/beijing_temple_of_heaven_runtime_test.dart
           test/authoritative_story_challenge_contract_test.dart
           test/forbidden_city_content_uniqueness_remediation_test.dart
           test/journey_semantic_anti_template_gate_test.dart
