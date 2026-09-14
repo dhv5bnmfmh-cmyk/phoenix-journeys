@@ -2,6 +2,7 @@ import '../models/story_content.dart';
 
 export 'daily_journey_experience.dart';
 import 'beijing_story_catalog.dart';
+import 'beijing_temple_of_heaven_story.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
 import 'journey_data.dart';
@@ -80,7 +81,7 @@ const shanghaiStoryAnnotations = <ReadingAnnotation>[
     vietnamese:
         'Sáng sớm, bạn đứng bên sông Hoàng Phố. Gió sông lướt qua Bến Thượng Hải, đường nét của những tòa nhà cổ dần hiện rõ trong ánh sáng dịu.',
     english:
-        'At dawn, you stand beside the Huangpu River. The river breeze crosses the Bund as the outlines of historic buildings slowly sharpen in the soft light.',
+        'At dawn, the sky over Beijing is just beginning to brighten. You stand before a massive red palace gate as a light breeze drifts across the moat.',
   ),
   ReadingAnnotation(
     pinyin:
@@ -510,6 +511,7 @@ final dailyStorySources = <StorySourceRecord>[
 
 final dailyJourneyRecords = <JourneyContentRecord>[
   beijingForbiddenCityJourney,
+  beijingTempleOfHeavenJourney,
   summerPalaceJourneyContent,
   shanghaiBundJourney,
   xianCityWallJourney,
@@ -524,6 +526,7 @@ final dailyJourneyRecords = <JourneyContentRecord>[
 final List<String> dailyJourneyIds = List<String>.unmodifiable(
   const <String>[
     'beijing-forbidden-city',
+    'beijing-temple-of-heaven',
     'beijing-summer-palace',
     'shanghai-bund',
     'xian-city-wall',
@@ -577,6 +580,25 @@ final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function
     discoveries: discoveries,
     wonderQuestion: wonderQuestion,
     expressQuestion: expressQuestion,
+  ),
+  () => DailyJourneyExperience(
+    id: beijingTempleOfHeavenJourney.id,
+    city: '北京',
+    cityCode: 'PEK',
+    place: '天坛',
+    appBarTitle: '北京 · 天坛',
+    storyTitle: templeOfHeavenCanonicalTitle,
+    headline: '林桥删掉了全天下午最好看的圜丘镜头',
+    description: '校展截止前，林桥与何予发现一个漂亮转场把祈年殿祈谷和圜丘冬至祭天剪成了同一场礼仪。',
+    discoveryTeaser: '同属天坛的祈年殿、圜丘与皇穹宇，怎样在统一空间中承担不同礼仪关系？',
+    distanceLabel: '1,670 km',
+    stampSymbol: '坛',
+    content: beijingTempleOfHeavenJourney,
+    storyAnnotations: templeOfHeavenBaseAnnotations,
+    words: templeWords,
+    discoveries: templeOfHeavenBaseDiscoveries,
+    wonderQuestion: '林桥为什么最终删掉全天下午最好看的圜丘镜头？',
+    expressQuestion: '祈年殿祈谷与圜丘冬至祭天为什么不能被剪成同一场礼仪？',
   ),
   () => summerPalaceJourneyExperience,
   () => DailyJourneyExperience(
