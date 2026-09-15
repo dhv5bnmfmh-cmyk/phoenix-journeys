@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phoenix_journeys/data/beijing_temple_of_heaven_story.dart';
 import 'package:phoenix_journeys/data/chengdu_kuanzhai_one_pass.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/datong_yungang_gold_content.dart';
@@ -80,6 +81,12 @@ void main() {
           pingyaoAncientCityGoldLevelContent(5).storyParagraphs,
           reason: journey.id,
         );
+      } else if (journey.id == templeOfHeavenJourneyId) {
+        expect(
+          journey.content.storyParagraphs,
+          templeOfHeavenCanonicalStoryParagraphs,
+          reason: journey.id,
+        );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
         expect(journey.content.storyParagraphs, hasLength(2), reason: journey.id);
       } else if (journey.id == 'beijing-summer-palace') {
@@ -136,6 +143,12 @@ void main() {
         expect(
           journey.discoveries,
           hasLength(pingyaoAncientCityGoldLevelContent(5).discoveries.length),
+          reason: journey.id,
+        );
+      } else if (journey.id == templeOfHeavenJourneyId) {
+        expect(
+          journey.discoveries,
+          hasLength(templeOfHeavenBaseDiscoveries.length),
           reason: journey.id,
         );
       } else if (journey.id == 'jiangmen-kaiping-diaolou') {
