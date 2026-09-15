@@ -101,6 +101,6 @@ void main() {
     await state.refreshDailyJourney();
 
     expect(state.activeJourneyId, expectedDailyJourneyId);
-    expect(state.canResumeActiveJourney(resumableJourneyId), isTrue);
+    expect(state.canResumeActiveJourney(expectedDailyJourneyId), isTrue);
   });
 }
