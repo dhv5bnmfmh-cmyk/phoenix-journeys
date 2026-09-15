@@ -9,6 +9,34 @@ import '../state/access_controlled_app_state.dart';
 import '../theme/phoenix_theme.dart';
 import 'journey_screen.dart';
 
+Future<void> openJourneyDestination(
+  BuildContext context,
+  AppState state,
+  DailyJourneyExperience destinationJourney,
+) async {
+  final stories = storiesForJourney(destinationJourney);
+  if (stories.length > 1) {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => JourneyStorySelectionScreen(
+          destinationJourney: destinationJourney,
+        ),
+      ),
+    );
+    return;
+  }
+
+  final story = stories.isEmpty ? destinationJourney : stories.single;
+  await state.activateJourney(story.id);
+  if (state.journeyCompleted) await state.restartJourney();
+  if (!context.mounted) return;
+  await Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => JourneyScreen(journeyId: story.id),
+    ),
+  );
+}
+
 class JourneyStorySelectionScreen extends StatelessWidget {
   const JourneyStorySelectionScreen({
     super.key,
