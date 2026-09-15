@@ -93,6 +93,12 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(
+      find.byKey(
+        const ValueKey('journey-destination-beijing-temple-of-heaven'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('今日未开放'), findsNothing);
   });
 
@@ -180,6 +186,12 @@ void main() {
     expect(
       find.byKey(
         const ValueKey('passport-place-option-beijing-forbidden-city'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey('passport-place-option-beijing-temple-of-heaven'),
       ),
       findsOneWidget,
     );

@@ -5,7 +5,7 @@ import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/journey_picker_sheet.dart';
 
 void main() {
-  testWidgets('traveler sees only the published Beijing reference', (
+  testWidgets('traveler sees both published Beijing Journeys', (
     tester,
   ) async {
     final state = AppState(clock: () => DateTime(2026, 7, 22));
@@ -40,6 +40,12 @@ void main() {
     expect(
       find.byKey(
         const ValueKey('journey-destination-beijing-forbidden-city'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey('journey-destination-beijing-temple-of-heaven'),
       ),
       findsOneWidget,
     );

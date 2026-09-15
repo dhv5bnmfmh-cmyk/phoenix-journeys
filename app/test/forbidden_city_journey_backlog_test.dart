@@ -36,6 +36,7 @@ void main() {
         '色彩象征',
       ]),
     );
-    expect(publishedJourneyRuntimeIds, ['beijing-forbidden-city']);
+    expect(publishedJourneyRuntimeIds,
+        ['beijing-forbidden-city', 'beijing-temple-of-heaven']);
   });
 }

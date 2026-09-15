@@ -7,14 +7,14 @@ import 'package:phoenix_journeys/data/journey_startup_metadata.dart';
 import 'package:phoenix_journeys/models/city_standard.dart';
 
 void main() {
-  test('normal discovery publishes Beijing and Forbidden City Journey only',
+  test('normal discovery publishes both Beijing Journeys',
       () {
     expect(
         publishedJourneyStartupCityCatalog.map((city) => city.id), ['beijing']);
     expect(
         publishedJourneyStartupCityCatalog.single.destinations
             .map((item) => item.id),
-        ['beijing-forbidden-city']);
+        ['beijing-forbidden-city', 'beijing-temple-of-heaven']);
   });
 
   test('hidden legacy journeys remain directly resolvable', () {
@@ -31,10 +31,11 @@ void main() {
       expect(requireDailyJourneyExperience(id).id, id);
       expect(journeyPublicationState(id), PublicationState.hidden);
     }
-    expect(publishedJourneyRuntimeIds, ['beijing-forbidden-city']);
+    expect(publishedJourneyRuntimeIds,
+        ['beijing-forbidden-city', 'beijing-temple-of-heaven']);
     expect(
       hiddenLegacyJourneyRuntimeIds.length,
-      dailyJourneyIds.length - 1,
+      dailyJourneyIds.length - 2,
     );
   });
 
