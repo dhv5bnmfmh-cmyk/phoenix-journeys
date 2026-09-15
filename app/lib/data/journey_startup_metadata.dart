@@ -43,6 +43,7 @@ class JourneyStartupMetadata {
 
 const Map<String, String> _journeyStartupDescriptions = <String, String>{
   'beijing-forbidden-city': '跟随沈砚与阿宁对照两条不同路线，在相同的宫殿空间条件下，看不同任务怎样改变合理的路线选择。',
+  'beijing-temple-of-heaven': '校展截止前，林桥与何予发现一个漂亮转场把祈年殿祈谷和圜丘冬至祭天剪成了同一场礼仪。',
   'beijing-summer-palace': '冬至前后的十七孔桥光线和一张旧照片，把许澄与外婆周岚推入一次不可兼得的选择。',
   'shanghai-bund': '母亲在外滩把外祖父的旧提单交给林岸；过江以后，他不再把上海分成互不相干的过去与未来。',
   'xian-city-wall': '搬家前，周遥想用最后一圈告别城内生活；跑表越过永宁门后，他把老家与新家留在同一条路线上。',
@@ -86,6 +87,17 @@ const List<JourneyStartupMetadata> journeyStartupMetadata =
     stampSymbol: '宫',
     headline: '沈砚要让两条都走得通的路留在同一张图上',
     discoveryTeaser: '中轴、宫门与内外朝怎样共同组织紫禁城里的不同路线？',
+  ),
+  JourneyStartupMetadata(
+    id: 'beijing-temple-of-heaven',
+    city: '北京',
+    cityCode: 'PEK',
+    place: '天坛',
+    distanceLabel: '1,670 km',
+    geoNodeId: 'cn-beijing-dongcheng-temple-of-heaven',
+    stampSymbol: '坛',
+    headline: '林桥删掉了全天下午最好看的圜丘镜头',
+    discoveryTeaser: '同属天坛的祈年殿、圜丘与皇穹宇，怎样在统一空间中承担不同礼仪关系？',
   ),
   JourneyStartupMetadata(
     id: 'beijing-summer-palace',
@@ -423,6 +435,7 @@ final List<JourneyStartupCityMetadata> publishedJourneyStartupCityCatalog =
     destinations:
         List<JourneyStartupMetadata>.unmodifiable(<JourneyStartupMetadata>[
       requireJourneyStartupMetadata('beijing-forbidden-city'),
+      requireJourneyStartupMetadata('beijing-temple-of-heaven'),
     ]),
   ),
 ]);

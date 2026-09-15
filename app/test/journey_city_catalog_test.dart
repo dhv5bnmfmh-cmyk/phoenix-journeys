@@ -46,14 +46,19 @@ void main() {
     expect(paths, contains('guangzhou/chen-clan-ancestral-hall'));
   });
 
-  test('Beijing publishes two independent destination journeys', () {
+  test('Beijing keeps registered destination journeys independent', () {
     final beijing = requireJourneyCity('beijing');
 
-    expect(beijing.destinationCount, 2);
+    expect(beijing.destinationCount, 3);
     expect(
       beijing.destinations.map((journey) => journey.destinationId),
-      orderedEquals(['forbidden-city', 'summer-palace']),
+      orderedEquals([
+        'forbidden-city',
+        'temple-of-heaven',
+        'summer-palace',
+      ]),
     );
+    expect(beijing.destinationById('temple-of-heaven')?.place, '天坛');
     expect(beijing.destinationById('summer-palace')?.place, '颐和园');
     expect(
       requireDailyJourneyExperience('beijing-summer-palace').locationPath,

@@ -5,11 +5,15 @@ const referenceJourneyRuntimeId = 'beijing-forbidden-city';
 
 const publishedJourneyRuntimeIds = <String>[
   referenceJourneyRuntimeId,
+  'beijing-temple-of-heaven',
 ];
 
 PublicationState journeyPublicationState(String journeyId) {
   if (journeyId == referenceJourneyRuntimeId) {
     return PublicationState.reference;
+  }
+  if (publishedJourneyRuntimeIds.contains(journeyId)) {
+    return PublicationState.published;
   }
   if (journeyExperienceById(journeyId) != null) {
     return PublicationState.hidden;

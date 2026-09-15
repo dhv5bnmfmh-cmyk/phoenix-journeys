@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:phoenix_journeys/data/journey_city_catalog.dart';
 import 'package:phoenix_journeys/screens/city_passport_screen.dart';
+import 'package:phoenix_journeys/screens/journey_screen.dart';
+import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
 import 'package:phoenix_journeys/state/app_state.dart';
 
 void main() {
@@ -14,7 +16,7 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('Passport drills from continent to country and one city', (
+  testWidgets('Passport publishes and opens both Beijing Journeys from rendered entry', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(430, 900);
@@ -22,11 +24,48 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final state = AppState(clock: () => DateTime(2026, 7, 22));
+    const seed =
+        '0101010101010101010101010101010101010101010101010101010101010101';
+    final state = AccessControlledAppState(
+      clock: () => DateTime(2026, 7, 22, 10),
+      debugBuild: false,
+      runtimeUri: Uri.parse(
+        'https://phoenix-journeys-pr-209.7hn5tyrjgh.workers.dev/'
+        '?unlock=all&prototype=journeys',
+      ),
+      explorerSeedGenerator: () => seed,
+    );
     await state.load();
 
+    final beijing = requirePublishedJourneyCity('beijing');
+    expect(
+      beijing.destinations.map((journey) => journey.id).toList(),
+      const <String>[
+        'beijing-forbidden-city',
+        'beijing-temple-of-heaven',
+      ],
+    );
+    expect(state.isDevelopmentExperience, isTrue);
+    expect(state.canOpenJourney('beijing-forbidden-city'), isTrue);
+    expect(state.canOpenJourney('beijing-temple-of-heaven'), isTrue);
+
+    await state.activateJourney('beijing-forbidden-city');
+    await state.saveJourneyProgress(
+      step: 2,
+      wonder: 'forbidden-only-state',
+      express: '',
+      memory: '',
+    );
+    await state.activateJourney('beijing-temple-of-heaven');
+    expect(state.journeyStep, 0);
+    expect(state.wonderDraft, isEmpty);
+    await state.activateJourney('beijing-forbidden-city');
+    expect(state.journeyStep, 2);
+    expect(state.wonderDraft, 'forbidden-only-state');
+    await state.restartJourney();
+
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
+      ChangeNotifierProvider<AppState>.value(
         value: state,
         child: const MaterialApp(
           home: Scaffold(body: CityPassportScreen()),
@@ -59,6 +98,7 @@ void main() {
     );
     expect(find.text('北京收藏册'), findsNothing);
     expect(find.text('紫禁城'), findsNothing);
+    expect(find.text('天坛'), findsNothing);
 
     await tester.tap(
       find.byKey(const ValueKey('passport-country-china')),
@@ -80,9 +120,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('北京市'), findsOneWidget);
-    expect(find.text('1 段旅程'), findsOneWidget);
+    expect(find.text('2 段旅程'), findsOneWidget);
     expect(find.text('北京市 · 北京市'), findsNothing);
-    expect(find.text('东城区'), findsOneWidget);
+    expect(find.text('东城区'), findsWidgets);
     expect(find.text('海淀区'), findsNothing);
     expect(
       find.byKey(const ValueKey('passport-city-option-beijing')),
@@ -103,6 +143,14 @@ void main() {
     expect(
       find.byKey(
         const ValueKey(
+          'passport-place-option-beijing-temple-of-heaven',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey(
           'passport-place-option-beijing-summer-palace',
         ),
       ),
@@ -113,14 +161,59 @@ void main() {
       findsOneWidget,
     );
 
+    await tester.tap(
+      find.byKey(
+        const ValueKey('passport-place-option-beijing-forbidden-city'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JourneyScreen), findsOneWidget);
+    expect(
+      tester.widget<JourneyScreen>(find.byType(JourneyScreen)).journeyId,
+      'beijing-forbidden-city',
+    );
+    expect(state.activeJourneyId, 'beijing-forbidden-city');
+    expect(state.activeJourney.storyTitle, '两条路，一张图');
+    expect(state.journeyStep, 0);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey('passport-place-option-beijing-temple-of-heaven'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(JourneyScreen), findsOneWidget);
+    expect(
+      tester.widget<JourneyScreen>(find.byType(JourneyScreen)).journeyId,
+      'beijing-temple-of-heaven',
+    );
+    expect(state.activeJourneyId, 'beijing-temple-of-heaven');
+    expect(state.activeJourney.storyTitle, '被删掉的最好镜头');
+    expect(state.journeyStep, 0);
+    expect(state.wonderDraft, isEmpty);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const ValueKey('passport-city-beijing')));
     await tester.pumpAndSettle();
 
-    expect(find.text('北京市 · 1 段旅程'), findsOneWidget);
+    expect(find.text('北京市 · 2 段旅程'), findsOneWidget);
     expect(find.text('北京市 · 北京市'), findsNothing);
     expect(
       find.byKey(
         const ValueKey('passport-destination-beijing-forbidden-city'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey('passport-destination-beijing-temple-of-heaven'),
       ),
       findsOneWidget,
     );
@@ -131,6 +224,7 @@ void main() {
       findsNothing,
     );
     expect(find.text('故宫博物院'), findsWidgets);
+    expect(find.text('天坛'), findsWidgets);
     expect(find.text('颐和园'), findsNothing);
   });
 
@@ -205,8 +299,9 @@ void main() {
     await state.toggleScript();
     await tester.pumpAndSettle();
 
-    expect(find.text('東城區'), findsOneWidget);
+    expect(find.text('東城區'), findsWidgets);
     expect(find.text('故宮博物院'), findsOneWidget);
+    expect(find.text('天壇'), findsOneWidget);
     expect(find.text('海淀區'), findsNothing);
     expect(find.text('頤和園'), findsNothing);
     expect(find.text('北京市 · 北京市'), findsNothing);
@@ -328,8 +423,8 @@ void main() {
     final viewport = find.byKey(const ValueKey('passport-map-viewport'));
     final initialViewport = tester.getRect(viewport);
     final viewer = tester.widget<InteractiveViewer>(
-      find.byKey(const ValueKey('passport-pinch-zoom-map')),
-    );
+      find.byKey(const ValueKey('passport-pinch-zoom-map'),
+    ));
     final controller = viewer.transformationController!;
 
     void setZoomedTransform() {
