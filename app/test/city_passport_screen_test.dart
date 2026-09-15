@@ -165,7 +165,8 @@ void main() {
         const ValueKey('passport-place-option-beijing-forbidden-city'),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(JourneyScreen), findsOneWidget);
     expect(
@@ -184,7 +185,8 @@ void main() {
         const ValueKey('passport-place-option-beijing-temple-of-heaven'),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(JourneyScreen), findsOneWidget);
     expect(

@@ -228,7 +228,7 @@ void main() {
     expect(state.explorerSeedFailureReason, contains('persistence failed'));
   });
 
-  test('single Reference Journey is stable across both daily slots', () async {
+  test('published Journeys are stable across both daily slots', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 8);
     final state = productionState(clock: () => now);
@@ -239,8 +239,10 @@ void main() {
 
     expect(refreshed.morningJourneyId, first.morningJourneyId);
     expect(refreshed.afternoonJourneyId, first.afternoonJourneyId);
-    expect(first.morningJourneyId, referenceJourneyRuntimeId);
-    expect(first.afternoonJourneyId, referenceJourneyRuntimeId);
+    expect(
+      {first.morningJourneyId, first.afternoonJourneyId},
+      publishedJourneyRuntimeIds.toSet(),
+    );
     expect(state.releasedDailyJourneyIds, {first.morningJourneyId});
     expect(state.todayJourney.id, first.morningJourneyId);
 
@@ -249,7 +251,7 @@ void main() {
       first.morningJourneyId,
       first.afternoonJourneyId,
     });
-    expect(state.releasedDailyJourneyIds, hasLength(1));
+    expect(state.releasedDailyJourneyIds, hasLength(2));
     expect(state.todayJourney.id, first.afternoonJourneyId);
   });
 
@@ -454,7 +456,7 @@ void main() {
     expect(committed['activeJourneyId'], referenceJourneyRuntimeId);
   });
 
-  test('date rollover keeps the only published Beijing Journey', () async {
+  test('date rollover keeps the published Beijing Journey catalog', () async {
     SharedPreferences.setMockInitialValues({});
     var now = DateTime(2026, 8, 3, 10);
     final state = productionState(clock: () => now);
@@ -465,7 +467,9 @@ void main() {
 
     expect(state.activeJourneyId, referenceJourneyRuntimeId);
     expect(
-        state.policyAccessibleRegularJourneyIds, {referenceJourneyRuntimeId});
+      state.policyAccessibleRegularJourneyIds,
+      publishedJourneyRuntimeIds.toSet(),
+    );
   });
 
   test('held Special Journeys stay unpublished even when locally listed',

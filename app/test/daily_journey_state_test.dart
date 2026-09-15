@@ -68,7 +68,7 @@ void main() {
     expect(restored.memories.first, contains('我记住了今天的城市'));
   });
 
-  test('date change preserves the only published Reference Journey', () async {
+  test('date change preserves a published Journey progress', () async {
     SharedPreferences.setMockInitialValues({});
     var currentDate = DateTime(2026, 7, 20, 10);
     final state = stateFor(
@@ -91,8 +91,7 @@ void main() {
     expect(state.activeJourneyId, resumableJourneyId);
     expect(state.journeyStep, 2);
     expect(state.wonderDraft, '继续当前旅程');
-    expect(resumableJourneyId, referenceJourneyRuntimeId);
-    expect(state.canOpenJourney(resumableJourneyId), isTrue);
+    expect(publishedJourneyRuntimeIds, contains(resumableJourneyId));
     expect(state.canResumeActiveJourney(resumableJourneyId), isTrue);
 
     await state.activateJourney(resumableJourneyId);

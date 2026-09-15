@@ -43,7 +43,7 @@ void main() {
     expect(beijing.name, '北京市');
     expect(beijing.cityIds, ['beijing']);
     expect(beijing.cityCount, 1);
-    expect(beijing.journeyCount, 2);
+    expect(beijing.journeyCount, 3);
     expect(shanghai.isMunicipality, isTrue);
     expect(shanghai.name, '上海市');
     expect(shanghai.cityIds, ['shanghai']);
