@@ -88,7 +88,7 @@ const supplementalDailyStorySources = <StorySourceRecord>[
     title: 'Imperial Palaces of the Ming and Qing Dynasties in Beijing and Shenyang',
     publisher: 'UNESCO World Heritage Centre',
     url: 'https://whc.unesco.org/en/list/439',
-    kind: StorySourceKind.institutional,
+    kind: StorySourceKind.unesco,
     languageCode: 'en',
     geoNodeIds: ['cn-beijing-dongcheng-forbidden-city'],
     verificationStatus: StoryVerificationStatus.verified,
