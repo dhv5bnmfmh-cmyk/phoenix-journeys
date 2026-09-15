@@ -1,8 +1,9 @@
 import '../agents/phoenix_world_story_agent.dart';
 import '../data/daily_journey_catalog.dart';
+import '../data/journey_startup_metadata.dart';
+import '../data/journey_story_identity.dart';
 import '../data/world_geo_catalog.dart';
 import '../models/geo_node.dart';
-import '../data/journey_startup_metadata.dart';
 
 class JourneyMapPoint {
   const JourneyMapPoint({required this.x, required this.y});
@@ -27,6 +28,8 @@ class JourneyLocationBinding {
         _journeyId = journey.id,
         _cityId = journey.cityId,
         _destinationId = journey.destinationId,
+        _storyId = journey.storyId,
+        _isPrimaryStory = journey.isPrimaryStory,
         _locationPath = journey.locationPath;
 
   JourneyLocationBinding._startup({
@@ -36,13 +39,18 @@ class JourneyLocationBinding {
   })  : _journey = null,
         _journeyId = metadata.id,
         _cityId = metadata.cityId,
-        _destinationId = metadata.destinationId,
-        _locationPath = metadata.locationPath;
+        _destinationId = journeyStoryIdentityFor(metadata.id).destinationId,
+        _storyId = journeyStoryIdentityFor(metadata.id).storyId,
+        _isPrimaryStory = journeyStoryIdentityFor(metadata.id).isPrimaryStory,
+        _locationPath =
+            '${metadata.cityId}/${journeyStoryIdentityFor(metadata.id).destinationId}';
 
   final DailyJourneyExperience? _journey;
   final String _journeyId;
   final String _cityId;
   final String _destinationId;
+  final String _storyId;
+  final bool _isPrimaryStory;
   final String _locationPath;
 
   DailyJourneyExperience get journey =>
@@ -108,12 +116,24 @@ class JourneyLocationBinding {
   String get journeyId => _journeyId;
   String get cityId => _cityId;
   String get destinationId => _destinationId;
+  String get storyId => _storyId;
+  bool get isPrimaryStory => _isPrimaryStory;
   String get locationPath => _locationPath;
+  String get storyPath => '$locationPath/$storyId';
   String get geoNodeId => placeNode.id;
-  String get storageNamespace => 'journey.$locationPath';
+
+  // Existing single-story destinations and the primary Story retain their
+  // stable namespace, so Founder-approved Golden progress/resume remains
+  // byte-for-byte compatible. Additional Stories receive an explicit
+  // story-scoped namespace and therefore cannot leak state into the primary.
+  String get storageNamespace => isPrimaryStory
+      ? 'journey.$locationPath'
+      : 'journey.$locationPath.story.$storyId';
   String get legacyStorageNamespace => 'journey.$journeyId';
-  String get generatedBackgroundDirectory =>
-      'assets/images/backgrounds/generated/$locationPath/';
+
+  String get generatedBackgroundDirectory => isPrimaryStory
+      ? 'assets/images/backgrounds/generated/$locationPath/'
+      : 'assets/images/backgrounds/generated/$locationPath/$storyId/';
 
   double get latitude => placeNode.latitude!;
   double get longitude => placeNode.longitude!;
@@ -328,20 +348,13 @@ Map<String, JourneyLocationBinding> buildJourneyLocationBindingsForValidation(
   Iterable<DailyJourneyExperience> journeys,
 ) {
   final bindings = <String, JourneyLocationBinding>{};
-  final paths = <String>{};
-  final geoNodeIds = <String>{};
+  final storyIdentities = <String>{};
 
   for (final journey in journeys) {
     final binding = _buildJourneyLocationBinding(journey);
-    if (!paths.add(binding.locationPath)) {
-      throw StateError(
-        'Duplicate Journey location path: ${binding.locationPath}.',
-      );
-    }
-    if (!geoNodeIds.add(binding.geoNodeId)) {
-      throw StateError(
-        'Duplicate Journey GeoNode binding: ${binding.geoNodeId}.',
-      );
+    final identityKey = '${binding.locationPath}/${binding.storyId}';
+    if (!storyIdentities.add(identityKey)) {
+      throw StateError('Duplicate Journey Story identity: $identityKey.');
     }
     if (bindings.containsKey(journey.id)) {
       throw StateError('Duplicate Journey ID: ${journey.id}.');
