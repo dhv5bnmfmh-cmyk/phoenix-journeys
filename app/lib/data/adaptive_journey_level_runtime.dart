@@ -7,6 +7,7 @@ import '../services/narrative_quality_shaper.dart';
 import '../services/phoenix_story_length_policy.dart';
 import '../services/special_journey_story_length_expander.dart';
 import 'all_journey_language_level_catalog.dart';
+import 'authored_journey_level_catalog.dart';
 import 'batch_one_adaptive_story_levels.dart';
 import 'daily_journey_experience.dart';
 import 'dedicated_adaptive_journey_catalog.dart';
@@ -72,6 +73,13 @@ JourneyLevelContent resolveAdaptiveJourneyLevel(
   required ChineseProficiencyProfile profile,
   Set<String> knownWords = const <String>{},
 }) {
+  final registered = resolveRegisteredAuthoredJourneyLevel(
+    experience,
+    profile: profile,
+    knownWords: knownWords,
+  );
+  if (registered != null) return registered;
+
   if (!usesDedicatedAdaptiveJourneyRuntime(experience.id)) {
     return resolveSharedAdaptiveJourneyLevel(
       experience,
