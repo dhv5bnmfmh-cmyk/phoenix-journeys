@@ -1,19 +1,16 @@
 import '../models/journey_challenge.dart';
+import 'authored_journey_challenge_catalog.dart';
 import 'challenge_option_balancer.dart';
-import 'forbidden_city_challenge_level_standard.dart';
 import 'journey_challenge_engine_legacy.dart' as legacy;
 
 export 'journey_challenge_engine_legacy.dart'
     hide JourneyChallengeEngine, ChallengeAntiTemplateAuditor;
 
-const _forbiddenCityJourneyId = 'beijing-forbidden-city';
-
 /// Single product-facing Challenge entry point.
 ///
-/// Golden Forbidden City uses the Founder-approved explicitly authored 2×6
-/// package. Other existing Journeys retain their current legacy content path
-/// until they are deliberately migrated through the same authoritative
-/// contract. Final A/B/C/D order remains deterministic and content-preserving.
+/// Explicitly authored Stories register content builders in one shared lookup.
+/// All visual behavior, answer balancing, feedback, auditing and lifecycle stay
+/// in this product engine; unregistered Journeys retain the legacy content path.
 class JourneyChallengeEngine {
   const JourneyChallengeEngine();
 
@@ -22,16 +19,16 @@ class JourneyChallengeEngine {
     required int sessionLevel,
     required List<String> storyParagraphs,
   }) {
-    final authored = journeyId == _forbiddenCityJourneyId
-        ? buildForbiddenCityGoldenChallenge(
-            level: sessionLevel,
-            storyParagraphs: storyParagraphs,
-          )
-        : const legacy.JourneyChallengeEngine().build(
-            journeyId: journeyId,
-            sessionLevel: sessionLevel,
-            storyParagraphs: storyParagraphs,
-          );
+    final authored = buildRegisteredAuthoredChallenge(
+          journeyId: journeyId,
+          sessionLevel: sessionLevel,
+          storyParagraphs: storyParagraphs,
+        ) ??
+        const legacy.JourneyChallengeEngine().build(
+          journeyId: journeyId,
+          sessionLevel: sessionLevel,
+          storyParagraphs: storyParagraphs,
+        );
     return _balanceRenderedMultipleChoiceOrder(authored);
   }
 }
@@ -161,14 +158,14 @@ StoryChallengeQuestion _copyQuestion(
       signature: source.signature,
     );
 
-/// The existing Semantic Anti-Template gate, extended to the active 2×6
-/// Challenge contract. This remains the single active Challenge auditor.
+/// The existing Semantic Anti-Template gate, extended to every authored 2×6
+/// Challenge package registered in the single shared product registry.
 class ChallengeAntiTemplateAuditor {
   const ChallengeAntiTemplateAuditor();
 
   ChallengeAuditReport audit(StoryChallengeSet set) {
     final failures = <String>[];
-    if (set.journeyId == _forbiddenCityJourneyId) {
+    if (authoredChallengeJourneyIds.contains(set.journeyId)) {
       if (set.questions.length != 12) failures.add('question-count');
       for (final mode in _goldenModes) {
         if (set.questions.where((q) => q.mode == mode).length != 2) {
@@ -416,9 +413,9 @@ bool _trivialAdjacentVariation(
 }
 
 String _normalize(String value) => value
-    .replaceAll(RegExp(r'沈砚|阿宁|周师傅'), '<PERSON>')
+    .replaceAll(RegExp(r'沈砚|阿宁|周师傅|白昀|杜衡'), '<PERSON>')
     .replaceAll(
-      RegExp(r'紫禁城|午门|乾清门|中轴|外朝|内廷|东侧'),
+      RegExp(r'紫禁城|午门|乾清门|中轴|外朝|内廷|东侧|武英殿'),
       '<PLACE>',
     )
     .replaceAll(RegExp(r'[，。！？：；、“”\s]'), '')
