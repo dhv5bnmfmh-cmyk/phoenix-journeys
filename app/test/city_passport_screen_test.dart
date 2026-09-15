@@ -7,7 +7,6 @@ import 'package:phoenix_journeys/data/journey_city_catalog.dart';
 import 'package:phoenix_journeys/screens/city_passport_screen.dart';
 import 'package:phoenix_journeys/screens/journey_screen.dart';
 import 'package:phoenix_journeys/state/access_controlled_app_state.dart';
-import 'package:phoenix_journeys/state/app_state.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -423,8 +422,8 @@ void main() {
     final viewport = find.byKey(const ValueKey('passport-map-viewport'));
     final initialViewport = tester.getRect(viewport);
     final viewer = tester.widget<InteractiveViewer>(
-      find.byKey(const ValueKey('passport-pinch-zoom-map'),
-    ));
+      find.byKey(const ValueKey('passport-pinch-zoom-map')),
+    );
     final controller = viewer.transformationController!;
 
     void setZoomedTransform() {
