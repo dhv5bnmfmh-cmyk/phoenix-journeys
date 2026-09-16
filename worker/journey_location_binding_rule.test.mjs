@@ -18,7 +18,9 @@ const location = readFileSync(
 );
 
 test('map, records and backgrounds share one Journey location binding', () => {
-  assert.match(location, /storageNamespace => 'journey\.\$locationPath'/);
+  assert.match(location, /String get storageNamespace => isPrimaryStory/);
+  assert.match(location, /\? 'journey\.\$locationPath'/);
+  assert.match(location, /: 'journey\.\$locationPath\.story\.\$storyId'/);
   assert.match(location, /generatedBackgroundDirectory/);
   assert.match(location, /placeNode\.latitude/);
   assert.match(location, /placeNode\.longitude/);

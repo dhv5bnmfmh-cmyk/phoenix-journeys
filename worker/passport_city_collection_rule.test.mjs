@@ -7,6 +7,10 @@ const passport = readFileSync(
   'app/lib/screens/city_passport_screen.dart',
   'utf8',
 );
+const storySelection = readFileSync(
+  'app/lib/screens/journey_story_selection_screen.dart',
+  'utf8',
+);
 
 test('Home uses the city-grouped Passport screen', () => {
   assert.match(shell, /import 'city_passport_screen\.dart';/);
@@ -31,8 +35,11 @@ test('Passport tiles render a compact layered journey symbol and name', () => {
   assert.match(passport, /size: 50/);
   assert.match(passport, /state\.displayText\(location\.placeName\)/);
   assert.match(passport, /state\.displayText\(location\.districtName!\)/);
-  assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
-  assert.match(passport, /state\.activateJourney\(journey\.id\)/);
+  assert.match(passport, /openJourneyDestination\(context, state, journey\)/);
+  assert.match(storySelection, /storiesForJourney\(destinationJourney\)/);
+  assert.match(storySelection, /JourneyStorySelectionScreen\(/);
+  assert.match(storySelection, /state\.activateJourney\(story\.id\)/);
+  assert.match(storySelection, /JourneyScreen\(journeyId: story\.id\)/);
   assert.doesNotMatch(passport, /journey\.description/);
   assert.doesNotMatch(passport, /LinearProgressIndicator/);
   assert.doesNotMatch(passport, /JourneyShareButton/);
