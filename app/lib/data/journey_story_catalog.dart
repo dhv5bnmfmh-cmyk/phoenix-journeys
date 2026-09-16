@@ -1,5 +1,4 @@
 import 'daily_journey_catalog.dart';
-import 'daily_journey_experience.dart';
 import 'forbidden_city_story_two_content.dart';
 
 /// Shared Story registry for a Destination. Product behavior keys only on the
