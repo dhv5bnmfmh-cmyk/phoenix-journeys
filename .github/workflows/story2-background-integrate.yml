@@ -33,9 +33,9 @@ jobs:
             10-quiet-palace-edge
           )
           for i in $(seq 0 9); do
-            col=$((i % 5)); row=$((i / 5)); x=$((col * 180)); y=$((row * 320))
+            col=$((i % 5)); row=$((i / 5)); x=$((col * 90)); y=$((row * 160))
             ffmpeg -hide_banner -loglevel error -y -i "$src" \
-              -vf "crop=180:320:${x}:${y},scale=360:640:flags=lanczos" \
+              -vf "crop=90:160:${x}:${y},scale=360:640:flags=lanczos" \
               -frames:v 1 -c:v libwebp -quality 68 "$out/${names[$i]}.webp"
           done
           rm "$src"
