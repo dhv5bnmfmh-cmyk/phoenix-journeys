@@ -45,7 +45,7 @@ class _ChoiceSpec {
     this.knowledge,
     this.learning,
     this.reasoning,
-    [this.sourceLabel = '当前 Story / Story 2 Discovery'],
+    [this.sourceLabel = '当前 Story / Story 2 Discovery']
   );
   final String prompt;
   final String answer;
