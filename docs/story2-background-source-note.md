@@ -1,0 +1,1 @@
+Story 2 reviewed art source is stored as the deterministic contact-sheet payload under the Story-scoped generated-background directory. Release materialization is reproducible from that source; the ten reviewed runtime slots are declared in journey_background_story_two.dart.

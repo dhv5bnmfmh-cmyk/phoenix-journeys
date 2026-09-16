@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import '../models/story_content.dart';
 import 'journey_data.dart';
+import 'journey_story_identity.dart';
 import 'luoyang_longmen_one_pass.dart';
 
 class DailyJourneyExperience {
@@ -97,27 +98,24 @@ class DailyJourneyExperience {
   String get expressQuestion =>
       _isLongmenGold ? _longmenBase.expressQuestion : _expressQuestion;
 
+  JourneyStoryIdentity get storyIdentity => journeyStoryIdentityFor(id);
+
   String get cityId {
     final separator = id.indexOf('-');
     return separator <= 0 ? id : id.substring(0, separator);
   }
 
-  String get destinationId {
-    if (id == 'guangzhou-chen-clan-academy') {
-      return 'chen-clan-ancestral-hall';
-    }
-    final separator = id.indexOf('-');
-    if (separator < 0 || separator == id.length - 1) return id;
-    return id.substring(separator + 1);
-  }
+  String get destinationId => storyIdentity.destinationId;
+  String get storyId => storyIdentity.storyId;
+  bool get isPrimaryStory => storyIdentity.isPrimaryStory;
 
   String get geoNodeId => _content.geoNodeId;
 
   String get locationPath => '$cityId/$destinationId';
+  String get storyPath => '$locationPath/$storyId';
 
   String get stampTitle => '$city · $place';
 }
-
 
 class DeferredDailyJourneyExperience extends DailyJourneyExperience {
   // ignore: use_super_parameters
@@ -202,7 +200,6 @@ class DeferredDailyJourneyExperience extends DailyJourneyExperience {
   @override
   String get geoNodeId => _identityGeoNodeId;
 }
-
 
 typedef DailyJourneyExperienceBuilder = DailyJourneyExperience Function();
 

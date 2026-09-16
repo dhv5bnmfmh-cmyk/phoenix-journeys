@@ -4,6 +4,7 @@ export 'daily_journey_experience.dart';
 import 'beijing_story_catalog.dart';
 import 'daily_journey_experience.dart';
 import 'extended_journey_catalog.dart';
+import 'forbidden_city_story_two_content.dart';
 import 'journey_data.dart';
 import 'journey_expansion_catalog.dart';
 import 'journey_expansion_batch_two.dart';
@@ -644,6 +645,7 @@ final dailyJourneyExperiences = LazyJourneyList(<DailyJourneyExperience Function
 
 final allJourneyExperiences = <DailyJourneyExperience>[
   ...dailyJourneyExperiences,
+  forbiddenCityStoryTwoExperience,
   ...specialJourneyExperiences,
 ];
 
@@ -656,6 +658,9 @@ final List<WordEntry> allDailyJourneyWords = List<WordEntry>.unmodifiable(
 
 DailyJourneyExperience? journeyExperienceById(String id) {
   if (id.isEmpty) return null;
+  if (id == forbiddenCityStoryTwoJourneyId) {
+    return forbiddenCityStoryTwoExperience;
+  }
   final dailyIndex = _dailyJourneyIndexById[id];
   if (dailyIndex != null) {
     return dailyJourneyExperiences[dailyIndex];

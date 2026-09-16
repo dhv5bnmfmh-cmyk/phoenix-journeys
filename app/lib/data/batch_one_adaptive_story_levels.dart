@@ -4,11 +4,13 @@ import 'batch_one_journey_remediation.dart';
 import 'chengdu_kuanzhai_one_pass.dart';
 import 'daily_journey_experience.dart';
 import 'datong_yungang_gold_content.dart';
+import 'forbidden_city_story_two_content.dart';
 import 'hangzhou_west_lake_one_pass.dart';
 import 'honghe_hani_rice_terraces_gold_content.dart';
 import 'pingyao_ancient_city_gold_content.dart';
 import 'journey_data.dart';
 import 'journey_level_catalog.dart';
+import 'journey_story_identity.dart';
 import 'kaiping_diaolou_gold.dart';
 import 'lijiang_old_town_gold_content.dart';
 import 'luoyang_longmen_level_depth.dart';
@@ -70,9 +72,6 @@ JourneyLevelContent _withLijiangLv10Vocabulary(
   );
 }
 
-/// Thin adaptive adapter over canonical one-pass content packages.
-/// Story, Words, Discovery, Challenge, Memory, and Completion remain immutable
-/// content definitions; narration/progress updates never rebuild them.
 String shanghaiBundWonderQuestionForLevel(int requestedLevel) {
   final level = requestedLevel.clamp(1, 10).toInt();
   if (level == 1) {
@@ -379,10 +378,57 @@ BatchOneJourneyMemorySpec _xianCityWallMemorySpecForLevel(int phoenixLevel) {
   );
 }
 
+BatchOneJourneyMemorySpec _forbiddenCityStoryTwoMemorySpecForLevel(
+  int phoenixLevel,
+) {
+  final level = phoenixLevel.clamp(1, 10).toInt();
+  final memory = forbiddenCityStoryTwoMemoryForLevel(level);
+  return BatchOneJourneyMemorySpec(
+    storyResult:
+        '白昀最终没有继续加灯。她让复制书页、武英殿的木构与一圈没有被抹掉的暗边同时留在镜头里，并承担画面可能不够“漂亮”的创作代价。',
+    culturalPoint:
+        '武英殿的宫廷刊书历史、木构遗产风险与历代修缮重建共同决定了这次拍摄的边界；地点不是背景，而是判断依据的一部分。',
+    reviews: const <RemediatedMemoryReview>[
+      RemediatedMemoryReview(
+        category: 'choice',
+        prompt: '最后一次拍摄前，白昀真正决定了什么？',
+        answer: '她撤回临时加灯方案，改用已有光线、反光板与相机设置完成拍摄。',
+        storyEventIds: <String>['light-limit-choice'],
+      ),
+      RemediatedMemoryReview(
+        category: 'evidence',
+        prompt: '哪几类证据共同改变了她的判断？',
+        answer: '现场风险、原有核定条件、武英殿刊书史以及建筑损毁与重建留下的时间层次。',
+        storyEventIds: <String>['risk-evidence', 'printing-history', 'rebuild-layer'],
+      ),
+      RemediatedMemoryReview(
+        category: 'relationship',
+        prompt: '白昀和杜衡的关系最后发生了什么变化？',
+        answer: '白昀不再把杜衡当成只会说“不行”的人，杜衡也不再替她做创作决定；两人开始用同一组依据讨论边界。',
+        storyEventIds: <String>['shared-judgment'],
+      ),
+      RemediatedMemoryReview(
+        category: 'memory',
+        prompt: '这段 Journey 最值得留下的具体画面是什么？',
+        answer: '一束光停在旧纸边缘，暗处没有被补掉，武英殿仍然在画面里。',
+        storyEventIds: <String>['memory-anchor'],
+      ),
+    ],
+    longTermAnchor: memory.anchor,
+    completionSummary: '${memory.closure} ${memory.learning}',
+  );
+}
+
 BatchOneJourneyMemorySpec? batchOneMemorySpecFor(
   String journeyId, {
   int? phoenixLevel,
 }) {
+  if (journeyId == forbiddenCityStoryTwoJourneyId) {
+    return _forbiddenCityStoryTwoMemorySpecForLevel(
+      phoenixLevel ?? PhoenixLevelController.instance.level,
+    );
+  }
+
   if (journeyId == shanghaiBundJourneyId) {
     return _shanghaiBundMemorySpecForLevel(
       phoenixLevel ?? PhoenixLevelController.instance.level,
