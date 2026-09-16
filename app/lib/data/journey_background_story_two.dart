@@ -18,7 +18,7 @@ final forbiddenCityStoryTwoBackgrounds = <JourneyBackgroundAsset>[
       id: '$forbiddenCityStoryTwoJourneyId-$assetName',
       journeyId: forbiddenCityStoryTwoJourneyId,
       assetPath:
-          'assets/images/backgrounds/generated/beijing/forbidden-city/wuying-hall-light-limit/$assetName.webp',
+          'assets/images/backgrounds/generated/beijing/forbidden-city/wuying-hall-light-limit/$assetName.png',
       generatedOn: DateTime.utc(2026, 9, 16),
       origin: JourneyBackgroundOrigin.aiGenerated,
       complianceReviewed: true,
