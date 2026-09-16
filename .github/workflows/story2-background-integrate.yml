@@ -17,9 +17,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          payload='app/assets/images/backgrounds/generated/beijing/forbidden-city/wuying-hall-light-limit/contact.webp.b64'
           src='app/assets/images/backgrounds/generated/beijing/forbidden-city/wuying-hall-light-limit/contact.webp'
           out='app/assets/images/backgrounds/generated/beijing/forbidden-city/wuying-hall-light-limit'
-          test -f "$src"
+          test -f "$payload"
+          base64 -d "$payload" > "$src"
           names=(
             01-palace-axis-soft-morning
             02-roofline-haze
@@ -38,7 +40,7 @@ jobs:
               -vf "crop=90:160:${x}:${y},scale=360:640:flags=lanczos" \
               -frames:v 1 -c:v libwebp -quality 68 "$out/${names[$i]}.webp"
           done
-          rm "$src"
+          rm "$src" "$payload"
           python3 - <<'PY'
           from pathlib import Path
           catalog = Path('app/lib/data/journey_background_catalog.dart')
