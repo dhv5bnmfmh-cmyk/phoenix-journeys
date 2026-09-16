@@ -12,11 +12,11 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  test('every regular and special Journey has a unique location binding', () {
+  test('every regular and special Story has a unique location binding', () {
     expect(journeyLocationBindings, hasLength(allJourneyExperiences.length));
 
-    final paths = <String>{};
-    final geoNodes = <String>{};
+    final storyPaths = <String>{};
+    final storageNamespaces = <String>{};
     final mapPoints = <JourneyMapPoint>{};
     for (final journey in allJourneyExperiences) {
       final binding = requireJourneyLocation(journey.id);
@@ -31,8 +31,8 @@ void main() {
         binding.generatedBackgroundDirectory,
         contains('/${journey.locationPath}/'),
       );
-      expect(paths.add(binding.locationPath), isTrue);
-      expect(geoNodes.add(binding.geoNodeId), isTrue);
+      expect(storyPaths.add(binding.storyPath), isTrue);
+      expect(storageNamespaces.add(binding.storageNamespace), isTrue);
       mapPoints.add(binding.mapPoint);
     }
 

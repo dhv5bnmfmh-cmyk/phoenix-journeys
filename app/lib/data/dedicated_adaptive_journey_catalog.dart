@@ -23,6 +23,7 @@ const dedicatedAdaptiveJourneyIds = <String>{
 /// This set is about active content-shape governance. It is deliberately not an
 /// Approved Gold registry and must never be used as a promotion signal.
 const canonicalExpandedDiscoveryJourneyIds = <String>{
+  'beijing-forbidden-city-wuying-hall-light',
   'beijing-summer-palace',
   'beijing-forbidden-city',
   'xian-city-wall',

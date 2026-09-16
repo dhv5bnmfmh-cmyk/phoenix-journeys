@@ -12,6 +12,7 @@ import 'package:phoenix_journeys/services/journey_challenge_engine.dart';
 import 'package:phoenix_journeys/services/journey_location_binding.dart';
 import 'package:phoenix_journeys/state/app_state.dart';
 import 'package:phoenix_journeys/widgets/hsk_story_challenge.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -174,9 +175,13 @@ void main() {
   testWidgets('shared Story selector renders both Forbidden City Stories',
       (tester) async {
     final golden = requireDailyJourneyExperience(forbiddenCityGoldenJourneyId);
+    final state = AppState(clock: () => DateTime(2026, 9, 16));
     await tester.pumpWidget(
-      MaterialApp(
-        home: JourneyStorySelectionScreen(destinationJourney: golden),
+      ChangeNotifierProvider<AppState>.value(
+        value: state,
+        child: MaterialApp(
+          home: JourneyStorySelectionScreen(destinationJourney: golden),
+        ),
       ),
     );
     await tester.pump();
@@ -220,7 +225,9 @@ void main() {
 
     expect(find.text('STEP 1 · 哪里错？'), findsOneWidget);
     expect(grammar.errorSegments.length, 4);
-    await tester.tap(find.byKey(const ValueKey('grammar-location-0')));
+    await tester.tap(
+      find.byKey(ValueKey('grammar-location-${grammar.errorSegmentIndex}')),
+    );
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pump();
     expect(find.byKey(const ValueKey('grammar-step1-continue')), findsOneWidget);
