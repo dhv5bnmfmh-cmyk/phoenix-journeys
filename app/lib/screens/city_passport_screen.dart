@@ -10,7 +10,7 @@ import '../services/journey_location_binding.dart';
 import '../state/access_controlled_app_state.dart';
 import '../theme/phoenix_theme.dart';
 import '../widgets/journey_symbol_badge.dart';
-import 'journey_screen.dart';
+import 'journey_story_selection_screen.dart';
 
 class CityPassportScreen extends StatelessWidget {
   const CityPassportScreen({super.key});
@@ -476,14 +476,8 @@ class _PassportPlaceRail extends StatelessWidget {
   Future<void> _openDestination(
     BuildContext context,
     DailyJourneyExperience journey,
-  ) async {
-    await state.activateJourney(journey.id);
-    if (state.journeyCompleted) await state.restartJourney();
-    if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journey.id)),
-    );
-  }
+  ) =>
+      openJourneyDestination(context, state, journey);
 
   @override
   Widget build(BuildContext context) {
@@ -1185,12 +1179,8 @@ class _DestinationStampTile extends StatelessWidget {
 
   Future<void> _openJourney(BuildContext context) async {
     Navigator.of(context).pop();
-    await state.activateJourney(journey.id);
-    if (state.journeyCompleted) await state.restartJourney();
     if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => JourneyScreen(journeyId: journey.id)),
-    );
+    await openJourneyDestination(context, state, journey);
   }
 
   @override

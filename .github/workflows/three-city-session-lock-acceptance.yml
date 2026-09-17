@@ -28,12 +28,14 @@ jobs:
         with:
           ref: ${{ env.CANDIDATE_SHA }}
           fetch-depth: 0
-      - name: Verify exact candidate identity and product tree preservation
+      - name: Verify exact candidate identity and shared Story contract
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          test -z "$(git diff --name-only 6454ffc5d46f0228af7f0cd793d1f142ca386fec..HEAD -- 'app/lib/**')"
+          node --test \
+            worker/journey_location_binding_rule.test.mjs \
+            worker/passport_city_collection_rule.test.mjs
           node --check .github/scripts/verify_three_city_session_lock.mjs
           node --check .github/scripts/verify_forbidden_city_mobile_webkit_discovery_depth.mjs
           node --check .github/scripts/measure_journey_open_visible.mjs

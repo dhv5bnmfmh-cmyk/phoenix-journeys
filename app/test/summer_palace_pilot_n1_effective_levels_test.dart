@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phoenix_journeys/agents/phoenix_language_level_agent.dart';
 import 'package:phoenix_journeys/data/adaptive_journey_level_runtime.dart';
+import 'package:phoenix_journeys/data/authored_journey_level_catalog.dart';
 import 'package:phoenix_journeys/data/daily_journey_catalog.dart';
 import 'package:phoenix_journeys/data/dedicated_adaptive_journey_catalog.dart';
 import 'package:phoenix_journeys/data/journey_narrative_dna_catalog.dart';
@@ -374,7 +375,11 @@ void main() {
 
   test('the public resolver is unchanged for every generic Journey', () {
     final genericJourneys = allJourneyExperiences
-        .where((journey) => usesSharedGenericAdaptivePipeline(journey.id))
+        .where(
+          (journey) =>
+              usesSharedGenericAdaptivePipeline(journey.id) &&
+              !authoredJourneyLevelProviders.containsKey(journey.id),
+        )
         .toList(growable: false);
     expect(genericJourneys, isNotEmpty);
 

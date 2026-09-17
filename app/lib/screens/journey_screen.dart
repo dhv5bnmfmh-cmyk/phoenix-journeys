@@ -11,6 +11,7 @@ import '../data/batch_one_adaptive_story_levels.dart';
 import '../data/daily_journey_catalog.dart';
 import '../data/forbidden_city_content_cache.dart';
 import '../data/forbidden_city_journey_runtime.dart';
+import '../data/journey_story_identity.dart';
 import '../data/beijing_city_standard.dart';
 import '../data/journey_data.dart';
 import '../data/journey_level_catalog.dart';
@@ -261,6 +262,9 @@ class _JourneyScreenState extends State<JourneyScreen>
   // Pilot N1 content remains, but every Journey now uses the stable six-stage flow.
   bool get _isSummerPalacePilot => false;
   bool get _isForbiddenCity => _experience.id == forbiddenCityJourneyId;
+  bool get _usesAuthoredChallenge =>
+      _experience.id == forbiddenCityJourneyId ||
+      _experience.id == forbiddenCityStoryTwoJourneyId;
 
   @override
   void initState() {
@@ -2389,7 +2393,7 @@ class _JourneyScreenState extends State<JourneyScreen>
       buttonIcon: Icons.arrow_forward_rounded,
       primaryEnabled: _challengeResolved,
       showActions: _challengeResolved,
-      child: _isForbiddenCity
+      child: _usesAuthoredChallenge
           ? HskStoryChallenge(
               key: ValueKey(
                 'forbidden-city-challenge-${_sessionLanguageProfile.phoenixLevel}-$_challengeSeed',

@@ -1,5 +1,6 @@
 import '../models/journey_background.dart';
 import 'journey_background_generated.dart';
+import 'journey_background_story_two.dart';
 
 const _seedJourneys = <String>[
   'beijing-forbidden-city',
@@ -27,6 +28,7 @@ final seedJourneyBackgrounds = <JourneyBackgroundAsset>[
 ];
 
 final journeyBackgroundCatalog = <JourneyBackgroundAsset>[
+  ...forbiddenCityStoryTwoBackgrounds,
   ...generatedJourneyBackgrounds,
   ...seedJourneyBackgrounds,
 ];

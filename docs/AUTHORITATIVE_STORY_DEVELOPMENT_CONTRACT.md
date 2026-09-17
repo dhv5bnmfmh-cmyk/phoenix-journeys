@@ -26,6 +26,23 @@ supplies only its own approved Story and Story-grounded learning data. It MUST
 NOT implement a parallel engine, navigation route, lifecycle, fallback,
 Challenge shell, candidate workflow, or alternate Preview path.
 
+## Shared multi-Story Destination capability
+
+A Destination MAY contain more than one authored Story. Multi-Story support is a
+shared product capability, never a Story-specific engine or alternate Journey
+shell. A Story is identified within its Destination by stable `destinationId`
+and `storyId` identity, and each Story MUST retain isolated progress, resume,
+Challenge, Memory, narration, and completion state. Multiple Stories MAY bind
+to the same canonical place/GeoNode when their Story identities are distinct.
+
+Single-Story Destinations retain the existing direct-open behavior. A
+multi-Story Destination inserts the shared Story-selection step before the
+existing Level/Journey flow. This exception is limited to shared Destination →
+Story selection and Story-scoped identity/state; it does not authorize a
+Story-specific layout, Challenge engine, page shell, lifecycle, or release path.
+The Founder-approved Forbidden City Golden Story remains the regression
+reference and its existing behavior/state namespace MUST remain compatible.
+
 ## Active Challenge contract: 2 × 6
 
 Every Story Level from Lv1 through Lv10 MUST contain exactly **12 Challenge

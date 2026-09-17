@@ -7,6 +7,18 @@ const passport = readFileSync(
   'app/lib/screens/city_passport_screen.dart',
   'utf8',
 );
+const storySelection = readFileSync(
+  'app/lib/screens/journey_story_selection_screen.dart',
+  'utf8',
+);
+const storyIdentity = readFileSync(
+  'app/lib/data/journey_story_identity.dart',
+  'utf8',
+);
+const journeyCatalog = readFileSync(
+  'app/lib/data/daily_journey_catalog.dart',
+  'utf8',
+);
 
 test('Home uses the city-grouped Passport screen', () => {
   assert.match(shell, /import 'city_passport_screen\.dart';/);
@@ -31,8 +43,17 @@ test('Passport tiles render a compact layered journey symbol and name', () => {
   assert.match(passport, /size: 50/);
   assert.match(passport, /state\.displayText\(location\.placeName\)/);
   assert.match(passport, /state\.displayText\(location\.districtName!\)/);
-  assert.match(passport, /JourneyScreen\(journeyId: journey\.id\)/);
-  assert.match(passport, /state\.activateJourney\(journey\.id\)/);
+  assert.match(passport, /openJourneyDestination\(context, state, journey\)/);
+  assert.match(storySelection, /storiesForJourney\(destinationJourney\)/);
+  assert.match(storySelection, /if \(stories\.length > 1\)/);
+  assert.match(storySelection, /JourneyStorySelectionScreen\(/);
+  assert.match(storySelection, /stories\.isEmpty \? destinationJourney : stories\.single/);
+  assert.match(storySelection, /state\.activateJourney\(story\.id\)/);
+  assert.match(storySelection, /JourneyScreen\(journeyId: story\.id\)/);
+  assert.match(storyIdentity, /required this\.storyId/);
+  assert.match(storyIdentity, /forbiddenCityGoldenStoryId = 'two-roads-one-map'/);
+  assert.match(storyIdentity, /storyId: forbiddenCityGoldenStoryId,[\s\S]*isPrimaryStory: true/);
+  assert.match(journeyCatalog, /storyTitle: '两条路，一张图'/);
   assert.doesNotMatch(passport, /journey\.description/);
   assert.doesNotMatch(passport, /LinearProgressIndicator/);
   assert.doesNotMatch(passport, /JourneyShareButton/);

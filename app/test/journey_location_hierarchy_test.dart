@@ -100,20 +100,23 @@ void main() {
     final chengdu = requireJourneyLocation('chengdu-kuanzhai-alley');
 
     expect(coverage.journeyCount, journeyLocationBindings.length);
-    expect(coverage.coveredPlaceCount, journeyLocationBindings.length);
+    expect(
+      coverage.coveredPlaceCount,
+      journeyLocationBindings.values.map((binding) => binding.geoNodeId).toSet().length,
+    );
     expect(coverage.coveredProvinceLevelRegionCount, greaterThan(1));
     expect(coverage.coveredCityEquivalentRegionCount, greaterThan(1));
     expect(
       coverage.journeyCountForProvinceLevelRegion(
         beijing.provinceLevelNode!.id,
       ),
-      2,
+      3,
     );
     expect(
       coverage.journeyCountForCityEquivalentRegion(
         beijing.cityEquivalentNode!.id,
       ),
-      2,
+      3,
     );
     expect(
       coverage.journeyCountForProvinceLevelRegion(
