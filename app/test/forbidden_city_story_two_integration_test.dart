@@ -228,6 +228,7 @@ void main() {
     await tester.tap(
       find.byKey(ValueKey('grammar-location-${grammar.errorSegmentIndex}')),
     );
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('challenge-submit')));
     await tester.pump();
     expect(find.byKey(const ValueKey('grammar-step1-continue')), findsOneWidget);
